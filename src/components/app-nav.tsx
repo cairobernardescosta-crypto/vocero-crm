@@ -19,7 +19,7 @@ import {
 import type { Branding } from "@/lib/branding";
 import type { Apariencia } from "@/lib/temas";
 import { cn, initials } from "@/lib/utils";
-import { appNavGroups, isNavActive, SETTINGS_ITEM, type NavItem } from "@/lib/nav";
+import { appNavGroups, isNavActive, SETTINGS_ITEM, type ModoWhatsApp, type NavItem } from "@/lib/nav";
 import { signOut } from "@/lib/auth/client";
 import { useEvents } from "@/components/use-events";
 import {
@@ -74,6 +74,7 @@ export function AppNav({
   apariencia,
   commit,
   agenda = false,
+  baileys = false,
   kicker = "CRM · WhatsApp",
   open = false,
   onClose,
@@ -96,6 +97,7 @@ export function AppNav({
    * todavía debe ver la entrada igual.
    */
   agenda?: boolean;
+  baileys?: boolean;
   /** Solo aplica por debajo de `lg`: en escritorio el lateral es fijo. */
   open?: boolean;
   onClose?: () => void;
@@ -106,6 +108,20 @@ export function AppNav({
   // 045 — Chats con algo sin leer: es lo que WhatsApp cuenta en la pestaña.
   const [chats, setChats] = useState(0);
   const [sonido, setSonido] = useState(true);
+  const [modo, setModo] = useState<ModoWhatsApp>(
+    pathname.startsWith("/baileys") ? "baileys" : "api"
+  );
+
+  useEffect(() => {
+    if (!baileys || pathname.startsWith("/baileys")) return;
+    if (window.localStorage.getItem("vocero-modo-whatsapp") === "baileys") setModo("baileys");
+  }, [baileys, pathname]);
+
+  const cambiarModo = (siguiente: ModoWhatsApp) => {
+    setModo(siguiente);
+    window.localStorage.setItem("vocero-modo-whatsapp", siguiente);
+    router.push(siguiente === "baileys" ? "/baileys/inbox" : "/inbox");
+  };
 
   const contar = useCallback((lista: ConversacionDeLista[]) => {
     setUnread(lista.reduce((a, c) => a + c.unreadCount, 0));
@@ -191,7 +207,7 @@ export function AppNav({
   const version = commit ?? { commit: BUILD_COMMIT, verified: BUILD_COMMIT !== "" };
   // #87 — Qué hay en el menú y en qué grupo lo decide `appNavGroups`; aquí
   // solo se pinta.
-  const groups = appNavGroups({ agenda, role });
+  const groups = appNavGroups({ agenda, baileys, modo, role });
 
   function renderItem(item: NavItem) {
     const active = isNavActive(pathname, item.href);
@@ -271,6 +287,9 @@ export function AppNav({
       version={versionTexto}
       versionTitulo={versionTitulo}
       onSalir={() => void salir()}
+      modo={modo}
+      baileys={baileys}
+      onModo={cambiarModo}
     />
     <aside
       // Móvil: cajón que se desliza desde la izquierda (siempre montado, así
@@ -305,6 +324,10 @@ export function AppNav({
           <span className="kicker mt-2 block">{kicker}</span>
         </div>
       </div>
+
+      {baileys && (
+        <SelectorModo modo={modo} onModo={cambiarModo} />
+      )}
 
       {/* Grupos con encabezado pequeño, sin letras ni colapsables: se leen
           de arriba abajo como una lista de lo que hay. Un grupo sin título
@@ -397,6 +420,9 @@ function Riel({
   version,
   versionTitulo,
   onSalir,
+  modo,
+  baileys,
+  onModo,
 }: {
   branding: Branding;
   groups: ReturnType<typeof appNavGroups>;
@@ -409,6 +435,9 @@ function Riel({
   version: React.ReactNode;
   versionTitulo: string;
   onSalir: () => void;
+  modo: ModoWhatsApp;
+  baileys: boolean;
+  onModo: (modo: ModoWhatsApp) => void;
 }) {
   const [cuenta, setCuenta] = useState(false);
   const cuentaRef = useRef<HTMLDivElement>(null);
@@ -463,6 +492,25 @@ function Riel({
       <Link href="/inbox" aria-label={branding.name} title={branding.name} className="rounded-[14px] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring">
         <BrandTile branding={branding} className="h-11 w-11 rounded-[14px] text-[18px]" />
       </Link>
+      {baileys && (
+        <div className="mt-3 flex flex-col rounded-xl border bg-muted p-0.5" aria-label="Modo de WhatsApp">
+          {(["api", "baileys"] as const).map((opcion) => (
+            <button
+              key={opcion}
+              type="button"
+              onClick={() => onModo(opcion)}
+              className={cn(
+                "rounded-lg px-2 py-1 text-[10px] font-bold",
+                modo === opcion ? "bg-brand text-brand-fg" : "text-text-3 hover:text-foreground"
+              )}
+              title={opcion === "api" ? "WhatsApp API" : "Baileys"}
+              aria-pressed={modo === opcion}
+            >
+              {opcion === "api" ? "API" : "B"}
+            </button>
+          ))}
+        </div>
+      )}
       <div className="mt-7 flex min-h-0 flex-1 flex-col items-center gap-2.5 overflow-y-auto">
         {groups.map((g, i) => (
           <div key={g.title ?? i} className="flex flex-col items-center gap-2.5">
@@ -520,5 +568,18 @@ function Riel({
         </div>
       </div>
     </nav>
+  );
+}
+
+function SelectorModo({ modo, onModo }: { modo: ModoWhatsApp; onModo: (modo: ModoWhatsApp) => void }) {
+  return (
+    <div className="mb-4 grid grid-cols-2 rounded-xl border bg-muted p-1" aria-label="Modo de WhatsApp">
+      <button type="button" onClick={() => onModo("api")} aria-pressed={modo === "api"} className={cn("rounded-lg px-2 py-2 text-xs font-semibold", modo === "api" && "bg-background text-foreground shadow-sm")}>
+        WhatsApp API
+      </button>
+      <button type="button" onClick={() => onModo("baileys")} aria-pressed={modo === "baileys"} className={cn("rounded-lg px-2 py-2 text-xs font-semibold", modo === "baileys" && "bg-background text-foreground shadow-sm")}>
+        Baileys
+      </button>
+    </div>
   );
 }

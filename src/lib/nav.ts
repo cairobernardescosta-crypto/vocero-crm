@@ -8,6 +8,7 @@ import {
   Settings,
   Sparkles,
   Users,
+  MessageCircleMore,
   type LucideIcon,
 } from "lucide-react";
 import { canConfigure } from "@/lib/auth/roles";
@@ -36,6 +37,8 @@ export type NavGroup = {
   items: NavItem[];
 };
 
+export type ModoWhatsApp = "api" | "baileys";
+
 /** La única entrada que va abajo, separada del resto. */
 export const SETTINGS_ITEM: NavItem = {
   href: "/settings",
@@ -49,15 +52,30 @@ export const SETTINGS_ITEM: NavItem = {
  */
 export function appNavGroups({
   agenda = false,
+  baileys = false,
+  modo = "api",
   role,
 }: {
   /** 015 — "Citas" solo existe si esta instancia encendió la agenda. */
   agenda?: boolean;
+  /** Fork local — WhatsApp Web só aparece com BAILEYS_ENABLED=on. */
+  baileys?: boolean;
+  modo?: ModoWhatsApp;
   /** #86 — La guía de inicio solo para quien puede configurar. */
   role?: string | null;
 }): NavGroup[] {
+  if (modo === "baileys" && baileys) {
+    return [{
+      title: "Baileys",
+      items: [
+        { href: "/baileys/inbox", label: "Conversaciones", icon: MessageCircleMore },
+        { href: "/pipeline", label: "Pipeline", icon: Kanban },
+      ],
+    }];
+  }
+
   const trabajo: NavItem[] = [
-    { href: "/inbox", label: "Bandeja", icon: Inbox, badge: true },
+    { href: "/inbox", label: "WhatsApp API", icon: Inbox, badge: true },
     { href: "/pipeline", label: "Pipeline", icon: Kanban },
     { href: "/contacts", label: "Contactos", icon: Users },
   ];

@@ -31,6 +31,7 @@ export function AppShell({
   apariencia,
   commit,
   agenda = false,
+  baileys = false,
   kicker,
   aviso = null,
   children,
@@ -43,6 +44,7 @@ export function AppShell({
   commit?: ResolvedCommit;
   /** 015 — ¿esta instancia tiene agenda? Lo decide el servidor. */
   agenda?: boolean;
+  baileys?: boolean;
   /** 028 — La etiqueta bajo el logo (`navKicker`). */
   kicker?: string;
   /**
@@ -57,7 +59,11 @@ export function AppShell({
   children: React.ReactNode;
 }) {
   const pathname = usePathname();
-  const esBandeja = pathname === "/inbox" || pathname.startsWith("/inbox/");
+  const esBandeja =
+    pathname === "/inbox" ||
+    pathname.startsWith("/inbox/") ||
+    pathname === "/baileys/inbox" ||
+    pathname.startsWith("/baileys/inbox/");
   const [navOpen, setNavOpen] = useState(false);
 
   // Navegar = cerrar el cajón. Sin esto, tocar "Pipeline" deja el velo encima
@@ -95,6 +101,7 @@ export function AppShell({
         role={role}
         apariencia={apariencia}
         agenda={agenda}
+        baileys={baileys}
         kicker={kicker}
         open={navOpen}
         onClose={() => setNavOpen(false)}

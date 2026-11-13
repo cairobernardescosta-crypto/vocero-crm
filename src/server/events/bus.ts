@@ -38,6 +38,10 @@ export type SseEvent =
   /** 015 — algo cambió en la agenda: la pantalla de Citas se refresca sola. */
   | { type: "booking.updated"; data: { bookingId: string } }
   | {
+      type: "baileys.updated";
+      data: { status?: string; chatId?: string; messageId?: string };
+    }
+  | {
       type: "lab.run";
       data: {
         runId: string;

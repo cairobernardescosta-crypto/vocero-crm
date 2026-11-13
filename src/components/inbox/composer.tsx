@@ -52,6 +52,7 @@ export function Composer({
   onReplyChange,
   children,
   onNota,
+  templatesEnabled = true,
 }: {
   conversation: ConversationDto;
   onSend: (text: string, replyTo: MessageDto | null) => Promise<string | null>;
@@ -67,6 +68,8 @@ export function Composer({
    * Devuelve el error a mostrar, o `null`.
    */
   onNota?: (texto: string) => Promise<string | null>;
+  /** Conectores de texto que não usam plantillas oficiales de Meta. */
+  templatesEnabled?: boolean;
 }) {
   // 051 — Lo que quedó escrito en esta conversación vuelve al regresar a ella.
   const [text, setText] = useState(() => leerBorrador("responder", conversation.id));
@@ -123,6 +126,10 @@ export function Composer({
   const textoLibre = conversation.windowOpen || Boolean(conversation.humanWindow?.open);
 
   useEffect(() => {
+    if (!templatesEnabled) {
+      setTemplates([]);
+      return;
+    }
     let cancelled = false;
     fetch("/api/templates")
       .then((r) => (r.ok ? r.json() : { templates: [] }))
@@ -134,7 +141,7 @@ export function Composer({
     return () => {
       cancelled = true;
     };
-  }, []);
+  }, [templatesEnabled]);
 
   // 039: al elegir «Responder» se escribe ya, sin buscar el campo.
   useEffect(() => {

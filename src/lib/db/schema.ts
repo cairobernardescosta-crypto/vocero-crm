@@ -1401,3 +1401,72 @@ export const conversationNote = pgTable(
     index("conversation_note_conv_idx").on(t.organizationId, t.conversationId, t.createdAt),
   ]
 );
+
+/* ============================================================
+ * Fork local — conector opcional Baileys (WhatsApp Web)
+ * ============================================================ */
+
+export const baileysConnection = pgTable(
+  "baileys_connection",
+  {
+    id: text("id").primaryKey(),
+    organizationId: text("organization_id")
+      .notNull()
+      .references(() => organization.id, { onDelete: "cascade" }),
+    status: text("status", {
+      enum: ["disconnected", "waiting_qr", "connecting", "connected", "reconnecting", "error"],
+    }).notNull().default("disconnected"),
+    phone: text("phone"),
+    error: text("error"),
+    updatedAt: timestamp("updated_at").notNull().defaultNow(),
+  },
+  (t) => [uniqueIndex("baileys_connection_org_uq").on(t.organizationId)]
+);
+
+export const baileysChat = pgTable(
+  "baileys_chat",
+  {
+    id: text("id").primaryKey(),
+    organizationId: text("organization_id")
+      .notNull()
+      .references(() => organization.id, { onDelete: "cascade" }),
+    remoteJid: text("remote_jid").notNull(),
+    name: text("name"),
+    phone: text("phone"),
+    stageId: text("stage_id").references(() => pipelineStage.id, { onDelete: "set null" }),
+    lastMessage: text("last_message"),
+    lastMessageAt: timestamp("last_message_at"),
+    unreadCount: integer("unread_count").notNull().default(0),
+    updatedAt: timestamp("updated_at").notNull().defaultNow(),
+  },
+  (t) => [
+    uniqueIndex("baileys_chat_org_jid_uq").on(t.organizationId, t.remoteJid),
+    index("baileys_chat_org_stage_idx").on(t.organizationId, t.stageId),
+    index("baileys_chat_org_last_idx").on(t.organizationId, t.lastMessageAt),
+  ]
+);
+
+export const baileysMessage = pgTable(
+  "baileys_message",
+  {
+    id: text("id").primaryKey(),
+    organizationId: text("organization_id")
+      .notNull()
+      .references(() => organization.id, { onDelete: "cascade" }),
+    chatId: text("chat_id")
+      .notNull()
+      .references(() => baileysChat.id, { onDelete: "cascade" }),
+    providerId: text("provider_id").notNull(),
+    direction: text("direction", { enum: ["in", "out"] }).notNull(),
+    type: text("type").notNull().default("text"),
+    text: text("text"),
+    status: text("status", { enum: ["pending", "sent", "failed"] }).notNull().default("sent"),
+    error: text("error"),
+    occurredAt: timestamp("occurred_at").notNull(),
+    createdAt: timestamp("created_at").notNull().defaultNow(),
+  },
+  (t) => [
+    uniqueIndex("baileys_message_org_provider_uq").on(t.organizationId, t.providerId),
+    index("baileys_message_org_chat_idx").on(t.organizationId, t.chatId, t.occurredAt),
+  ]
+);

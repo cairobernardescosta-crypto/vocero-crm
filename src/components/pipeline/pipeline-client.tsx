@@ -28,6 +28,7 @@ import { LeadDrawer } from "./lead-drawer";
 
 export type BoardLead = {
   id: string;
+  source: "meta" | "baileys";
   stageId: string;
   position: number;
   lastActivityAt: string | null;
@@ -65,7 +66,8 @@ export function PipelineClient() {
   );
 
   const refetch = useCallback(async () => {
-    const res = await fetch("/api/pipeline/board").catch(() => null);
+    const modo = window.localStorage.getItem("vocero-modo-whatsapp") === "baileys" ? "baileys" : "api";
+    const res = await fetch(`/api/pipeline/board?modo=${modo}`).catch(() => null);
     if (!res?.ok) return;
     const data = (await res.json()) as {
       stages: StageDto[];
@@ -96,17 +98,26 @@ export function PipelineClient() {
     setLeads((prev) =>
       prev.map((l) => (l.id === leadId ? { ...l, stageId: overStage, position } : l))
     );
-    await fetch(`/api/pipeline/leads/${leadId}`, {
-      method: "PATCH",
-      headers: { "content-type": "application/json" },
-      body: JSON.stringify({
-        stageId: overStage,
-        position,
-        ...(loss
-          ? { lossReason: loss.reason, ...(loss.note ? { lossNote: loss.note } : {}) }
-          : {}),
-      }),
-    }).catch(() => null);
+    const lead = leads.find((item) => item.id === leadId);
+    if (lead?.source === "baileys") {
+      await fetch("/api/baileys", {
+        method: "POST",
+        headers: { "content-type": "application/json" },
+        body: JSON.stringify({ action: "set_stage", chatId: leadId, stageId: overStage }),
+      }).catch(() => null);
+    } else {
+      await fetch(`/api/pipeline/leads/${leadId}`, {
+        method: "PATCH",
+        headers: { "content-type": "application/json" },
+        body: JSON.stringify({
+          stageId: overStage,
+          position,
+          ...(loss
+            ? { lossReason: loss.reason, ...(loss.note ? { lossNote: loss.note } : {}) }
+            : {}),
+        }),
+      }).catch(() => null);
+    }
     void refetch();
   }
 
@@ -146,7 +157,7 @@ export function PipelineClient() {
     // Perder un trato exige motivo. Se pregunta ANTES de mover: si el dueño
     // cancela, la tarjeta ni siquiera parpadea fuera de su columna.
     const destino = stages.find((s) => s.id === overStage);
-    if (destino?.kind === "lost") {
+    if (destino?.kind === "lost" && lead.source === "meta") {
       setPendingLoss({ leadId, stageId: overStage, name: lead.contact.name });
       return;
     }
@@ -163,7 +174,7 @@ export function PipelineClient() {
     const lead = leads.find((l) => l.id === leadId);
     if (!lead || lead.stageId === stageId) return;
     const destino = stages.find((s) => s.id === stageId);
-    if (destino?.kind === "lost") {
+    if (destino?.kind === "lost" && lead.source === "meta") {
       setPendingLoss({ leadId, stageId, name: lead.contact.name });
       return;
     }
@@ -193,8 +204,8 @@ export function PipelineClient() {
                 key={stage.id}
                 stage={stage}
                 currency={currency}
-                onEditAmount={setEditandoMonto}
-                onOpen={(l) => setAbiertoId(l.id)}
+                onEditAmount={(lead) => lead.source === "meta" && setEditandoMonto(lead)}
+                onOpen={(lead) => lead.source === "meta" && setAbiertoId(lead.id)}
                 leads={leads
                   .filter((l) => l.stageId === stage.id)
                   .sort((a, b) => a.position - b.position)}
@@ -276,6 +287,7 @@ function totalesDeEtapa(leads: BoardLead[], businessCurrency: string) {
   let otraMoneda = 0;
 
   for (const l of leads) {
+    if (l.source === "baileys") continue;
     if (l.amountCents === null) {
       sinMonto++;
       continue;
@@ -444,7 +456,7 @@ function LeadCard({
         </div>
         {lead.conversationId && (
           <Link
-            href={`/inbox?contact=${lead.contact.id}`}
+            href={lead.source === "baileys" ? "/baileys/inbox" : `/inbox?contact=${lead.contact.id}`}
             onPointerDown={(e) => e.stopPropagation()}
             onClick={(e) => e.stopPropagation()}
             aria-label="Abrir conversación"
@@ -454,7 +466,7 @@ function LeadCard({
           </Link>
         )}
       </div>
-      {!overlay && onEditAmount && (
+      {!overlay && onEditAmount && lead.source === "meta" && (
         <button
           // `stopPropagation` en pointerdown: sin esto, tocar el monto empieza
           // un arrastre y el diálogo nunca abre.
@@ -476,6 +488,11 @@ function LeadCard({
             ? "+ monto"
             : formatMoneyCents(lead.amountCents, lead.currency ?? currency)}
         </button>
+      )}
+      {lead.source === "baileys" && (
+        <span className="mt-1.5 inline-flex rounded-full bg-brand-tint px-2 py-0.5 text-[10px] font-semibold text-brand-text">
+          Baileys
+        </span>
       )}
       {overlay && lead.amountCents !== null && (
         <p className="mt-1.5 text-right text-xs font-semibold tabular-nums">

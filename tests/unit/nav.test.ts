@@ -20,7 +20,7 @@ describe("barra lateral agrupada", () => {
     const groups = appNavGroups({ role: "member" });
     expect(groups.map((g) => g.title)).toEqual(["Trabajo", "Agente", undefined]);
     expect(labels(groups)).toEqual([
-      ["Bandeja", "Pipeline", "Contactos"],
+      ["WhatsApp API", "Pipeline", "Contactos"],
       ["Agente", "Laboratorio"],
       ["Resultados"],
     ]);
@@ -29,12 +29,19 @@ describe("barra lateral agrupada", () => {
   it("AGENDA añade Citas al final de Trabajo", () => {
     const [trabajo] = appNavGroups({ agenda: true, role: "member" });
     expect(trabajo!.items.map((i) => i.label)).toEqual([
-      "Bandeja",
+      "WhatsApp API",
       "Pipeline",
       "Contactos",
       "Citas",
     ]);
     expect(trabajo!.items.at(-1)!.href).toBe("/bookings");
+  });
+
+  it("BAILEYS muestra solamente sus funciones al seleccionar su modo", () => {
+    const items = appNavGroups({ baileys: true, modo: "baileys", role: "member" }).flatMap((g) => g.items);
+    expect(items.filter((i) => i.href === "/baileys/inbox")).toHaveLength(1);
+    expect(items.map((i) => i.label)).toEqual(["Conversaciones", "Pipeline"]);
+    expect(items.map((i) => i.href)).not.toContain("/inbox");
   });
 
   it("la guía de inicio abre el grupo Agente solo para quien configura", () => {

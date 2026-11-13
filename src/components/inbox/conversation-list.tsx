@@ -41,9 +41,11 @@ const FOCO_SEPARADO =
 function InboxEmptyState({
   onSeeded,
   channels,
+  allowSeed = true,
 }: {
   onSeeded: () => void;
   channels: readonly Channel[];
+  allowSeed?: boolean;
 }) {
   const [seeding, setSeeding] = useState(false);
   const [failed, setFailed] = useState(false);
@@ -65,7 +67,7 @@ function InboxEmptyState({
       title="Sin conversaciones todavía"
       description={emptyInboxDescription(channels.map((ch) => CHANNEL_LABEL[ch]))}
       action={
-        !failed && (
+        allowSeed && !failed && (
           <Button
             size="sm"
             variant="outline"
@@ -87,6 +89,9 @@ export function ConversationList({
   selectedId,
   onSelect,
   onSeeded,
+  title = "Bandeja",
+  simple = false,
+  headerAction,
 }: {
   conversations: ConversationDto[] | null;
   /** Canales encendidos en esta instancia (ADR-001). */
@@ -94,6 +99,11 @@ export function ConversationList({
   selectedId: string | null;
   onSelect: (id: string) => void;
   onSeeded: () => void;
+  /** Permite reutilizar la bandeja para conectores con datos propios. */
+  title?: string;
+  /** Oculta filtros y acciones exclusivas del dominio Meta/pipeline. */
+  simple?: boolean;
+  headerAction?: React.ReactNode;
 }) {
   const [query, setQuery] = useState("");
   // 052 (enmienda) — Dos pestañas y un botón «Filtrar» con lo demás.
@@ -252,9 +262,10 @@ export function ConversationList({
       <div className="flex min-h-0 flex-1 flex-col bg-background lg:tarjeta lg:overflow-hidden">
       <header className="border-b px-4 pb-3 pt-3.5">
         <div className="flex items-center gap-2">
-          <h2 className="text-[17px] font-bold tracking-tight">Bandeja</h2>
+          <h2 className="text-[17px] font-bold tracking-tight">{title}</h2>
           <span className="font-mono text-[12px] text-text-3">{conversations.length}</span>
-          {multiChannel && (
+          {headerAction && <div className="ml-auto">{headerAction}</div>}
+          {multiChannel && !headerAction && (
             <div className="ml-auto flex items-center gap-1">
               {channels.map((ch) => {
                 const on = inbox === ch;
@@ -316,7 +327,7 @@ export function ConversationList({
             ))}
           </div>
 
-          <div ref={menuRef} className="relative ml-auto">
+          {!simple && <div ref={menuRef} className="relative ml-auto">
             <button
               type="button"
               onClick={() => setMenuFiltros((v) => !v)}
@@ -397,7 +408,7 @@ export function ConversationList({
                 )}
               </div>
             )}
-          </div>
+          </div>}
         </div>
 
         {nFiltros > 0 && (
@@ -419,7 +430,7 @@ export function ConversationList({
         {loading ? (
           <p className="p-6 text-center text-xs text-text-3">Cargando…</p>
         ) : conversations.length === 0 ? (
-          <InboxEmptyState onSeeded={onSeeded} channels={channels} />
+          <InboxEmptyState onSeeded={onSeeded} channels={channels} allowSeed={!simple} />
         ) : visible.length === 0 ? (
           <p className="p-6 text-center text-xs text-text-3">
             {/* 028: un canal en el que nadie ha escrito no es una búsqueda fallida. */}
@@ -485,7 +496,7 @@ export function ConversationList({
                         >
                           {(() => {
                             // 051 — Como WhatsApp: lo que quedó a medias se ve.
-                            const borrador = leerBorrador("responder", c.id);
+                            const borrador = simple ? "" : leerBorrador("responder", c.id);
                             return borrador ? (
                               <>
                                 <span className="font-semibold text-brand-ink">Borrador:</span>{" "}
@@ -514,7 +525,7 @@ export function ConversationList({
                             {c.stageName}
                           </span>
                         )}
-                        {porVencer(c) && (
+                        {!simple && porVencer(c) && (
                           // 052 — Pasada la ventana, solo con plantilla: se avisa antes.
                           <span
                             data-vence
@@ -524,13 +535,13 @@ export function ConversationList({
                             {etiquetaVence(c.windowRemainingMs)}
                           </span>
                         )}
-                        {c.handoffAt && (
+                        {!simple && c.handoffAt && (
                           <span className="inline-flex items-center gap-1 rounded-full border border-warning-soft bg-warning-tint px-2 py-0.5 text-[11px] text-warning-text">
                             <UserRound className="h-3 w-3" strokeWidth={1.7} />
                             Atención humana
                           </span>
                         )}
-                        {c.anuncio && (
+                        {!simple && c.anuncio && (
                           <span
                             className="inline-flex min-w-0 items-center gap-1 rounded-full border border-info-soft bg-info-tint px-2 py-0.5 text-[11px] text-info-text"
                             title={titularDeOrigen(c.anuncio.headline, c.anuncio.sourceType)}
