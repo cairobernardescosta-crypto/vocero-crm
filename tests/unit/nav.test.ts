@@ -40,7 +40,7 @@ describe("barra lateral agrupada", () => {
   it("BAILEYS muestra solamente sus funciones al seleccionar su modo", () => {
     const items = appNavGroups({ baileys: true, modo: "baileys", role: "member" }).flatMap((g) => g.items);
     expect(items.filter((i) => i.href === "/baileys/inbox")).toHaveLength(1);
-    expect(items.map((i) => i.label)).toEqual(["Conversaciones", "Pipeline"]);
+    expect(items.map((i) => i.label)).toEqual(["Conversaciones", "Pipeline", "Contactos", "Resultados"]);
     expect(items.map((i) => i.href)).not.toContain("/inbox");
   });
 

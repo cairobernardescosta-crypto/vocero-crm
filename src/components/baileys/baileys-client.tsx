@@ -2,6 +2,7 @@
 
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import Image from "next/image";
+import { useSearchParams } from "next/navigation";
 import { ChevronLeft, LoaderCircle, LogOut, QrCode } from "lucide-react";
 import { ContactAvatar } from "@/components/avatar";
 import { Composer } from "@/components/inbox/composer";
@@ -11,8 +12,10 @@ import type { ConversationDto, MessageDto } from "@/lib/types";
 import { cn, formatPhone } from "@/lib/utils";
 
 type Connection = { status: string; phone: string | null; error: string | null };
-type Chat = { id: string; name: string | null; phone: string | null; stageId: string | null; stageName: string | null; lastMessage: string | null; lastMessageAt: string | null; unreadCount: number };
-type RawMessage = { id: string; chatId: string; direction: "in" | "out"; type: string; text: string | null; status: string; occurredAt: string };
+type Participant = { jid: string; admin?: string | null };
+type Chat = { id: string; name: string | null; phone: string | null; isGroup: boolean; avatarUrl: string | null; participants: Participant[] | null; stageId: string | null; stageName: string | null; lastMessage: string | null; lastMessageAt: string | null; unreadCount: number };
+type RawMedia = { id: string; kind: "image" | "video" | "audio" | "document" | "sticker"; mimeType: string | null; fileName: string | null; fileSize: number | null; caption: string | null; fetchStatus: "available" | "pending" | "failed"; payload: unknown };
+type RawMessage = { id: string; chatId: string; direction: "in" | "out"; type: string; text: string | null; status: string; occurredAt: string; media: RawMedia | null };
 type Stage = { id: string; name: string; kind: string };
 type Snapshot = { connection: Connection; qr: string | null; chats: Chat[]; stages: Stage[]; messages: RawMessage[] };
 
@@ -24,12 +27,14 @@ function toConversation(chat: Chat, connected: boolean): ConversationDto {
 
 function toMessage(message: RawMessage): MessageDto {
   const allowed = new Set(["pending", "sent", "delivered", "read", "failed"]);
-  return { id: message.id, conversationId: message.chatId, direction: message.direction, type: message.type, text: message.text, status: (allowed.has(message.status) ? message.status : "sent") as MessageDto["status"], error: null, aiGenerated: false, origin: "operator", media: null, quotable: false, replyTo: null, createdAt: message.occurredAt };
+  return { id: message.id, conversationId: message.chatId, direction: message.direction, type: message.type, text: message.text, status: (allowed.has(message.status) ? message.status : "sent") as MessageDto["status"], error: null, aiGenerated: false, origin: "operator", media: message.media ? { assetId: message.media.id, kind: message.media.kind, mimeType: message.media.mimeType, fileName: message.media.fileName, fileSize: message.media.fileSize, caption: message.media.caption, fetchStatus: message.media.fetchStatus, payload: message.media.payload } : null, quotable: false, replyTo: null, createdAt: message.occurredAt };
 }
 
 export function BaileysClient() {
+  const searchParams = useSearchParams();
+  const initialChatId = searchParams.get("chat");
   const [data, setData] = useState<Snapshot | null>(null);
-  const [selectedId, setSelectedId] = useState<string | null>(null);
+  const [selectedId, setSelectedId] = useState<string | null>(initialChatId);
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const selectedRef = useRef<string | null>(null);
@@ -42,6 +47,12 @@ export function BaileysClient() {
   }, []);
   useEffect(() => { void load().catch((e: unknown) => setError(e instanceof Error ? e.message : "Erro")); }, [load]);
   useEffect(() => { const source = new EventSource("/api/events"); const refresh = () => void load().catch(() => undefined); source.addEventListener("baileys.updated", refresh); return () => source.close(); }, [load]);
+  useEffect(() => {
+    const status = data?.connection.status;
+    if (!status || !["connecting", "reconnecting", "waiting_qr"].includes(status)) return;
+    const timer = window.setInterval(() => void load().catch(() => undefined), 2000);
+    return () => window.clearInterval(timer);
+  }, [data?.connection.status, load]);
 
   async function action(payload: object): Promise<string | null> {
     setBusy(true); setError(null);
@@ -57,6 +68,7 @@ export function BaileysClient() {
   const connected = data?.connection.status === "connected";
   const conversations = useMemo(() => (data?.chats ?? []).map((chat) => toConversation(chat, connected)), [data?.chats, connected]);
   const selected = conversations.find((conversation) => conversation.id === selectedId) ?? null;
+  const selectedChat = data?.chats.find((chat) => chat.id === selectedId) ?? null;
   const messages = useMemo(() => (data?.messages ?? []).map(toMessage), [data?.messages]);
   const connectionAction = connected ? (
     <button type="button" disabled={busy} title="Desconectar Baileys" aria-label="Desconectar Baileys" onClick={() => confirm("Desconectar e remover a sessão deste aparelho?") && void action({ action: "disconnect" })} className="rounded-md p-1.5 text-text-3 hover:bg-accent hover:text-foreground disabled:opacity-50"><LogOut className="h-4 w-4" /></button>
@@ -73,7 +85,10 @@ export function BaileysClient() {
       {selected ? <>
         <header className="flex items-center justify-between gap-1 border-b bg-background px-2 py-2.5 md:px-4 lg:tarjeta lg:border-b-0 lg:px-5 lg:py-3">
           <button onClick={() => setSelectedId(null)} aria-label="Voltar às conversas" className="shrink-0 rounded-md p-1.5 text-text-2 hover:bg-accent md:hidden"><ChevronLeft className="h-5 w-5" /></button>
-          <div className="flex min-w-0 flex-1 items-center gap-3 p-1"><ContactAvatar name={selected.contact.name} seed={selected.contact.id} size="md" /><div className="min-w-0"><p className="truncate text-[15px] font-bold leading-tight lg:text-[18px] lg:font-semibold">{selected.contact.name}</p><p className="mt-0.5 font-mono text-[10.5px] tracking-[0.04em] text-text-3">{selected.contact.phone ? formatPhone(selected.contact.phone) : "WhatsApp Web"}</p></div></div>
+          <div className="flex min-w-0 flex-1 items-center gap-3 p-1">
+            {selectedChat?.avatarUrl ? <span aria-label={`Foto de ${selected.contact.name}`} className="h-9 w-9 shrink-0 rounded-full bg-cover bg-center" style={{ backgroundImage: `url(${JSON.stringify(selectedChat.avatarUrl).slice(1, -1)})` }} /> : <ContactAvatar name={selected.contact.name} seed={selected.contact.id} size="md" />}
+            <div className="min-w-0"><p className="truncate text-[15px] font-bold leading-tight lg:text-[18px] lg:font-semibold">{selected.contact.name}</p><p className="mt-0.5 font-mono text-[10.5px] tracking-[0.04em] text-text-3">{selectedChat?.isGroup ? `Grupo · ${selectedChat.participants?.length ?? 0} participantes` : selected.contact.phone ? formatPhone(selected.contact.phone) : "WhatsApp Web"}</p>{selectedChat?.isGroup && selectedChat.participants?.length ? <p className="max-w-lg truncate text-[10px] text-text-3" title={selectedChat.participants.map((p) => p.jid).join(", ")}>{selectedChat.participants.slice(0, 5).map((p) => p.jid.split("@")[0]).join(", ")}{selectedChat.participants.length > 5 ? "…" : ""}</p> : null}</div>
+          </div>
           <select
             aria-label="Etapa da conversa"
             value={data?.chats.find((chat) => chat.id === selected.id)?.stageId ?? ""}

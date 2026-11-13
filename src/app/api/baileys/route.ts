@@ -2,7 +2,7 @@ import { z } from "zod";
 import { apiError, parseBody, withAuth } from "@/lib/api";
 import { canConfigure } from "@/lib/auth/roles";
 import { baileysDisabledResponse, baileysEnabled } from "@/server/baileys/flag";
-import { baileysSnapshot, markBaileysChatRead, sendText, setBaileysChatStage, startBaileys, stopBaileys } from "@/server/baileys/connector";
+import { baileysSnapshot, markBaileysChatRead, pairBaileys, sendText, setBaileysChatStage, stopBaileys } from "@/server/baileys/connector";
 
 export const dynamic = "force-dynamic";
 
@@ -31,7 +31,7 @@ export const POST = withAuth(async (session, req: Request) => {
   if ((body.data.action === "connect" || body.data.action === "disconnect") && !canConfigure(session.role)) {
     return apiError(403, "forbidden", "Sem permissão para administrar a conexão");
   }
-  if (body.data.action === "connect") await startBaileys(session.organizationId);
+  if (body.data.action === "connect") await pairBaileys(session.organizationId);
   if (body.data.action === "disconnect") await stopBaileys(session.organizationId);
   if (body.data.action === "mark_read") {
     try {

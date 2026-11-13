@@ -70,6 +70,8 @@ export function appNavGroups({
       items: [
         { href: "/baileys/inbox", label: "Conversaciones", icon: MessageCircleMore },
         { href: "/pipeline", label: "Pipeline", icon: Kanban },
+        { href: "/baileys/contacts", label: "Contactos", icon: Users },
+        { href: "/baileys/results", label: "Resultados", icon: ChartColumn },
       ],
     }];
   }
