@@ -1,5 +1,5 @@
 import path from "node:path";
-import { mkdir, rm } from "node:fs/promises";
+import { mkdir, readdir, rm } from "node:fs/promises";
 import { and, asc, desc, eq, inArray, isNull, notLike, sql } from "drizzle-orm";
 import QRCode from "qrcode";
 import { getDb, getSql, schema } from "@/lib/db";
@@ -70,9 +70,12 @@ function runtimeFor(organizationId: string): Runtime {
   return value;
 }
 
+function authRoot(): string {
+  return path.resolve(process.env.BAILEYS_DATA_DIR || "./.baileys-data");
+}
+
 function authDir(organizationId: string): string {
-  const base = process.env.BAILEYS_DATA_DIR || "./.baileys-data";
-  return path.resolve(base, organizationId.replace(/[^a-zA-Z0-9_-]/g, "_"));
+  return path.join(authRoot(), organizationId.replace(/[^a-zA-Z0-9_-]/g, "_"));
 }
 
 function ignoredJid(jid: string): boolean {
@@ -607,6 +610,14 @@ export async function pairBaileys(organizationId: string): Promise<void> {
 
 /** Recupera sessões que estavam ativas antes do processo Node reiniciar. */
 export async function recoverBaileysConnections(): Promise<void> {
+  // Migra inclusive sessões antigas/inativas para não manter chaves em texto puro.
+  const directories = await readdir(authRoot(), { withFileTypes: true }).catch(() => []);
+  for (const directory of directories) {
+    if (!directory.isDirectory()) continue;
+    await loadEncryptedAuthState(path.join(authRoot(), directory.name)).catch((error: unknown) => {
+      console.warn(`[baileys] sessão antiga não migrada: ${error instanceof Error ? error.message : "erro"}`);
+    });
+  }
   const rows = await getDb()
     .select({ organizationId: schema.baileysConnection.organizationId })
     .from(schema.baileysConnection)
