@@ -1,5 +1,5 @@
 import { z } from "zod";
-import { apiError, parseBody, withAuth } from "@/lib/api";
+import { apiError, parseBody, requireConfigureRole, withAuth } from "@/lib/api";
 import {
   desconectarCanal,
   getCredentialsByOrg,
@@ -58,6 +58,8 @@ const putSchema = z.object({
  * reintentar (o pegar la URL a mano, que sigue a la vista).
  */
 export const PUT = withAuth(async (session, req: Request) => {
+  const forbidden = requireConfigureRole(session);
+  if (forbidden) return forbidden;
   const body = await parseBody(req, putSchema);
   if (!body.ok) return body.response;
 
@@ -125,6 +127,8 @@ async function resolverCuentaDeMensajes(
  * conexión. Idempotente: sin conexión responde 200 igual.
  */
 export const DELETE = withAuth(async (session) => {
+  const forbidden = requireConfigureRole(session);
+  if (forbidden) return forbidden;
   const creds = await getCredentialsByOrg(session.organizationId);
   if (creds) {
     await unregisterWebhookForNumber({

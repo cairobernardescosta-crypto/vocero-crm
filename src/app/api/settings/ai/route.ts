@@ -1,4 +1,4 @@
-import { apiError, parseBody, withAuth } from "@/lib/api";
+import { apiError, parseBody, requireConfigureRole, withAuth } from "@/lib/api";
 import {
   AiCredentialError,
   deleteAiCredential,
@@ -24,6 +24,8 @@ export const GET = withAuth(async (session) => {
 });
 
 export const PUT = withAuth(async (session, req: Request) => {
+  const forbidden = requireConfigureRole(session);
+  if (forbidden) return forbidden;
   const body = await parseBody(req, aiSettingsPutSchema);
   if (!body.ok) return body.response;
 
@@ -45,6 +47,8 @@ export const PUT = withAuth(async (session, req: Request) => {
 });
 
 export const DELETE = withAuth(async (session) => {
+  const forbidden = requireConfigureRole(session);
+  if (forbidden) return forbidden;
   await deleteAiCredential(session.organizationId);
   return Response.json(await vistaAjustesIa(session.organizationId));
 });

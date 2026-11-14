@@ -1,4 +1,4 @@
-import { apiError, parseBody, withAuth } from "@/lib/api";
+import { apiError, parseBody, requireConfigureRole, withAuth } from "@/lib/api";
 import { probeProvider } from "@/lib/ai/probe";
 import { apiRoot } from "@/lib/ai/presets";
 import { getAiCredentialPublic, marcarActiva } from "@/server/ai/credentials";
@@ -18,6 +18,8 @@ export const dynamic = "force-dynamic";
  * de «recargué saldo» sin pegar la misma llave otra vez.
  */
 export const POST = withAuth(async (session, req: Request) => {
+  const forbidden = requireConfigureRole(session);
+  if (forbidden) return forbidden;
   const body = await parseBody(req, aiProbeSchema);
   if (!body.ok) return body.response;
 

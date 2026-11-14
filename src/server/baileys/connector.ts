@@ -7,6 +7,7 @@ import { newId } from "@/lib/db/ids";
 import { publish } from "@/server/events/bus";
 import { baileysMessageContent, unwrapBaileysMessage } from "@/server/baileys/message-content";
 import { saveMediaFile } from "@/server/whatsapp/media";
+import { loadEncryptedAuthState } from "@/server/baileys/auth-state";
 
 type ConnectionStatus =
   | "disconnected"
@@ -29,11 +30,25 @@ type Runtime = {
   historyTimer: ReturnType<typeof setTimeout> | null;
   syncing: boolean;
   syncProgress: number;
+  retryAttempt: number;
+  backfill: Promise<void> | null;
 };
 
 const globalRuntime = globalThis as unknown as { __voceroBaileys?: Map<string, Runtime> };
 const runtimes = globalRuntime.__voceroBaileys ?? new Map<string, Runtime>();
 globalRuntime.__voceroBaileys = runtimes;
+
+const logGuard = globalThis as unknown as { __voceroBaileysLogGuard?: boolean };
+function installBaileysLogGuard(): void {
+  if (logGuard.__voceroBaileysLogGuard) return;
+  logGuard.__voceroBaileysLogGuard = true;
+  const original = console.log.bind(console);
+  console.log = (...args: unknown[]) => {
+    const first = typeof args[0] === "string" ? args[0] : "";
+    if (first.startsWith("Closing session") || first.startsWith("Closing open session")) return;
+    original(...args);
+  };
+}
 
 /** Baileys/pino não pode imprimir chaves de sessão nem payloads privados. */
 const silentLogger = {
@@ -50,7 +65,7 @@ const silentLogger = {
 function runtimeFor(organizationId: string): Runtime {
   const existing = runtimes.get(organizationId);
   if (existing) return existing;
-  const value: Runtime = { socket: null, qrDataUrl: null, starting: null, manualStop: false, lock: null, retryTimer: null, watchdog: null, historyTimer: null, syncing: false, syncProgress: 0 };
+  const value: Runtime = { socket: null, qrDataUrl: null, starting: null, manualStop: false, lock: null, retryTimer: null, watchdog: null, historyTimer: null, syncing: false, syncProgress: 0, retryAttempt: 0, backfill: null };
   runtimes.set(organizationId, value);
   return value;
 }
@@ -262,21 +277,26 @@ async function persistMessage(
     .limit(1);
   if (!chat) return;
   const [existing] = await db
-    .select({ id: schema.baileysMessage.id, mediaAssetId: schema.baileysMessage.mediaAssetId })
+    .select({
+      id: schema.baileysMessage.id,
+      mediaAssetId: schema.baileysMessage.mediaAssetId,
+      mediaStatus: schema.mediaAsset.fetchStatus,
+    })
     .from(schema.baileysMessage)
+    .leftJoin(schema.mediaAsset, eq(schema.baileysMessage.mediaAssetId, schema.mediaAsset.id))
     .where(and(
       eq(schema.baileysMessage.organizationId, organizationId),
       eq(schema.baileysMessage.providerId, providerId)
     ))
     .limit(1);
-  if (existing?.mediaAssetId || (existing && content.type === "text")) return;
+  if (existing?.mediaStatus === "available" || (existing && content.type === "text")) return;
   let mediaAssetId: string | null = null;
   if (["image", "audio", "video", "document", "sticker"].includes(content.type)) {
     const raw = unwrapBaileysMessage(message.message);
     const media = raw?.imageMessage ?? raw?.audioMessage ?? raw?.videoMessage ?? raw?.documentMessage ?? raw?.stickerMessage;
     const mimeType = media?.mimetype ?? null;
     const fileName = raw?.documentMessage?.fileName ?? null;
-    mediaAssetId = newId("mediaAsset");
+    mediaAssetId = existing?.mediaAssetId ?? newId("mediaAsset");
     let storagePath: string | null = null;
     let fileSize: number | null = null;
     let fetchStatus: "available" | "failed" = "failed";
@@ -294,7 +314,7 @@ async function persistMessage(
       fetchError = error instanceof Error ? error.message.slice(0, 240) : "Mídia indisponível";
       if (!options.history) console.warn(`[baileys] falha ao guardar mídia (${content.type}): ${fetchError}`);
     }
-    await db.insert(schema.mediaAsset).values({
+    const assetValues = {
       id: mediaAssetId,
       organizationId,
       kind: content.type as "image" | "audio" | "video" | "document" | "sticker",
@@ -305,7 +325,16 @@ async function persistMessage(
       storagePath,
       fetchStatus,
       fetchError,
-    });
+      updatedAt: new Date(),
+    };
+    if (existing?.mediaAssetId) {
+      await db.update(schema.mediaAsset).set(assetValues).where(and(
+        eq(schema.mediaAsset.id, existing.mediaAssetId),
+        eq(schema.mediaAsset.organizationId, organizationId)
+      ));
+    } else {
+      await db.insert(schema.mediaAsset).values(assetValues);
+    }
   }
   if (existing) {
     if (mediaAssetId) {
@@ -348,6 +377,7 @@ async function persistMessage(
 }
 
 async function startInternal(organizationId: string): Promise<void> {
+  installBaileysLogGuard();
   const runtime = runtimeFor(organizationId);
   runtime.manualStop = false;
   if (!runtime.lock) {
@@ -366,7 +396,7 @@ async function startInternal(organizationId: string): Promise<void> {
   await mkdir(authDir(organizationId), { recursive: true });
   await setStatus(organizationId, "connecting");
   const baileys = await import("@whiskeysockets/baileys");
-  const { state, saveCreds } = await baileys.useMultiFileAuthState(authDir(organizationId));
+  const { state, saveCreds } = await loadEncryptedAuthState(authDir(organizationId));
   const { version } = await baileys.fetchLatestBaileysVersion();
   const socket = baileys.default({
     auth: state,
@@ -483,6 +513,7 @@ async function startInternal(organizationId: string): Promise<void> {
       if (update.connection === "open") {
         if (runtime.watchdog) clearTimeout(runtime.watchdog);
         runtime.qrDataUrl = null;
+        runtime.retryAttempt = 0;
         runtime.syncing = true;
         runtime.syncProgress = 0;
         if (runtime.historyTimer) clearTimeout(runtime.historyTimer);
@@ -492,7 +523,8 @@ async function startInternal(organizationId: string): Promise<void> {
         }, 20000);
         const phone = socket.user?.id?.split(":")[0] ?? socket.user?.id?.split("@")[0] ?? null;
         await setStatus(organizationId, "connected", { phone });
-        void backfillBaileysData(organizationId, socket).catch((error: unknown) => {
+        runtime.backfill ??= backfillBaileysData(organizationId, socket).finally(() => { runtime.backfill = null; });
+        void runtime.backfill.catch((error: unknown) => {
           console.warn(`[baileys] falha ao completar dados existentes: ${error instanceof Error ? error.message : "erro"}`);
         });
       }
@@ -514,7 +546,10 @@ async function startInternal(organizationId: string): Promise<void> {
         if (invalidSession) await rm(authDir(organizationId), { recursive: true, force: true });
         await setStatus(organizationId, invalidSession ? "connecting" : "reconnecting", { error: statusCode ? `Desconexão ${statusCode}` : null });
         if (runtime.retryTimer) clearTimeout(runtime.retryTimer);
-        runtime.retryTimer = setTimeout(() => void startBaileys(organizationId), invalidSession ? 500 : 3000);
+        const delay = invalidSession
+          ? 500
+          : Math.min(60_000, 3_000 * (2 ** runtime.retryAttempt++)) + Math.floor(Math.random() * 1_000);
+        runtime.retryTimer = setTimeout(() => void startBaileys(organizationId), delay);
       }
     })().catch(async (error: unknown) => {
       await setStatus(organizationId, "error", {
@@ -576,7 +611,11 @@ export async function recoverBaileysConnections(): Promise<void> {
     .select({ organizationId: schema.baileysConnection.organizationId })
     .from(schema.baileysConnection)
     .where(sql`${schema.baileysConnection.status} in ('connected','connecting','reconnecting','waiting_qr')`);
-  for (const row of rows) await startBaileys(row.organizationId);
+  for (const row of rows) {
+    await startBaileys(row.organizationId).catch((error: unknown) => {
+      console.warn(`[baileys] organização não recuperada: ${error instanceof Error ? error.message : "erro"}`);
+    });
+  }
 }
 
 export async function sendText(organizationId: string, chatId: string, text: string) {

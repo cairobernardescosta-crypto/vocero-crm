@@ -260,8 +260,8 @@ export function dayLabelInTz(startUtc: string, tz: string, now?: Date): string {
   const todayIso = dayIsoInTz(now ?? new Date(), tz);
 
   let prefijo = "";
-  if (dayIso === todayIso) prefijo = "hoy ";
-  else if (dayIso === addDaysISO(todayIso, 1)) prefijo = "mañana ";
+  if (dayIso === todayIso) prefijo = "hoje ";
+  else if (dayIso === addDaysISO(todayIso, 1)) prefijo = "amanhã ";
 
   const cuerpo = new Intl.DateTimeFormat("pt-BR", {
     timeZone: tz,

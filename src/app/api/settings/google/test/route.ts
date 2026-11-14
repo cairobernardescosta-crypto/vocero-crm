@@ -1,5 +1,5 @@
 import { z } from "zod";
-import { apiError, parseBody, withAuth } from "@/lib/api";
+import { apiError, parseBody, requireConfigureRole, withAuth } from "@/lib/api";
 import { agendaDisabledResponse, agendaEnabled } from "@/server/agenda/flag";
 import { googleConnector } from "@/server/agenda/connectors/google";
 import { getGoogleCredentials } from "@/server/agenda/connectors/google-credentials";
@@ -16,6 +16,8 @@ const schema = z.object({
 /** Probar sin guardar; con los campos vacíos prueba lo ya guardado. */
 export const POST = withAuth(async (session, req: Request) => {
   if (!agendaEnabled()) return agendaDisabledResponse();
+  const forbidden = requireConfigureRole(session);
+  if (forbidden) return forbidden;
   const body = await parseBody(req, schema);
   if (!body.ok) return body.response;
 

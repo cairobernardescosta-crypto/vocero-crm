@@ -1,5 +1,6 @@
 import { z } from "zod";
 import { requireSession, UnauthorizedError, type SessionContext } from "@/lib/auth/session";
+import { canConfigure } from "@/lib/auth/roles";
 
 /** Respuesta de error estándar de la API interna (contrato api.md). */
 export function apiError(
@@ -8,6 +9,13 @@ export function apiError(
   message: string
 ): Response {
   return Response.json({ error: { code, message } }, { status });
+}
+
+/** Gate comum para qualquer mutação de configuração da instância. */
+export function requireConfigureRole(session: SessionContext): Response | null {
+  return canConfigure(session.role)
+    ? null
+    : apiError(403, "forbidden", "Somente o proprietário ou um administrador pode alterar configurações");
 }
 
 /**

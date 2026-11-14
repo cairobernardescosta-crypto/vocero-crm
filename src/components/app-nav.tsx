@@ -113,13 +113,17 @@ export function AppNav({
   );
 
   useEffect(() => {
-    if (!baileys || pathname.startsWith("/baileys")) return;
-    if (window.localStorage.getItem("vocero-modo-whatsapp") === "baileys") setModo("baileys");
+    if (!baileys) return;
+    if (pathname.startsWith("/baileys")) return setModo("baileys");
+    if (pathname.startsWith("/inbox")) return setModo("api");
+    try {
+      if (window.localStorage.getItem("vocero-modo-whatsapp") === "baileys") setModo("baileys");
+    } catch {}
   }, [baileys, pathname]);
 
   const cambiarModo = (siguiente: ModoWhatsApp) => {
     setModo(siguiente);
-    window.localStorage.setItem("vocero-modo-whatsapp", siguiente);
+    try { window.localStorage.setItem("vocero-modo-whatsapp", siguiente); } catch {}
     router.push(siguiente === "baileys" ? "/baileys/inbox" : "/inbox");
   };
 
@@ -489,7 +493,7 @@ function Riel({
       aria-label="Secciones"
       className="tarjeta hidden w-[76px] shrink-0 flex-col items-center py-4 lg:flex"
     >
-      <Link href="/inbox" aria-label={branding.name} title={branding.name} className="rounded-[14px] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring">
+      <Link href={modo === "baileys" ? "/baileys/inbox" : "/inbox"} aria-label={branding.name} title={branding.name} className="rounded-[14px] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring">
         <BrandTile branding={branding} className="h-11 w-11 rounded-[14px] text-[18px]" />
       </Link>
       {baileys && (

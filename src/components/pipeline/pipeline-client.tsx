@@ -40,6 +40,8 @@ export type BoardLead = {
 };
 
 export function PipelineClient() {
+  const [loading, setLoading] = useState(true);
+  const [loadError, setLoadError] = useState<string | null>(null);
   const [stages, setStages] = useState<StageDto[]>([]);
   const [currency, setCurrency] = useState("MXN");
   const [leads, setLeads] = useState<BoardLead[]>([]);
@@ -66,9 +68,16 @@ export function PipelineClient() {
   );
 
   const refetch = useCallback(async () => {
-    const modo = window.localStorage.getItem("vocero-modo-whatsapp") === "baileys" ? "baileys" : "api";
+    setLoading(true);
+    setLoadError(null);
+    let modo = "api";
+    try { modo = window.localStorage.getItem("vocero-modo-whatsapp") === "baileys" ? "baileys" : "api"; } catch {}
     const res = await fetch(`/api/pipeline/board?modo=${modo}`).catch(() => null);
-    if (!res?.ok) return;
+    if (!res?.ok) {
+      setLoadError("Não foi possível carregar o Pipeline.");
+      setLoading(false);
+      return;
+    }
     const data = (await res.json()) as {
       stages: StageDto[];
       leads: BoardLead[];
@@ -77,11 +86,15 @@ export function PipelineClient() {
     if (data.currency) setCurrency(data.currency);
     setStages(data.stages);
     setLeads(data.leads);
+    setLoading(false);
   }, []);
 
   useEffect(() => {
     void refetch();
   }, [refetch]);
+
+  if (loading) return <div className="flex h-full items-center justify-center text-sm text-text-3" role="status">Carregando Pipeline…</div>;
+  if (loadError) return <div className="flex h-full flex-col items-center justify-center gap-3"><p role="alert" className="text-sm text-danger-text">{loadError}</p><Button onClick={() => void refetch()}>Tentar novamente</Button></div>;
 
   function onDragStart(event: DragStartEvent) {
     const lead = leads.find((l) => l.id === event.active.id);

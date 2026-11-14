@@ -1,5 +1,5 @@
 import { z } from "zod";
-import { apiError, parseBody, withAuth } from "@/lib/api";
+import { apiError, parseBody, requireConfigureRole, withAuth } from "@/lib/api";
 import {
   atribucionDisabledResponse,
   atribucionEnabled,
@@ -41,6 +41,8 @@ const putSchema = z.object({
 
 export const PUT = withAuth(async (session, req: Request) => {
   if (!atribucionEnabled()) return atribucionDisabledResponse();
+  const forbidden = requireConfigureRole(session);
+  if (forbidden) return forbidden;
 
   const body = await parseBody(req, putSchema);
   if (!body.ok) return body.response;
@@ -81,6 +83,8 @@ export const PUT = withAuth(async (session, req: Request) => {
 
 export const DELETE = withAuth(async (session) => {
   if (!atribucionEnabled()) return atribucionDisabledResponse();
+  const forbidden = requireConfigureRole(session);
+  if (forbidden) return forbidden;
   await deleteCapiSettings(session.organizationId);
   return Response.json({ ok: true });
 });

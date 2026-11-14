@@ -44,6 +44,7 @@ export function BaileysClient() {
     const response = await fetch(`/api/baileys${chatId ? `?chatId=${encodeURIComponent(chatId)}` : ""}`, { cache: "no-store" });
     if (!response.ok) throw new Error("Não foi possível carregar a bandeja Baileys");
     setData((await response.json()) as Snapshot);
+    setError(null);
   }, []);
   useEffect(() => { void load().catch((e: unknown) => setError(e instanceof Error ? e.message : "Erro")); }, [load]);
   useEffect(() => { const source = new EventSource("/api/events"); const refresh = () => void load().catch(() => undefined); source.addEventListener("baileys.updated", refresh); return () => source.close(); }, [load]);
@@ -78,7 +79,7 @@ export function BaileysClient() {
 
   return <div className="flex h-full lg:gap-[var(--hueco)]">
     <section className={cn("w-full shrink-0 overflow-hidden md:w-[300px] md:border-r lg:w-[340px] lg:overflow-visible lg:border-r-0", selected && "max-md:hidden")}>
-      {connected && data?.syncing ? <div className="flex h-full flex-col bg-background p-4 lg:tarjeta"><div className="flex items-center justify-between"><h2 className="font-semibold">Baileys</h2>{connectionAction}</div><div className="mt-8 flex items-center gap-2 text-sm text-text-2"><LoaderCircle className="h-4 w-4 animate-spin"/>Carregando conversas… {data.syncProgress > 0 ? `${data.syncProgress}%` : ""}</div><div className="mt-5 space-y-3" aria-hidden>{[1,2,3,4,5].map((item) => <div key={item} className="h-14 animate-pulse rounded-xl bg-muted" />)}</div></div> : <ConversationList conversations={data ? conversations : null} channels={["whatsapp"]} selectedId={selectedId} onSelect={(id) => { setSelectedId(id); void action({ action: "mark_read", chatId: id }); void load(id); }} onSeeded={() => void load()} title="Baileys" simple headerAction={connectionAction} />}
+      {connected && data?.syncing ? <div className="flex h-full flex-col bg-background p-4 lg:tarjeta"><div className="flex items-center justify-between"><h2 className="font-semibold">Baileys</h2>{connectionAction}</div><div className="mt-8 flex items-center gap-2 text-sm text-text-2" role="status" aria-live="polite"><LoaderCircle className="h-4 w-4 animate-spin"/>Carregando conversas… {data.syncProgress > 0 ? `${data.syncProgress}%` : ""}</div><div className="mt-5 space-y-3" aria-hidden>{[1,2,3,4,5].map((item) => <div key={item} className="h-14 animate-pulse rounded-xl bg-muted" />)}</div></div> : <ConversationList conversations={data ? conversations : null} channels={["whatsapp"]} selectedId={selectedId} onSelect={(id) => { setSelectedId(id); void action({ action: "mark_read", chatId: id }); void load(id); }} onSeeded={() => void load()} title="Baileys" simple headerAction={connectionAction} />}
     </section>
     <section className={cn("flex min-w-0 flex-1 flex-col lg:gap-[var(--hueco)]", !selected && "max-md:hidden")}>
       {error && <p role="alert" className="rounded-lg bg-danger-soft px-3 py-2 text-sm text-danger-text">{error}</p>}
