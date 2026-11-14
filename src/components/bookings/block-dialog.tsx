@@ -73,7 +73,7 @@ export function BlockDialog({
     setBusy(false);
     if (res?.status !== 201) {
       const data = (await res?.json().catch(() => null)) as { error?: { message?: string } } | null;
-      setError(data?.error?.message ?? "No se pudo bloquear ese horario");
+      setError(data?.error?.message ?? "Não foi possível bloquear esse horário");
       return;
     }
     onCreated(day);

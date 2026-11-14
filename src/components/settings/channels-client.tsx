@@ -131,7 +131,7 @@ export function ChannelsClient() {
     if (!res?.ok) {
       setNotice({
         ok: false,
-        text: data?.error?.message ?? "No se pudo dar de alta el webhook. Intenta de nuevo.",
+        text: data?.error?.message ?? "Não foi possível cadastrar o webhook. Tente novamente.",
       });
       return;
     }
@@ -148,7 +148,7 @@ export function ChannelsClient() {
   if (!rows) {
     return (
       <p className="text-sm text-muted-foreground">
-        {failed ? "No se pudo cargar el estado de los canales." : "Cargando…"}
+        {failed ? "Não foi possível carregar o status dos canais." : "Carregando…"}
       </p>
     );
   }
@@ -198,7 +198,7 @@ export function ChannelsClient() {
                 <dl className="grid gap-x-6 gap-y-1.5 text-sm sm:grid-cols-[9.5rem_1fr]">
                   <dt className="text-text-2">Cuenta</dt>
                   <dd>
-                    {r.account ?? "Sin nombre"}
+                    {r.account ?? "Sem nome"}
                     {r.channel !== "whatsapp" && (
                       <span className="text-text-2">
                         {" "}

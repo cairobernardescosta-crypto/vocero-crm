@@ -118,7 +118,7 @@ export function AdsClient() {
       const body = (await res?.json().catch(() => null)) as
         | { error?: { message?: string } }
         | null;
-      setError(body?.error?.message ?? "No se pudo guardar");
+      setError(body?.error?.message ?? "Não foi possível salvar");
       return;
     }
     setToken("");
@@ -226,7 +226,7 @@ export function AdsClient() {
 
           <div className="flex gap-2">
             <Button onClick={save} disabled={saving || !datasetId.trim()}>
-              {saving ? "Guardando…" : "Guardar"}
+              {saving ? "Salvando…" : "Salvar"}
             </Button>
             {capi ? (
               <Button variant="outline" onClick={disconnect} disabled={saving}>

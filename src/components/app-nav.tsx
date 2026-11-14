@@ -314,7 +314,7 @@ export function AppNav({
             alcanzable con el pulgar. */}
         <button
           onClick={onClose}
-          aria-label="Cerrar el menú"
+          aria-label="Fechar menu"
           className="-ml-1 mt-0.5 rounded-md p-1.5 text-text-3 hover:bg-accent hover:text-foreground lg:hidden"
         >
           <X className="h-[18px] w-[18px]" strokeWidth={1.8} />
@@ -362,15 +362,15 @@ export function AppNav({
         <span className="min-w-0 flex-1">
           <span className="block truncate text-[13px] font-semibold">{userName}</span>
           <span className="block truncate text-[11px] text-text-3">
-            {role === "owner" ? "Propietario" : "Equipo"} · En línea
+            {role === "owner" ? "Proprietário" : "Equipe"} · Online
           </span>
         </span>
         <span className="flex shrink-0 items-center">
           {campana}
           <ThemeToggle initial={apariencia} />
           <button
-            aria-label="Cerrar sesión"
-            title="Cerrar sesión"
+            aria-label="Sair"
+            title="Sair"
             className="rounded p-1 text-text-3 hover:text-foreground"
             onClick={() => void salir()}
           >
@@ -543,7 +543,7 @@ function Riel({
               <div className="px-2.5 pb-1.5 pt-1">
                 <p className="truncate text-[14px] font-semibold">{userName}</p>
                 <p className="text-[12px] text-text-3">
-                  {role === "owner" ? "Propietario" : "Equipo"} · En línea
+                  {role === "owner" ? "Proprietário" : "Equipe"} · Online
                 </p>
               </div>
               <div className="flex items-center justify-between rounded-lg px-2.5 py-1.5 text-[13.5px] text-text-2">
@@ -558,7 +558,7 @@ function Riel({
                 className={cn(navItemClass(false), "w-full")}
               >
                 <LogOut className="h-5 w-5 shrink-0 text-text-3" strokeWidth={1.8} aria-hidden />
-                Cerrar sesión
+                Sair
               </button>
               <p className="px-2.5 pb-1 pt-1.5 font-mono text-[10.5px] tracking-[0.06em] text-text-2" title={versionTitulo}>
                 {version}

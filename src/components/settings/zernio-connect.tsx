@@ -71,7 +71,7 @@ export function ZernioConnect({
         error?: { message?: string; details?: { accounts?: Candidate[] } };
       } | null;
       setCandidates(data?.error?.details?.accounts ?? []);
-      setError(data?.error?.message ?? "No se pudo conectar. Intenta de nuevo.");
+      setError(data?.error?.message ?? "Não foi possível conectar. Tente novamente.");
       return;
     }
     const data = (await res.json().catch(() => ({}))) as Saved;
@@ -176,7 +176,7 @@ export function ZernioConnect({
           {saved.health && saved.health.level !== "ok" && <Aviso>{saved.health.message}</Aviso>}
           {saved.webhook && !saved.webhook.ok && (
             <Aviso>
-              {saved.webhook.message ?? "No se pudo dar de alta el webhook en Zernio."}{" "}
+              {saved.webhook.message ?? "Não foi possível cadastrar o webhook no Zernio."}{" "}
               <Link href="/settings/channels" className="font-semibold underline">
                 Ver el estado de los canales
               </Link>

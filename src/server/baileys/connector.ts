@@ -26,6 +26,9 @@ type Runtime = {
   lock: ReservedDb | null;
   retryTimer: ReturnType<typeof setTimeout> | null;
   watchdog: ReturnType<typeof setTimeout> | null;
+  historyTimer: ReturnType<typeof setTimeout> | null;
+  syncing: boolean;
+  syncProgress: number;
 };
 
 const globalRuntime = globalThis as unknown as { __voceroBaileys?: Map<string, Runtime> };
@@ -47,7 +50,7 @@ const silentLogger = {
 function runtimeFor(organizationId: string): Runtime {
   const existing = runtimes.get(organizationId);
   if (existing) return existing;
-  const value: Runtime = { socket: null, qrDataUrl: null, starting: null, manualStop: false, lock: null, retryTimer: null, watchdog: null };
+  const value: Runtime = { socket: null, qrDataUrl: null, starting: null, manualStop: false, lock: null, retryTimer: null, watchdog: null, historyTimer: null, syncing: false, syncProgress: 0 };
   runtimes.set(organizationId, value);
   return value;
 }
@@ -88,7 +91,8 @@ async function setStatus(
 async function persistMessage(
   organizationId: string,
   message: import("@whiskeysockets/baileys").WAMessage,
-  socket: import("@whiskeysockets/baileys").WASocket
+  socket: import("@whiskeysockets/baileys").WASocket,
+  options: { history?: boolean; contactName?: string | null } = {}
 ) {
   const jid = message.key.remoteJid;
   const providerId = message.key.id;
@@ -98,13 +102,15 @@ async function persistMessage(
   const occurredAt = new Date(Number(message.messageTimestamp ?? Math.floor(Date.now() / 1000)) * 1000);
   const isGroup = jid.endsWith("@g.us");
   const phone = jid.endsWith("@s.whatsapp.net") ? jid.split("@")[0] ?? null : null;
-  let name = message.pushName ?? null;
+  let name = options.contactName ?? message.pushName ?? null;
   let avatarUrl: string | null = null;
   let participants: unknown[] | null = null;
-  try {
-    avatarUrl = (await socket.profilePictureUrl(jid, "image")) ?? null;
-  } catch {}
-  if (isGroup) {
+  if (!options.history) {
+    try {
+      avatarUrl = (await socket.profilePictureUrl(jid, "image")) ?? null;
+    } catch {}
+  }
+  if (isGroup && !options.history) {
     try {
       const metadata = await socket.groupMetadata(jid);
       name = metadata.subject || name;
@@ -140,13 +146,13 @@ async function persistMessage(
       },
     });
   const [chat] = await db
-    .select({ id: schema.baileysChat.id })
+    .select({ id: schema.baileysChat.id, lastMessageAt: schema.baileysChat.lastMessageAt })
     .from(schema.baileysChat)
     .where(and(eq(schema.baileysChat.organizationId, organizationId), eq(schema.baileysChat.remoteJid, jid)))
     .limit(1);
   if (!chat) return;
   let mediaAssetId: string | null = null;
-  if (["image", "audio", "video", "document", "sticker"].includes(content.type)) {
+  if (!options.history && ["image", "audio", "video", "document", "sticker"].includes(content.type)) {
     try {
       const baileys = await import("@whiskeysockets/baileys");
       const bytes = await baileys.downloadMediaMessage(message, "buffer", {}, { logger: silentLogger as never, reuploadRequest: socket.updateMediaMessage });
@@ -193,17 +199,14 @@ async function persistMessage(
   // O gate único vem antes de contadores/prévia: uma reentrega concorrente não
   // pode incrementar não lidas nem mover a conversa duas vezes.
   if (!inserted) return;
-  await db
-    .update(schema.baileysChat)
-    .set({
-      lastMessage: content.preview,
-      lastMessageAt: occurredAt,
-      ...(message.key.fromMe
-        ? {}
-        : { unreadCount: sql`${schema.baileysChat.unreadCount} + 1` }),
-      updatedAt: new Date(),
-    })
-    .where(and(eq(schema.baileysChat.organizationId, organizationId), eq(schema.baileysChat.id, chat.id)));
+  const isLatest = !chat.lastMessageAt || occurredAt >= chat.lastMessageAt;
+  await db.update(schema.baileysChat).set({
+    ...(isLatest ? { lastMessage: content.preview, lastMessageAt: occurredAt } : {}),
+    ...(!options.history && !message.key.fromMe
+      ? { unreadCount: sql`${schema.baileysChat.unreadCount} + 1` }
+      : {}),
+    updatedAt: new Date(),
+  }).where(and(eq(schema.baileysChat.organizationId, organizationId), eq(schema.baileysChat.id, chat.id)));
   publish(organizationId, { type: "baileys.updated", data: { chatId: chat.id, messageId: inserted.id } });
 }
 
@@ -233,6 +236,8 @@ async function startInternal(organizationId: string): Promise<void> {
     version,
     printQRInTerminal: false,
     logger: silentLogger as never,
+    syncFullHistory: true,
+    shouldSyncHistoryMessage: () => true,
   });
   runtime.socket = socket;
   if (runtime.watchdog) clearTimeout(runtime.watchdog);
@@ -246,6 +251,52 @@ async function startInternal(organizationId: string): Promise<void> {
   socket.ev.on("messages.upsert", ({ messages }) => {
     for (const message of messages) void persistMessage(organizationId, message, socket).catch(() => undefined);
   });
+  socket.ev.on("messaging-history.set", ({ chats, contacts, messages, isLatest, progress }) => {
+    void (async () => {
+      runtime.syncing = true;
+      runtime.syncProgress = Math.max(runtime.syncProgress, Math.min(99, Math.round(progress ?? 0)));
+      publish(organizationId, { type: "baileys.updated", data: { status: "syncing", progress: runtime.syncProgress } });
+      const names = new Map(contacts.map((contact) => [contact.id, contact.notify ?? contact.name ?? contact.verifiedName ?? null]));
+      const db = getDb();
+      for (const chat of chats) {
+        if (!chat.id || chat.id === "status@broadcast") continue;
+        const timestamp = chat.conversationTimestamp
+          ? new Date(Number(chat.conversationTimestamp) * 1000)
+          : null;
+        await db.insert(schema.baileysChat).values({
+          id: newId("baileysChat"),
+          organizationId,
+          remoteJid: chat.id,
+          name: chat.name ?? names.get(chat.id) ?? null,
+          phone: chat.id.endsWith("@s.whatsapp.net") ? chat.id.split("@")[0] ?? null : null,
+          isGroup: chat.id.endsWith("@g.us"),
+          lastMessageAt: timestamp,
+          unreadCount: Number(chat.unreadCount ?? 0),
+          updatedAt: new Date(),
+        }).onConflictDoUpdate({
+          target: [schema.baileysChat.organizationId, schema.baileysChat.remoteJid],
+          set: { name: chat.name ?? names.get(chat.id) ?? undefined, updatedAt: new Date() },
+        });
+      }
+      const ordered = [...messages].sort((a, b) => Number(a.messageTimestamp ?? 0) - Number(b.messageTimestamp ?? 0));
+      for (let index = 0; index < ordered.length; index++) {
+        const message = ordered[index]!;
+        await persistMessage(organizationId, message, socket, {
+          history: true,
+          contactName: message.key.remoteJid ? names.get(message.key.remoteJid) : null,
+        }).catch(() => undefined);
+        if (index % 25 === 0 && ordered.length > 0) {
+          runtime.syncProgress = Math.max(runtime.syncProgress, Math.round(((index + 1) / ordered.length) * 100));
+          publish(organizationId, { type: "baileys.updated", data: { status: "syncing", progress: runtime.syncProgress } });
+        }
+      }
+      if (isLatest) {
+        runtime.syncing = false;
+        runtime.syncProgress = 100;
+      }
+      publish(organizationId, { type: "baileys.updated", data: { status: runtime.syncing ? "syncing" : "connected", progress: runtime.syncProgress } });
+    })().catch((error: unknown) => console.warn(`[baileys] falha ao sincronizar histórico: ${error instanceof Error ? error.message : "erro"}`));
+  });
   socket.ev.on("connection.update", (update) => {
     void (async () => {
       if (update.qr) {
@@ -256,6 +307,13 @@ async function startInternal(organizationId: string): Promise<void> {
       if (update.connection === "open") {
         if (runtime.watchdog) clearTimeout(runtime.watchdog);
         runtime.qrDataUrl = null;
+        runtime.syncing = true;
+        runtime.syncProgress = 0;
+        if (runtime.historyTimer) clearTimeout(runtime.historyTimer);
+        runtime.historyTimer = setTimeout(() => {
+          runtime.syncing = false;
+          publish(organizationId, { type: "baileys.updated", data: { status: "connected", progress: runtime.syncProgress } });
+        }, 20000);
         const phone = socket.user?.id?.split(":")[0] ?? socket.user?.id?.split("@")[0] ?? null;
         await setStatus(organizationId, "connected", { phone });
       }
@@ -263,6 +321,9 @@ async function startInternal(organizationId: string): Promise<void> {
         if (runtime.watchdog) clearTimeout(runtime.watchdog);
         runtime.socket = null;
         runtime.qrDataUrl = null;
+        runtime.syncing = false;
+        runtime.syncProgress = 0;
+        if (runtime.historyTimer) clearTimeout(runtime.historyTimer);
         if (runtime.manualStop) {
           await setStatus(organizationId, "disconnected", { phone: null });
           return;
@@ -301,6 +362,9 @@ export async function stopBaileys(organizationId: string): Promise<void> {
   runtime.qrDataUrl = null;
   if (runtime.retryTimer) clearTimeout(runtime.retryTimer);
   if (runtime.watchdog) clearTimeout(runtime.watchdog);
+  if (runtime.historyTimer) clearTimeout(runtime.historyTimer);
+  runtime.syncing = false;
+  runtime.syncProgress = 0;
   if (socket) await socket.logout().catch(() => socket.end(undefined));
   await rm(authDir(organizationId), { recursive: true, force: true });
   if (runtime.lock) {
@@ -440,6 +504,8 @@ export async function baileysSnapshot(organizationId: string, chatId?: string | 
   return {
     connection: connection ?? { status: "disconnected", phone: null, error: null },
     qr: runtimeFor(organizationId).qrDataUrl,
+    syncing: runtimeFor(organizationId).syncing,
+    syncProgress: runtimeFor(organizationId).syncProgress,
     chats: chats.map((chat) => ({
       ...chat,
       stageName: stages.find((stage) => stage.id === chat.stageId)?.name ?? null,

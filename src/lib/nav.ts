@@ -42,7 +42,7 @@ export type ModoWhatsApp = "api" | "baileys";
 /** La única entrada que va abajo, separada del resto. */
 export const SETTINGS_ITEM: NavItem = {
   href: "/settings",
-  label: "Ajustes",
+  label: "Configurações",
   icon: Settings,
 };
 
@@ -68,9 +68,9 @@ export function appNavGroups({
     return [{
       title: "Baileys",
       items: [
-        { href: "/baileys/inbox", label: "Conversaciones", icon: MessageCircleMore },
+        { href: "/baileys/inbox", label: "Conversas", icon: MessageCircleMore },
         { href: "/pipeline", label: "Pipeline", icon: Kanban },
-        { href: "/baileys/contacts", label: "Contactos", icon: Users },
+        { href: "/baileys/contacts", label: "Contatos", icon: Users },
         { href: "/baileys/results", label: "Resultados", icon: ChartColumn },
       ],
     }];
@@ -79,16 +79,16 @@ export function appNavGroups({
   const trabajo: NavItem[] = [
     { href: "/inbox", label: "WhatsApp API", icon: Inbox, badge: true },
     { href: "/pipeline", label: "Pipeline", icon: Kanban },
-    { href: "/contacts", label: "Contactos", icon: Users },
+    { href: "/contacts", label: "Contatos", icon: Users },
   ];
   // Citas va después de Contactos: es el paso siguiente de un trato, no una
   // sección aparte.
-  if (agenda) trabajo.push({ href: "/bookings", label: "Citas", icon: CalendarDays });
+  if (agenda) trabajo.push({ href: "/bookings", label: "Agendamentos", icon: CalendarDays });
 
   const agente: NavItem[] = [];
   // Un miembro del equipo no puede hacer ninguno de los pasos de la guía.
   if (canConfigure(role)) {
-    agente.push({ href: "/onboarding", label: "Guía de inicio", icon: ListChecks });
+    agente.push({ href: "/onboarding", label: "Guia inicial", icon: ListChecks });
   }
   agente.push(
     { href: "/agent", label: "Agente", icon: Sparkles },
@@ -96,7 +96,7 @@ export function appNavGroups({
   );
 
   return [
-    { title: "Trabajo", items: trabajo },
+    { title: "Trabalho", items: trabajo },
     { title: "Agente", items: agente },
     // 019 — Se mide al final: primero se atiende y se organiza.
     { items: [{ href: "/results", label: "Resultados", icon: ChartColumn }] },
@@ -140,7 +140,7 @@ export function settingsSections({
   // 023 — "Estado" reúne todos los canales; con WhatsApp solo no aporta nada
   // que su pantalla no diga, así que no existe (ADR-001).
   if (instagram || messenger || tiktok) {
-    canales.push({ href: "/settings/channels", label: "Estado" });
+    canales.push({ href: "/settings/channels", label: "Status" });
   }
   canales.push({ href: "/settings/whatsapp", label: "WhatsApp" });
   if (instagram) canales.push({ href: "/settings/instagram", label: "Instagram" });
@@ -155,17 +155,17 @@ export function settingsSections({
     { href: "/settings/branding", label: "Marca" },
     // 062 — Tema, letra, tamaño y densidad (cada quien la suya).
     { href: "/settings/appearance", label: "Apariencia" },
-    { href: "/settings/templates", label: "Plantillas" },
+    { href: "/settings/templates", label: "Modelos" },
     // 049 — lo que el equipo inserta con «/atajo» en la Bandeja.
-    { href: "/settings/quick-replies", label: "Respuestas rápidas" },
-    { href: "/settings/team", label: "Equipo" },
+    { href: "/settings/quick-replies", label: "Respostas rápidas" },
+    { href: "/settings/team", label: "Equipe" },
   ];
-  if (atribucion) negocio.push({ href: "/settings/ads", label: "Anuncios" });
+  if (atribucion) negocio.push({ href: "/settings/ads", label: "Anúncios" });
 
   return [
-    { title: "Canales", links: canales },
+    { title: "Canais", links: canales },
     { title: "Agente", links: agente },
-    { title: "Negocio", links: negocio },
+    { title: "Negócio", links: negocio },
   ];
 }
 

@@ -99,7 +99,7 @@ export function BrandingClient({
       const data = (await res?.json().catch(() => null)) as {
         error?: { message?: string };
       } | null;
-      setError(data?.error?.message ?? "No se pudo guardar");
+      setError(data?.error?.message ?? "Não foi possível salvar");
       return;
     }
     setSaved(true);
@@ -236,7 +236,7 @@ export function BrandingClient({
           {error && <p className="text-sm text-destructive">{error}</p>}
           {saved && <p className="text-sm" style={{ color: previewSet.text }}>Marca guardada ✓</p>}
           <Button disabled={saving || !name.trim()} onClick={() => void save()}>
-            {saving ? "Guardando…" : "Guardar marca"}
+            {saving ? "Salvando…" : "Salvar marca"}
           </Button>
         </CardContent>
       </Card>

@@ -190,10 +190,10 @@ function Desconectar({ onHecho }: { onHecho: () => void }) {
         const data = (await res.json().catch(() => null)) as {
           error?: { message?: string };
         } | null;
-        setError(data?.error?.message ?? "No se pudo desconectar el número.");
+        setError(data?.error?.message ?? "Não foi possível desconectar o número.");
       }
     } catch {
-      setError("Sin conexión con el servidor.");
+      setError("Sem conexão com o servidor.");
     } finally {
       setYendo(false);
     }
@@ -276,7 +276,7 @@ function ConnectForm({
     }).catch(() => null);
     setTesting(false);
     if (!res) {
-      setTestResult({ ok: false, message: "Sin conexión con el servidor" });
+      setTestResult({ ok: false, message: "Sem conexão com o servidor" });
       return;
     }
     const data = (await res.json().catch(() => null)) as {
@@ -316,7 +316,7 @@ function ConnectForm({
       const data = (await res?.json().catch(() => null)) as {
         error?: { message?: string };
       } | null;
-      setSaveError(data?.error?.message ?? "No se pudo guardar la conexión");
+      setSaveError(data?.error?.message ?? "Não foi possível salvar a conexão");
       return;
     }
     const saved = (await res.json().catch(() => null)) as {
@@ -332,7 +332,7 @@ function ConnectForm({
     <Card>
       <CardHeader>
         <CardTitle>
-          {existing ? "Reconectar / actualizar el número" : "Conectar tu número de WhatsApp"}
+          {existing ? "Reconectar / atualizar o número" : "Conectar seu número do WhatsApp"}
         </CardTitle>
         <CardDescription>
           Pega las credenciales de WhatsApp Cloud API. El token se valida
@@ -447,7 +447,7 @@ function ConnectForm({
             disabled={!testResult?.ok || saving}
             onClick={() => void save()}
           >
-            {saving ? "Guardando…" : "Guardar conexión"}
+            {saving ? "Salvando…" : "Salvar conexão"}
           </Button>
         </div>
       </CardContent>
@@ -595,7 +595,7 @@ function WebhookCard({
     } else {
       onRegistration({
         ok: false,
-        message: data?.error?.message ?? "Sin conexión con el servidor.",
+        message: data?.error?.message ?? "Sem conexão com o servidor.",
       });
     }
   }

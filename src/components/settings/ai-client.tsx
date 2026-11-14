@@ -143,7 +143,7 @@ export function AiClient() {
     if (!res?.ok) {
       setMensaje({
         kind: "error",
-        text: await leerError(res, "No se pudo probar la conexión"),
+        text: await leerError(res, "Não foi possível testar a conexão"),
       });
       return;
     }
@@ -157,7 +157,7 @@ export function AiClient() {
       kind: "ok",
       text: data.reactivada
         ? `Conexión correcta (${data.latencyMs} ms). Tu llave vuelve a estar activa.`
-        : `Conexión correcta (${data.latencyMs} ms)${token.trim() ? ". Pulsa Guardar para dejarla configurada." : "."}`,
+        : `Conexão correta (${data.latencyMs} ms)${token.trim() ? ". Clique em Salvar para manter a configuração." : "."}`,
     });
   }
 
@@ -173,7 +173,7 @@ export function AiClient() {
     if (!res?.ok) {
       setMensaje({
         kind: "error",
-        text: await leerError(res, "No se pudo traer la lista de modelos"),
+        text: await leerError(res, "Não foi possível carregar a lista de modelos"),
       });
       return;
     }
@@ -210,7 +210,7 @@ export function AiClient() {
     if (!res?.ok) {
       setMensaje({
         kind: "error",
-        text: await leerError(res, "No se pudo guardar. Revisa los datos e inténtalo de nuevo."),
+        text: await leerError(res, "Não foi possível salvar. Revise os dados e tente novamente."),
       });
       return;
     }
@@ -220,7 +220,7 @@ export function AiClient() {
     setToken("");
     setMensaje({
       kind: "ok",
-      text: "Guardado. Prueba la conexión y corre el Laboratorio antes de encender el agente con clientes reales.",
+      text: "Salvo. Teste a conexão e execute o Laboratório antes de ativar o agente com clientes reais.",
     });
   }
 
@@ -232,7 +232,7 @@ export function AiClient() {
     );
     setOcupado(null);
     if (!res?.ok) {
-      setMensaje({ kind: "error", text: "No se pudo quitar la llave." });
+      setMensaje({ kind: "error", text: "Não foi possível remover a chave." });
       return;
     }
     const data = (await res.json()) as Vista;
@@ -408,7 +408,7 @@ export function AiClient() {
                 type="submit"
                 disabled={ocupado !== null || !puedeProbar}
               >
-                {ocupado === "guardar" ? "Guardando…" : "Guardar"}
+                {ocupado === "guardar" ? "Salvando…" : "Salvar"}
               </Button>
               {cred && (
                 <button

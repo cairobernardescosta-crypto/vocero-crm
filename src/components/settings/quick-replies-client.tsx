@@ -58,7 +58,7 @@ export function QuickRepliesClient() {
     setGuardando(false);
     if (!res?.ok) {
       const d = (await res?.json().catch(() => null)) as { error?: { message?: string } } | null;
-      setError(d?.error?.message ?? "No se pudo guardar. Revisa la conexión.");
+      setError(d?.error?.message ?? "Não foi possível salvar. Verifique a conexão.");
       return;
     }
     setEditando(null);
@@ -157,7 +157,7 @@ export function QuickRepliesClient() {
               )}
               <div className="flex gap-2">
                 <Button size="sm" disabled={guardando || !atajoFinal || !texto.trim()} onClick={() => void guardar()}>
-                  {guardando ? "Guardando…" : "Guardar"}
+                  {guardando ? "Salvando…" : "Salvar"}
                 </Button>
                 <Button size="sm" variant="outline" disabled={guardando} onClick={() => setEditando(null)}>
                   Cancelar

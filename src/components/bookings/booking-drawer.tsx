@@ -87,7 +87,7 @@ export function BookingDrawer({
           panel es lateral y NO modal, como el detalle de Google: tocar otra
           cita del calendario cambia el panel sin cerrarlo primero. */}
       <button
-        aria-label="Cerrar la cita"
+        aria-label="Fechar agendamento"
         tabIndex={-1}
         onClick={onClose}
         className="fixed inset-0 z-40 bg-overlay md:hidden"
@@ -103,7 +103,7 @@ export function BookingDrawer({
           <button
             autoFocus
             onClick={onClose}
-            aria-label="Cerrar el panel de la cita"
+            aria-label="Fechar painel do agendamento"
             className="rounded p-1 text-text-3 hover:bg-accent hover:text-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-soft"
           >
             <X className="h-4 w-4" strokeWidth={1.7} />
@@ -283,7 +283,7 @@ export function BookingDrawer({
               className="text-danger-text"
               onClick={() => void run({ action: "cancel" })}
             >
-              {isSession ? "Cancelar cita" : "Quitar bloqueo"}
+              {isSession ? "Cancelar agendamento" : "Remover bloqueio"}
             </Button>
           </footer>
         )}
@@ -358,7 +358,7 @@ function Reschedule({
       {slots !== null && days.length === 0 && (
         <p className="text-sm text-text-3">
           {failed
-            ? "No se pudo comprobar la disponibilidad. Intenta de nuevo."
+            ? "Não foi possível verificar a disponibilidade. Tente novamente."
             : "No hay huecos libres para mover esta cita."}
         </p>
       )}
@@ -368,7 +368,7 @@ function Reschedule({
           <div className="-mx-1 flex gap-1.5 overflow-x-auto px-1 pb-1" role="group" aria-label="Días con huecos">
             {days.map(([d, list]) => {
               const h = dayHeading(d);
-              const prefix = d === today ? "Hoy" : d === addDaysISO(today, 1) ? "Mañana" : h.weekday;
+              const prefix = d === today ? "Hoje" : d === addDaysISO(today, 1) ? "Amanhã" : h.weekday;
               return (
                 <button
                   key={d}

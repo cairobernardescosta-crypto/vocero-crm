@@ -75,7 +75,7 @@ function InboxEmptyState({
             onClick={() => void seed()}
           >
             <Sparkles className="h-4 w-4" strokeWidth={1.7} />
-            {seeding ? "Cargando demo…" : "Cargar datos de demostración"}
+            {seeding ? "Carregando demonstração…" : "Carregar dados de demonstração"}
           </Button>
         )
       }
@@ -89,7 +89,7 @@ export function ConversationList({
   selectedId,
   onSelect,
   onSeeded,
-  title = "Bandeja",
+  title = "Conversas",
   simple = false,
   headerAction,
 }: {
@@ -209,7 +209,7 @@ export function ConversationList({
   visibleRef.current = visible.map((c) => c.id);
   const pestanas: { id: typeof filter; label: string; count: number }[] = [
     { id: "all", label: "Todas", count: filtrado.length },
-    { id: "unread", label: "No leídas", count: unreadCount },
+    { id: "unread", label: "Não lidas", count: unreadCount },
   ];
   const nFiltros = (stage !== "all" ? 1 : 0) + (soloPorVencer ? 1 : 0) + (soloAnuncios ? 1 : 0);
   function limpiarFiltros() {
@@ -242,8 +242,8 @@ export function ConversationList({
           <Search className="h-4 w-4 shrink-0 text-text-3" strokeWidth={1.7} />
           <input
             ref={inputRef}
-            placeholder="Buscar por nombre o teléfono…"
-            aria-label="Buscar conversación"
+            placeholder="Buscar por nome ou telefone…"
+            aria-label="Buscar conversa"
             defaultValue=""
             onChange={(e) => setQuery(e.target.value)}
             className="w-full bg-transparent text-[13px] outline-none placeholder:text-text-3"

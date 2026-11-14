@@ -125,7 +125,7 @@ export function LabClient() {
         setBrainConnected(false);
         return;
       }
-      setError(data?.error?.message ?? "No se pudo lanzar la corrida");
+      setError(data?.error?.message ?? "Não foi possível iniciar a execução");
       return;
     }
     const data = (await res.json()) as { runId: string };
@@ -230,7 +230,7 @@ export function LabClient() {
           <EmptyState
             icon={FlaskConical}
             className="rounded-lg border border-dashed p-10"
-            title={runs.length === 0 ? "Sin corridas todavía" : "Elige una corrida"}
+            title={runs.length === 0 ? "Ainda não há execuções" : "Escolha uma execução"}
             description={
               runs.length === 0
                 ? brainConnected
@@ -552,7 +552,7 @@ function HallazgoCard({
               onClick={() => void apply()}
               disabled={saving || !pregunta.trim() || !respuesta.trim()}
             >
-              {saving ? "Guardando…" : "Guardar en el KB"}
+              {saving ? "Salvando…" : "Salvar na base de conhecimento"}
             </Button>
             <Button size="sm" variant="ghost" onClick={() => setEditing(false)}>
               Cancelar

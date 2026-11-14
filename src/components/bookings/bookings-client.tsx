@@ -299,7 +299,7 @@ export function BookingsClient({
       const data = (await res?.json().catch(() => null)) as {
         error?: { message?: string };
       } | null;
-      return { ok: false, message: data?.error?.message ?? "No se pudo completar la acción" };
+      return { ok: false, message: data?.error?.message ?? "Não foi possível concluir a ação" };
     }
     await reload();
     return { ok: true };
@@ -491,7 +491,7 @@ function StatusBar({
             <Switch
               size="sm"
               checked={showTests}
-              label="Mostrar pruebas del Laboratorio"
+              label="Mostrar testes do Laboratório"
               onCheckedChange={onShowTests}
             />
             <span>Mostrar pruebas{counts.tests > 0 ? ` (${counts.tests})` : ""}</span>
@@ -501,7 +501,7 @@ function StatusBar({
           <Switch
             size="sm"
             checked={showCancelled}
-            label="Mostrar canceladas"
+            label="Mostrar cancelados"
             onCheckedChange={onShowCancelled}
           />
           <span>Mostrar canceladas{counts.cancelled > 0 ? ` (${counts.cancelled})` : ""}</span>

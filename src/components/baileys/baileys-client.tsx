@@ -17,7 +17,7 @@ type Chat = { id: string; name: string | null; phone: string | null; isGroup: bo
 type RawMedia = { id: string; kind: "image" | "video" | "audio" | "document" | "sticker"; mimeType: string | null; fileName: string | null; fileSize: number | null; caption: string | null; fetchStatus: "available" | "pending" | "failed"; payload: unknown };
 type RawMessage = { id: string; chatId: string; direction: "in" | "out"; type: string; text: string | null; status: string; occurredAt: string; media: RawMedia | null };
 type Stage = { id: string; name: string; kind: string };
-type Snapshot = { connection: Connection; qr: string | null; chats: Chat[]; stages: Stage[]; messages: RawMessage[] };
+type Snapshot = { connection: Connection; qr: string | null; syncing: boolean; syncProgress: number; chats: Chat[]; stages: Stage[]; messages: RawMessage[] };
 
 const STATUS: Record<string, string> = { disconnected: "Desconectado", waiting_qr: "Aguardando QR", connecting: "Conectando", connected: "Conectado", reconnecting: "Reconectando", error: "Erro" };
 
@@ -49,10 +49,10 @@ export function BaileysClient() {
   useEffect(() => { const source = new EventSource("/api/events"); const refresh = () => void load().catch(() => undefined); source.addEventListener("baileys.updated", refresh); return () => source.close(); }, [load]);
   useEffect(() => {
     const status = data?.connection.status;
-    if (!status || !["connecting", "reconnecting", "waiting_qr"].includes(status)) return;
+    if (!status || (!["connecting", "reconnecting", "waiting_qr"].includes(status) && !data?.syncing)) return;
     const timer = window.setInterval(() => void load().catch(() => undefined), 2000);
     return () => window.clearInterval(timer);
-  }, [data?.connection.status, load]);
+  }, [data?.connection.status, data?.syncing, load]);
 
   async function action(payload: object): Promise<string | null> {
     setBusy(true); setError(null);
@@ -66,7 +66,7 @@ export function BaileysClient() {
   }
 
   const connected = data?.connection.status === "connected";
-  const conversations = useMemo(() => (data?.chats ?? []).map((chat) => toConversation(chat, connected)), [data?.chats, connected]);
+  const conversations = useMemo(() => connected ? (data?.chats ?? []).map((chat) => toConversation(chat, true)) : [], [data?.chats, connected]);
   const selected = conversations.find((conversation) => conversation.id === selectedId) ?? null;
   const selectedChat = data?.chats.find((chat) => chat.id === selectedId) ?? null;
   const messages = useMemo(() => (data?.messages ?? []).map(toMessage), [data?.messages]);
@@ -78,7 +78,7 @@ export function BaileysClient() {
 
   return <div className="flex h-full lg:gap-[var(--hueco)]">
     <section className={cn("w-full shrink-0 overflow-hidden md:w-[300px] md:border-r lg:w-[340px] lg:overflow-visible lg:border-r-0", selected && "max-md:hidden")}>
-      <ConversationList conversations={data ? conversations : null} channels={["whatsapp"]} selectedId={selectedId} onSelect={(id) => { setSelectedId(id); void action({ action: "mark_read", chatId: id }); void load(id); }} onSeeded={() => void load()} title="Baileys" simple headerAction={connectionAction} />
+      {connected && data?.syncing ? <div className="flex h-full flex-col bg-background p-4 lg:tarjeta"><div className="flex items-center justify-between"><h2 className="font-semibold">Baileys</h2>{connectionAction}</div><div className="mt-8 flex items-center gap-2 text-sm text-text-2"><LoaderCircle className="h-4 w-4 animate-spin"/>Carregando conversas… {data.syncProgress > 0 ? `${data.syncProgress}%` : ""}</div><div className="mt-5 space-y-3" aria-hidden>{[1,2,3,4,5].map((item) => <div key={item} className="h-14 animate-pulse rounded-xl bg-muted" />)}</div></div> : <ConversationList conversations={data ? conversations : null} channels={["whatsapp"]} selectedId={selectedId} onSelect={(id) => { setSelectedId(id); void action({ action: "mark_read", chatId: id }); void load(id); }} onSeeded={() => void load()} title="Baileys" simple headerAction={connectionAction} />}
     </section>
     <section className={cn("flex min-w-0 flex-1 flex-col lg:gap-[var(--hueco)]", !selected && "max-md:hidden")}>
       {error && <p role="alert" className="rounded-lg bg-danger-soft px-3 py-2 text-sm text-danger-text">{error}</p>}

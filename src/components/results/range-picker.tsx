@@ -88,7 +88,7 @@ export function shortcuts(hoy: string): { label: string; range: Range }[] {
     { label: "7 días", range: { from: menos(6), to: hoy } },
     { label: "30 días", range: { from: menos(29), to: hoy } },
     { label: "Este mes", range: { from: primeroDeMes, to: hoy } },
-    { label: "Mes pasado", range: { from: iniMesPasado, to: finMesPasado } },
+    { label: "Mês passado", range: { from: iniMesPasado, to: finMesPasado } },
     { label: "90 días", range: { from: menos(89), to: hoy } },
   ];
 }

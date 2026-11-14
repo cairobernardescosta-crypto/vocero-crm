@@ -133,8 +133,8 @@ export function ContactsClient() {
             <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-muted-foreground" />
             <Input
               ref={inputRef}
-              placeholder="Buscar por nombre o teléfono…"
-              aria-label="Buscar contacto"
+              placeholder="Buscar por nome ou telefone…"
+              aria-label="Buscar contato"
               defaultValue=""
               onChange={(e) => setQuery(e.target.value)}
               className="w-full pl-8 sm:w-72"

@@ -122,7 +122,7 @@ export function AgentClient() {
       if (patch.enabled !== undefined) {
         setSwitchError(
           data?.error?.message ??
-            (patch.enabled ? "No se pudo encender el agente." : "No se pudo apagar el agente.")
+            (patch.enabled ? "Não foi possível ativar o agente." : "Não foi possível desativar o agente.")
         );
       }
       void refetch();
@@ -197,7 +197,7 @@ export function AgentClient() {
           </p>
           <p className="mx-auto mt-1 max-w-md text-sm text-muted-foreground">
             {aiMensaje ??
-              "Piensa a través del CRM con la llave de Ajustes → IA: elige el proveedor, el modelo y pega tu llave, sin reiniciar nada."}{" "}
+              "Pensa pelo CRM com a chave em Configurações → IA: escolha o provedor, o modelo e cole sua chave, sem reiniciar nada."}{" "}
             (Si tu agente usa su propia llave, puedes ignorar este aviso.)
           </p>
           <Link
@@ -486,7 +486,7 @@ function KbSection({
               <Button
                 variant="ghost"
                 size="icon"
-                aria-label="Eliminar entrada"
+                aria-label="Excluir entrada"
                 onClick={() => void remove(e.id)}
               >
                 <Trash2 className="h-4 w-4" />

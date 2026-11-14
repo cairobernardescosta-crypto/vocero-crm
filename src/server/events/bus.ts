@@ -39,7 +39,7 @@ export type SseEvent =
   | { type: "booking.updated"; data: { bookingId: string } }
   | {
       type: "baileys.updated";
-      data: { status?: string; chatId?: string; messageId?: string };
+      data: { status?: string; chatId?: string; messageId?: string; progress?: number };
     }
   | {
       type: "lab.run";

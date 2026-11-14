@@ -186,7 +186,7 @@ export function PipelineClient() {
       <header className="flex flex-wrap items-center justify-between gap-2 border-b px-4 py-3 sm:px-6 sm:py-4">
         <h2 className="text-[17px] font-bold tracking-tight">Pipeline</h2>
         <Button variant="outline" size="sm" onClick={() => setManaging(true)}>
-          <Settings2 className="h-4 w-4" /> Gestionar etapas
+          <Settings2 className="h-4 w-4" /> Gerenciar etapas
         </Button>
       </header>
 

@@ -104,7 +104,7 @@ export function EmbeddedSignup({
         | (ResultadoEmbebido & { error?: { message?: string } })
         | null;
       if (!res.ok || !data) {
-        return fallar(data?.error?.message ?? "No se pudo completar la conexión.");
+        return fallar(data?.error?.message ?? "Não foi possível concluir a conexão.");
       }
       activo.current = null;
       setBusy(false);
@@ -115,7 +115,7 @@ export function EmbeddedSignup({
       fallar(
         e instanceof Error && e.name === "TimeoutError"
           ? "La confirmación tardó demasiado. Recarga la página para ver si quedó conectado antes de repetir."
-          : "Sin conexión con el servidor."
+          : "Sem conexão com o servidor."
       );
     }
   }, [fallar]);
@@ -131,7 +131,7 @@ export function EmbeddedSignup({
       }
       if (e.kind === "coexistence") {
         return fallar(
-          "En Meta se eligió conectar la app de WhatsApp Business del teléfono (coexistencia), que esta versión no admite. No se guardó nada."
+          "Na Meta foi escolhida a conexão com o aplicativo WhatsApp Business do celular (coexistência), que esta versão não suporta. Nada foi salvo."
         );
       }
       activo.current.evento = { wabaId: e.wabaId, phoneNumberId: e.phoneNumberId };
@@ -170,7 +170,7 @@ export function EmbeddedSignup({
         void enviar();
       }, opcionesDeLogin(config.configId));
     } catch {
-      fallar("No se pudo abrir Meta. Permite las ventanas emergentes y vuelve a intentarlo.");
+      fallar("Não foi possível abrir a Meta. Permita janelas pop-up e tente novamente.");
     }
   }
 
@@ -184,7 +184,7 @@ export function EmbeddedSignup({
           src="https://connect.facebook.net/es_LA/sdk.js"
           strategy="afterInteractive"
           onReady={iniciarSdk}
-          onError={() => setError("No se pudo cargar Meta. Revisa el bloqueador del navegador y recarga.")}
+          onError={() => setError("Não foi possível carregar a Meta. Verifique o bloqueador do navegador e recarregue.")}
         />
       )}
       <CardHeader>
@@ -226,7 +226,7 @@ export function EmbeddedSignup({
             </div>
 
             <Button disabled={!sdk || busy || !pinValido} onClick={lanzar}>
-              {busy ? "Completando la conexión…" : "Conectar con Meta"}
+              {busy ? "Concluindo a conexão…" : "Conectar com a Meta"}
             </Button>
           </>
         )}

@@ -18,9 +18,9 @@ const labels = (groups: { items: { label: string }[] }[]) =>
 describe("barra lateral agrupada", () => {
   it("con todo apagado y como miembro: Trabajo, Agente y Resultados", () => {
     const groups = appNavGroups({ role: "member" });
-    expect(groups.map((g) => g.title)).toEqual(["Trabajo", "Agente", undefined]);
+    expect(groups.map((g) => g.title)).toEqual(["Trabalho", "Agente", undefined]);
     expect(labels(groups)).toEqual([
-      ["WhatsApp API", "Pipeline", "Contactos"],
+      ["WhatsApp API", "Pipeline", "Contatos"],
       ["Agente", "Laboratorio"],
       ["Resultados"],
     ]);
@@ -31,8 +31,8 @@ describe("barra lateral agrupada", () => {
     expect(trabajo!.items.map((i) => i.label)).toEqual([
       "WhatsApp API",
       "Pipeline",
-      "Contactos",
-      "Citas",
+      "Contatos",
+      "Agendamentos",
     ]);
     expect(trabajo!.items.at(-1)!.href).toBe("/bookings");
   });
@@ -40,14 +40,14 @@ describe("barra lateral agrupada", () => {
   it("BAILEYS muestra solamente sus funciones al seleccionar su modo", () => {
     const items = appNavGroups({ baileys: true, modo: "baileys", role: "member" }).flatMap((g) => g.items);
     expect(items.filter((i) => i.href === "/baileys/inbox")).toHaveLength(1);
-    expect(items.map((i) => i.label)).toEqual(["Conversaciones", "Pipeline", "Contactos", "Resultados"]);
+    expect(items.map((i) => i.label)).toEqual(["Conversas", "Pipeline", "Contatos", "Resultados"]);
     expect(items.map((i) => i.href)).not.toContain("/inbox");
   });
 
   it("la guía de inicio abre el grupo Agente solo para quien configura", () => {
     for (const role of ["owner", "admin"]) {
       const agente = appNavGroups({ role })[1]!;
-      expect(agente.items[0]).toMatchObject({ href: "/onboarding", label: "Guía de inicio" });
+      expect(agente.items[0]).toMatchObject({ href: "/onboarding", label: "Guia inicial" });
     }
     for (const role of ["member", null, undefined]) {
       const agente = appNavGroups({ role })[1]!;
@@ -79,38 +79,38 @@ describe("ajustes en tres secciones", () => {
 
   it("con todo apagado: Canales, Agente y Negocio con lo mínimo", () => {
     const sections = settingsSections({});
-    expect(sections.map((s) => s.title)).toEqual(["Canales", "Agente", "Negocio"]);
+    expect(sections.map((s) => s.title)).toEqual(["Canais", "Agente", "Negócio"]);
     expect(links(sections)).toEqual({
-      Canales: ["WhatsApp"],
+      Canais: ["WhatsApp"],
       Agente: ["IA"],
-      Negocio: ["Marca", "Apariencia", "Plantillas", "Respuestas rápidas", "Equipo"],
+      Negócio: ["Marca", "Apariencia", "Modelos", "Respostas rápidas", "Equipe"],
     });
   });
 
   it("cada bandera añade su enlace en su sección y en ninguna otra", () => {
     // 023: con un canal social, "Estado" abre la sección.
     expect(links(settingsSections({ messenger: true }))).toEqual({
-      Canales: ["Estado", "WhatsApp", "Messenger"],
+      Canais: ["Status", "WhatsApp", "Messenger"],
       Agente: ["IA"],
-      Negocio: ["Marca", "Apariencia", "Plantillas", "Respuestas rápidas", "Equipo"],
+      Negócio: ["Marca", "Apariencia", "Modelos", "Respostas rápidas", "Equipe"],
     });
-    expect(links(settingsSections({ instagram: true })).Canales).toEqual([
-      "Estado",
+    expect(links(settingsSections({ instagram: true })).Canais).toEqual([
+      "Status",
       "WhatsApp",
       "Instagram",
     ]);
     expect(
-      links(settingsSections({ instagram: true, messenger: true, tiktok: true })).Canales
-    ).toEqual(["Estado", "WhatsApp", "Instagram", "Messenger", "TikTok"]);
+      links(settingsSections({ instagram: true, messenger: true, tiktok: true })).Canais
+    ).toEqual(["Status", "WhatsApp", "Instagram", "Messenger", "TikTok"]);
     expect(links(settingsSections({ agenda: true }))).toEqual({
-      Canales: ["WhatsApp"],
+      Canais: ["WhatsApp"],
       Agente: ["IA", "Agenda"],
-      Negocio: ["Marca", "Apariencia", "Plantillas", "Respuestas rápidas", "Equipo"],
+      Negócio: ["Marca", "Apariencia", "Modelos", "Respostas rápidas", "Equipe"],
     });
     expect(links(settingsSections({ atribucion: true }))).toEqual({
-      Canales: ["WhatsApp"],
+      Canais: ["WhatsApp"],
       Agente: ["IA"],
-      Negocio: ["Marca", "Apariencia", "Plantillas", "Respuestas rápidas", "Equipo", "Anuncios"],
+      Negócio: ["Marca", "Apariencia", "Modelos", "Respostas rápidas", "Equipe", "Anúncios"],
     });
   });
 

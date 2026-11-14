@@ -49,7 +49,7 @@ export function FaviconCard({ branding }: { branding: Branding }) {
       const data = (await res?.json().catch(() => null)) as {
         error?: { message?: string };
       } | null;
-      setError(data?.error?.message ?? "No se pudo subir el icono");
+      setError(data?.error?.message ?? "Não foi possível enviar o ícone");
       return;
     }
     const data = (await res.json()) as { favicon: Branding["favicon"] };
@@ -66,7 +66,7 @@ export function FaviconCard({ branding }: { branding: Branding }) {
     }).catch(() => null);
     setSubiendo(false);
     if (!res?.ok) {
-      setError("No se pudo quitar el icono");
+      setError("Não foi possível remover o ícone");
       return;
     }
     setActual(null);

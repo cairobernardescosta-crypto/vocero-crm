@@ -45,7 +45,7 @@ export function AdsSection({
         <div className="space-y-6">
           <div className="grid grid-cols-2 gap-2.5 sm:gap-3 lg:max-w-xl">
             <StatCard
-              label="Conversaciones nuevas"
+              label="Novas conversas"
               value={String(data.conversations.current)}
               compare={data.conversations}
             />

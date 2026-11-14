@@ -63,7 +63,7 @@ export function EntregasCard() {
     }).catch(() => null);
     setReintentando(false);
     if (!res?.ok) {
-      setAviso("No se pudo reintentar. Revisa la conexión con el servidor.");
+      setAviso("Não foi possível tentar novamente. Verifique a conexão com o servidor.");
       return;
     }
     const data = (await res.json()) as Entregas & { reintentados: number };
@@ -114,7 +114,7 @@ export function EntregasCard() {
               onClick={() => void reintentar()}
             >
               <RotateCw className="h-4 w-4" />
-              {reintentando ? "Reintentando…" : "Reintentar"}
+              {reintentando ? "Tentando novamente…" : "Tentar novamente"}
             </Button>
           </div>
         ) : (

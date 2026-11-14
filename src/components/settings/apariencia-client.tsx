@@ -94,7 +94,7 @@ export function AparienciaClient({
     setGuardando(false);
     if (!res?.ok) {
       const d = (await res?.json().catch(() => null)) as { error?: { message?: string } } | null;
-      setError(d?.error?.message ?? "No se pudo guardar. Revisa la conexión.");
+      setError(d?.error?.message ?? "Não foi possível salvar. Verifique a conexão.");
       return;
     }
     setAviso("Aplicada a todo el equipo: la ve quien no eligió la suya.");

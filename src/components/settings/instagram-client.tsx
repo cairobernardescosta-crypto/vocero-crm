@@ -57,7 +57,7 @@ const HELP: Record<Source, { title: string; items: string[] }> = {
     items: [
       "La cuenta tiene que estar en modo profesional (Empresa o Creador).",
       "Genera el token con los permisos instagram_business_basic e instagram_business_manage_messages.",
-      "Sin App Review, la cuenta solo recibe mensajes de perfiles con un rol en la app (administradores, desarrolladores, testers).",
+      "Sem a revisão do aplicativo, a conta recebe mensagens apenas de perfis com função no aplicativo (administradores, desenvolvedores e testadores).",
     ],
   },
 };
@@ -112,7 +112,7 @@ export function InstagramClient() {
       const data = (await res?.json().catch(() => null)) as {
         error?: { message?: string };
       } | null;
-      setError(data?.error?.message ?? "No se pudo conectar la cuenta");
+      setError(data?.error?.message ?? "Não foi possível conectar a conta");
       return;
     }
     const data = (await res.json()) as { username?: string | null };

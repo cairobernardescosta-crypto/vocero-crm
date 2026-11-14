@@ -54,11 +54,11 @@ const HELP: Record<Source, { title: string; items: string[] }> = {
     ],
   },
   meta: {
-    title: "Crea una app en developers.facebook.com con el producto Messenger",
+    title: "Crie um aplicativo em developers.facebook.com com o produto Messenger",
     items: [
-      "El ID de la página está en la sección «Información» de la página, o en Messenger → Configuración → Tokens de acceso.",
+      "O ID da página fica na seção «Informações» da página ou em Messenger → Configurações → Tokens de acesso.",
       "Genera ahí el token de la página con el permiso pages_messaging. Uno de larga duración evita reconectar cada dos meses.",
-      "Sin App Review, la página solo recibe mensajes de cuentas con un rol en la app (administradores, desarrolladores, testers).",
+      "Sem a revisão do aplicativo, a página recebe mensagens apenas de contas com função no aplicativo (administradores, desenvolvedores e testadores).",
     ],
   },
 };
@@ -114,7 +114,7 @@ export function MessengerClient() {
       const data = (await res?.json().catch(() => null)) as {
         error?: { message?: string };
       } | null;
-      setError(data?.error?.message ?? "No se pudo conectar la página");
+      setError(data?.error?.message ?? "Não foi possível conectar a página");
       return;
     }
     const data = (await res.json()) as { pageName?: string | null };

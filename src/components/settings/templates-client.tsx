@@ -44,7 +44,7 @@ const STATUS_BADGE: Record<
 > = {
   draft: { label: "Borrador", variant: "secondary", hint: "Guardada, todavía sin enviar a Meta." },
   pending: { label: "En revisión", variant: "warning", hint: "Meta la está revisando. Suele tardar de unos minutos a 24 horas." },
-  approved: { label: "Aprobada", variant: "success", hint: "Lista para usar desde la Bandeja o desde Contactos." },
+  approved: { label: "Aprovado", variant: "success", hint: "Pronto para usar em Conversas ou Contatos." },
   rejected: { label: "Rechazada", variant: "destructive", hint: "Corrígela y créala de nuevo con otro nombre." },
 };
 
@@ -147,7 +147,7 @@ export function TemplatesClient() {
         const data = (await res?.json().catch(() => null)) as {
           error?: { message?: string };
         } | null;
-        setSyncMsg(data?.error?.message ?? "No se pudo sincronizar");
+        setSyncMsg(data?.error?.message ?? "Não foi possível sincronizar");
       }
     },
     [refetch]
@@ -274,7 +274,7 @@ function HowItWorks({ defaultOpen }: { defaultOpen: boolean }) {
     {
       icon: Send,
       title: "Úsala",
-      text: "En la Bandeja, cuando la ventana de 24 h está cerrada, elígela, llena las variables y envía. Para escribirle primero a alguien, usa «Escribir primero» en Contactos.",
+      text: "Em Conversas, quando a janela de 24 horas estiver fechada, escolha o modelo, preencha as variáveis e envie. Para iniciar uma conversa, use «Escrever primeiro» em Contatos.",
     },
   ];
 
@@ -405,7 +405,7 @@ function CreateForm({
       const data = (await res?.json().catch(() => null)) as {
         error?: { message?: string };
       } | null;
-      setError(data?.error?.message ?? "No se pudo crear la plantilla");
+      setError(data?.error?.message ?? "Não foi possível criar o modelo");
       return;
     }
     onCreated();
@@ -571,7 +571,7 @@ function CreateForm({
             disabled={saving || !name.trim() || !body.trim() || bodyError !== null}
             onClick={() => void create()}
           >
-            {saving ? "Enviando a Meta…" : "Crear y enviar a revisión"}
+            {saving ? "Enviando para a Meta…" : "Criar e enviar para análise"}
           </Button>
           <Button variant="outline" disabled={saving} onClick={onCancel}>
             Cancelar

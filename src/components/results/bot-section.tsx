@@ -40,7 +40,7 @@ export function BotSection({
       {data && (
         <div className="space-y-6">
           <div className="grid grid-cols-2 gap-2.5 sm:gap-3 lg:grid-cols-4">
-            <StatCard label="Conversaciones nuevas" value={String(data.conversations)} />
+            <StatCard label="Novas conversas" value={String(data.conversations)} />
             <RateCard
               label="Contestó el agente"
               rate={data.aiReplyRate}
@@ -74,7 +74,7 @@ export function BotSection({
               ) : (
                 <div className="grid grid-cols-2 gap-2.5 sm:gap-3 lg:grid-cols-5">
                   <StatCard
-                    label="Citas"
+                    label="Agendamentos"
                     value={String(data.sessions.booked)}
                     hint={pendientes(data.sessions)}
                   />

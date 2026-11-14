@@ -26,7 +26,7 @@ export function TimeBars({
   points,
   format,
   unit,
-  emptyText = "Sin movimientos en el periodo.",
+  emptyText = "Sem movimentações no período.",
 }: {
   title: string;
   points: TimePoint[];

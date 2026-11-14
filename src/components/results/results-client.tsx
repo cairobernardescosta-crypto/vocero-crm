@@ -34,7 +34,7 @@ async function cargar<T>(
     res = await fetch(url, { signal });
   } catch {
     if (signal.aborted) return;
-    set(() => ({ data: null, loading: false, error: "No se pudo cargar. Revisa tu conexión." }));
+    set(() => ({ data: null, loading: false, error: "Não foi possível carregar. Verifique sua conexão." }));
     return;
   }
   const body = (await res.json().catch(() => null)) as
@@ -45,7 +45,7 @@ async function cargar<T>(
     set(() => ({
       data: null,
       loading: false,
-      error: body?.error?.message ?? "No se pudo calcular este bloque.",
+      error: body?.error?.message ?? "Não foi possível calcular este bloco.",
     }));
     return;
   }
