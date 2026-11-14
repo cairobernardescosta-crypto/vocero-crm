@@ -21,7 +21,7 @@ export async function register(): Promise<void> {
     const { baileysEnabled } = await import("@/server/baileys/flag");
     if (baileysEnabled()) {
       const { recoverBaileysConnections } = await import("@/server/baileys/connector");
-      await recoverBaileysConnections().catch((error: unknown) => {
+      void recoverBaileysConnections().catch((error: unknown) => {
         console.error(
           "[baileys] falha ao recuperar conexões:",
           error instanceof Error ? error.message : "erro"
