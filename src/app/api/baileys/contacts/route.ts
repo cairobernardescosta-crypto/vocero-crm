@@ -1,4 +1,4 @@
-import { asc, eq } from "drizzle-orm";
+import { and, asc, eq, notLike } from "drizzle-orm";
 import { withAuth } from "@/lib/api";
 import { getDb, schema } from "@/lib/db";
 import { baileysDisabledResponse, baileysEnabled } from "@/server/baileys/flag";
@@ -20,7 +20,10 @@ export const GET = withAuth(async (session) => {
       unreadCount: schema.baileysChat.unreadCount,
     })
     .from(schema.baileysChat)
-    .where(eq(schema.baileysChat.organizationId, session.organizationId))
+    .where(and(
+      eq(schema.baileysChat.organizationId, session.organizationId),
+      notLike(schema.baileysChat.remoteJid, "%@newsletter")
+    ))
     .orderBy(asc(schema.baileysChat.name));
   return Response.json({
     contacts: chats,

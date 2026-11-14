@@ -1,6 +1,6 @@
 import path from "node:path";
 import { mkdir, rm } from "node:fs/promises";
-import { and, asc, desc, eq, inArray, sql } from "drizzle-orm";
+import { and, asc, desc, eq, inArray, isNull, notLike, sql } from "drizzle-orm";
 import QRCode from "qrcode";
 import { getDb, getSql, schema } from "@/lib/db";
 import { newId } from "@/lib/db/ids";
@@ -109,6 +109,65 @@ async function persistChatInfo(
     eq(schema.baileysChat.organizationId, organizationId),
     eq(schema.baileysChat.remoteJid, chat.id)
   ));
+}
+
+/** Completa os dados já gravados antes dos eventos de contatos e mídia. */
+async function backfillBaileysData(
+  organizationId: string,
+  socket: import("@whiskeysockets/baileys").WASocket
+): Promise<void> {
+  const db = getDb();
+  const chats = await db.select().from(schema.baileysChat).where(and(
+    eq(schema.baileysChat.organizationId, organizationId),
+    notLike(schema.baileysChat.remoteJid, "%@newsletter")
+  ));
+  for (const chat of chats) {
+    let name = chat.name;
+    let participants = chat.participants;
+    if (chat.isGroup) {
+      try {
+        const metadata = await socket.groupMetadata(chat.remoteJid);
+        name = metadata.subject || name;
+        participants = metadata.participants.map((participant) => ({
+          jid: participant.id,
+          admin: participant.admin ?? null,
+        }));
+      } catch {}
+    }
+    let avatarUrl = chat.avatarUrl;
+    if (!avatarUrl) {
+      try { avatarUrl = (await socket.profilePictureUrl(chat.remoteJid, "image")) ?? null; } catch {}
+    }
+    if (name !== chat.name || avatarUrl !== chat.avatarUrl || participants !== chat.participants) {
+      await db.update(schema.baileysChat).set({
+        name: name ?? undefined,
+        avatarUrl: avatarUrl ?? undefined,
+        participants: participants ?? undefined,
+        updatedAt: new Date(),
+      }).where(eq(schema.baileysChat.id, chat.id));
+    }
+  }
+
+  const semArquivo = await db.select({
+    id: schema.baileysMessage.id,
+    type: schema.baileysMessage.type,
+  }).from(schema.baileysMessage).where(and(
+    eq(schema.baileysMessage.organizationId, organizationId),
+    isNull(schema.baileysMessage.mediaAssetId),
+    inArray(schema.baileysMessage.type, ["image", "audio", "video", "document", "sticker"])
+  ));
+  for (const message of semArquivo) {
+    const assetId = newId("mediaAsset");
+    await db.insert(schema.mediaAsset).values({
+      id: assetId,
+      organizationId,
+      kind: message.type as "image" | "audio" | "video" | "document" | "sticker",
+      fetchStatus: "failed",
+      fetchError: "Mídia histórica sem chave de recuperação",
+    });
+    await db.update(schema.baileysMessage).set({ mediaAssetId: assetId }).where(eq(schema.baileysMessage.id, message.id));
+  }
+  publish(organizationId, { type: "baileys.updated", data: { status: "connected" } });
 }
 
 async function setStatus(
@@ -433,6 +492,9 @@ async function startInternal(organizationId: string): Promise<void> {
         }, 20000);
         const phone = socket.user?.id?.split(":")[0] ?? socket.user?.id?.split("@")[0] ?? null;
         await setStatus(organizationId, "connected", { phone });
+        void backfillBaileysData(organizationId, socket).catch((error: unknown) => {
+          console.warn(`[baileys] falha ao completar dados existentes: ${error instanceof Error ? error.message : "erro"}`);
+        });
       }
       if (update.connection === "close") {
         if (runtime.watchdog) clearTimeout(runtime.watchdog);
@@ -595,7 +657,10 @@ export async function baileysSnapshot(organizationId: string, chatId?: string | 
   const chats = await db
     .select()
     .from(schema.baileysChat)
-    .where(eq(schema.baileysChat.organizationId, organizationId))
+    .where(and(
+      eq(schema.baileysChat.organizationId, organizationId),
+      notLike(schema.baileysChat.remoteJid, "%@newsletter")
+    ))
     .orderBy(desc(schema.baileysChat.lastMessageAt))
     .limit(200);
   const stages = await db
