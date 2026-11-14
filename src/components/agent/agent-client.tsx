@@ -89,7 +89,7 @@ export function AgentClient() {
   if (!profile) {
     return (
       <div className="flex h-full items-center justify-center text-sm text-muted-foreground">
-        Cargando…
+        Carregando…
       </div>
     );
   }
@@ -193,7 +193,7 @@ export function AgentClient() {
         <div className="mx-4 mt-4 rounded-lg border border-brand-soft bg-brand-tint p-5 text-center sm:mx-6 sm:mt-6 sm:p-6">
           <Sparkles className="mx-auto mb-2 h-8 w-8 text-primary" />
           <p className="font-medium">
-            {aiMensaje ? "Tu agente no puede pensar" : "Tu agente no tiene con qué pensar"}
+            {aiMensaje ? "Seu agente não consegue processar" : "Seu agente não tem um modelo configurado"}
           </p>
           <p className="mx-auto mt-1 max-w-md text-sm text-muted-foreground">
             {aiMensaje ??
@@ -281,7 +281,7 @@ function RolSection({
           ))}
         </ul>
         <p className="text-xs text-muted-foreground">
-          El agente toma los cambios en unos minutos, sin redesplegar nada.
+          O agente aplica as alterações em alguns minutos, sem precisar republicar.
         </p>
       </CardContent>
     </Card>
@@ -308,7 +308,7 @@ function ProfileSection({
       </CardHeader>
       <CardContent className="space-y-4">
         <div className="space-y-1.5">
-          <Label htmlFor="agent-name">Nombre del agente</Label>
+          <Label htmlFor="agent-name">Nome do agente</Label>
           <Input
             id="agent-name"
             value={form.name}
@@ -339,7 +339,7 @@ function ProfileSection({
           <Textarea
             id="agent-escalation"
             rows={3}
-            placeholder="Cuándo pasar la conversación a un humano…"
+            placeholder="Quando transferir a conversa para uma pessoa…"
             value={form.escalationRules ?? ""}
             onChange={(e) => setForm({ ...form, escalationRules: e.target.value })}
           />
@@ -348,7 +348,7 @@ function ProfileSection({
           <Label htmlFor="agent-greeting">Saludo</Label>
           <Input
             id="agent-greeting"
-            placeholder="Saludo para conversaciones nuevas"
+            placeholder="Saudação para novas conversas"
             value={form.greeting ?? ""}
             onChange={(e) => setForm({ ...form, greeting: e.target.value })}
           />
@@ -362,7 +362,7 @@ function ProfileSection({
             void onSave({ name, tone, instructions, escalationRules, greeting });
           }}
         >
-          Guardar comportamiento
+          Salvar comportamento
         </Button>
       </CardContent>
     </Card>
@@ -417,33 +417,33 @@ function KbSection({
           <div>
             <CardTitle>Knowledge base</CardTitle>
             <CardDescription>
-              La única fuente de verdad del agente: lo que no está aquí, no lo
+              A única fonte de verdade do agente: o que não estiver aqui, ele não
               afirma.
             </CardDescription>
           </div>
           {kbSize && (
             <Badge variant={kbSize.warning ? "warning" : "secondary"}>
-              {kbSize.chars.toLocaleString("es-MX")} caracteres
+              {kbSize.chars.toLocaleString("pt-BR")} caracteres
             </Badge>
           )}
         </div>
         {kbSize?.warning && (
           <p className="text-xs text-warning-text">
-            El conocimiento se acerca al límite del contexto del modelo (v1 lo
-            inyecta completo en cada turno). Considera depurar entradas.
+            O conhecimento está próximo do limite de contexto do modelo (a v1 o
+            injeta por completo em cada interação). Considere revisar o conteúdo.
           </p>
         )}
       </CardHeader>
       <CardContent className="space-y-4">
         <div className="space-y-2 rounded-md border p-3">
-          <p className="text-sm font-medium">Nueva pregunta / respuesta</p>
+          <p className="text-sm font-medium">Nova pergunta / resposta</p>
           <Input
-            placeholder="Pregunta (p. ej. ¿Hacen envíos?)"
+            placeholder="Pergunta (ex.: Vocês fazem entregas?)"
             value={question}
             onChange={(e) => setQuestion(e.target.value)}
           />
           <Textarea
-            placeholder="Respuesta"
+            placeholder="Resposta"
             rows={2}
             value={answer}
             onChange={(e) => setAnswer(e.target.value)}
@@ -453,20 +453,20 @@ function KbSection({
             onClick={() => void addQa()}
             disabled={!question.trim() || !answer.trim()}
           >
-            <Plus className="h-4 w-4" /> Agregar P/R
+            <Plus className="h-4 w-4" /> Adicionar P/R
           </Button>
         </div>
 
         <div className="space-y-2 rounded-md border p-3">
-          <p className="text-sm font-medium">Nuevo bloque de texto libre</p>
+          <p className="text-sm font-medium">Novo bloco de texto livre</p>
           <Textarea
-            placeholder="Horarios, direcciones, políticas…"
+            placeholder="Horários, endereços, políticas…"
             rows={3}
             value={block}
             onChange={(e) => setBlock(e.target.value)}
           />
           <Button size="sm" onClick={() => void addBlock()} disabled={!block.trim()}>
-            <Plus className="h-4 w-4" /> Agregar bloque
+            <Plus className="h-4 w-4" /> Adicionar bloco
           </Button>
         </div>
 
@@ -495,7 +495,7 @@ function KbSection({
           ))}
           {entries.length === 0 && (
             <p className="py-2 text-center text-xs text-muted-foreground">
-              Sin entradas todavía: agrega lo que el agente debe saber.
+              Ainda não há conteúdo: adicione o que o agente precisa saber.
             </p>
           )}
         </ul>

@@ -55,7 +55,7 @@ export function BlockDialog({
     // sobre un datetime-local bloqueaba la hora del reloj de quien miraba).
     const startUtc = blockStartUtc(day, time, timezone);
     if (!startUtc) {
-      setError("Esa hora no existe en la zona del negocio");
+      setError("Esse horário não existe no fuso do negócio");
       return;
     }
     setBusy(true);
@@ -97,7 +97,7 @@ export function BlockDialog({
             Bloquear horario
           </h3>
           <p className="mt-1 text-sm text-text-3">
-            Para compromisos que viven fuera del CRM: ese tiempo deja de ofrecerse.
+            Para compromissos fora do CRM: esse horário deixa de ser oferecido.
           </p>
         </div>
 
@@ -141,12 +141,12 @@ export function BlockDialog({
             id="bloqueo-nota"
             value={notes}
             maxLength={120}
-            placeholder="Comida con proveedor"
+            placeholder="Almoço com fornecedor"
             onChange={(e) => setNotes(e.target.value)}
           />
         </div>
 
-        <p className="text-xs text-text-3">Hora de la zona del negocio ({timezone}).</p>
+        <p className="text-xs text-text-3">Horário do fuso do negócio ({timezone}).</p>
 
         {error && (
           <p role="alert" className="text-sm text-danger-text">

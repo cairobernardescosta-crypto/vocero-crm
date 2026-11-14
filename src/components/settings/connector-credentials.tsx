@@ -46,13 +46,13 @@ const FIELDS: Record<ExternalConnector, Field[]> = {
       name: "refreshToken",
       label: "Refresh token",
       secret: true,
-      help: "Se obtiene una sola vez autorizando tu propia app.",
+      help: "É obtido uma única vez ao autorizar seu próprio aplicativo.",
     },
     {
       name: "calendarId",
-      label: "Calendario",
+      label: "Calendário",
       placeholder: "primary",
-      help: "Déjalo en «primary» para tu calendario principal.",
+      help: "Deixe como «primary» para usar seu calendário principal.",
     },
   ],
 };
@@ -60,18 +60,18 @@ const FIELDS: Record<ExternalConnector, Field[]> = {
 /** Lo que hay que saber ANTES de pegar nada. Son los tropiezos reales. */
 const HELP: Record<ExternalConnector, { title: string; items: string[] }> = {
   zoom: {
-    title: "Crea una app Server-to-Server OAuth en el Marketplace de Zoom",
+    title: "Crie um aplicativo Server-to-Server OAuth no Marketplace do Zoom",
     items: [
-      "Copia de ahí el Account ID, el Client ID y el Client Secret.",
-      "Dale los cuatro permisos: crear, actualizar y borrar reunión, y leer el usuario (meeting:write, meeting:update, meeting:delete y user:read).",
-      "El de leer usuario es el que usa el botón «Probar»: sin él la conexión falla aunque las credenciales sean correctas.",
+      "Copie de lá o Account ID, o Client ID e o Client Secret.",
+      "Conceda as quatro permissões: criar, atualizar e excluir reunião e ler o usuário (meeting:write, meeting:update, meeting:delete e user:read).",
+      "A permissão de leitura do usuário é usada pelo botão «Testar»: sem ela, a conexão falha mesmo com credenciais corretas.",
     ],
   },
   google: {
-    title: "Crea un proyecto en Google Cloud con la API de Calendar activada",
+    title: "Crie um projeto no Google Cloud com a API Calendar ativada",
     items: [
-      "Necesitas Client ID, Client Secret y un refresh token con el permiso de eventos de calendario (calendar.events).",
-      "IMPORTANTE: publica tu app OAuth «en producción». Si la dejas en modo prueba, Google revoca el permiso a los 7 días y las citas dejarán de crear su enlace sin previo aviso.",
+      "Você precisa de Client ID, Client Secret e um refresh token com a permissão de eventos do calendário (calendar.events).",
+      "IMPORTANTE: publique seu aplicativo OAuth «em produção». No modo de teste, o Google revoga a permissão após sete dias e os agendamentos deixam de criar links sem aviso.",
     ],
   },
 };
@@ -134,12 +134,12 @@ export function ConnectorCredentials({
         kind: "error",
         text:
           data?.error?.message ??
-          `No se pudo conectar con ${meta.label}. Revisa las credenciales.`,
+          `Não foi possível conectar ao ${meta.label}. Revise as credenciais.`,
       });
       return;
     }
     if (mode === "test") {
-      setMessage({ kind: "ok", text: "Conexión correcta" });
+      setMessage({ kind: "ok", text: "Conexão correta" });
       return;
     }
     const data = (await res.json()) as { connection: Connection };
@@ -173,7 +173,7 @@ export function ConnectorCredentials({
 
         {connection?.status === "error" && (
           <p className="rounded-sm border border-danger-soft bg-danger-tint px-3 py-2 text-sm text-danger-text">
-            {meta.label} rechazó las últimas credenciales. Las citas se siguen
+            O {meta.label} rejeitou as últimas credenciais. Os agendamentos continuam
             agendando, pero sin enlace hasta que vuelvas a conectar.
           </p>
         )}
@@ -202,10 +202,10 @@ export function ConnectorCredentials({
 
         <div className="flex flex-wrap items-center gap-3">
           <Button variant="outline" onClick={() => submit("test")} disabled={busy}>
-            Probar
+            Testar
           </Button>
           <Button onClick={() => submit("save")} disabled={busy}>
-            {connection ? "Actualizar" : "Conectar"}
+            {connection ? "Atualizar" : "Conectar"}
           </Button>
           {connection && (
             <button

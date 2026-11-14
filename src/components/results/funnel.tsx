@@ -15,7 +15,7 @@ export function Funnel({ steps }: { steps: FunnelStepDto[] }) {
   if (steps.every((s) => s.reached === 0)) {
     return (
       <p className="py-4 text-sm text-text-3">
-        Ningún prospecto de este periodo tiene movimientos registrados todavía.
+        Nenhum prospecto deste período possui movimentações registradas ainda.
       </p>
     );
   }

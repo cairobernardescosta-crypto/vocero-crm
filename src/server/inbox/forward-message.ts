@@ -52,10 +52,10 @@ export async function forwardMessage(input: {
   const source = rows[0];
   if (!source) throw new ForwardImageError(404, "not_found", "Mensaje no encontrado");
   if (source.conversation.isTest) {
-    throw new SendError("sandbox_violation", "No se reenvían mensajes del Laboratorio");
+    throw new SendError("sandbox_violation", "Mensagens do Laboratório não podem ser encaminhadas");
   }
   if (source.message.conversationId === input.conversationId) {
-    throw new ForwardImageError(422, "invalid", "Elige otra conversación para reenviar el mensaje");
+    throw new ForwardImageError(422, "invalid", "Escolha outra conversa para encaminhar a mensagem");
   }
 
   const { message, asset } = source;

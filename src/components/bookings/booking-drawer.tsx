@@ -127,7 +127,7 @@ export function BookingDrawer({
                 {first && last && (
                   <p className="mt-0.5 text-sm text-text-2 first-letter:uppercase">
                     {longDayLabel(first.day)} · {hhmm(first.startMin)} – {hhmm(last.endMin)}
-                    {last.day !== first.day && " del día siguiente"}
+                    {last.day !== first.day && " do dia seguinte"}
                   </p>
                 )}
                 <p className="text-xs text-text-3">
@@ -156,13 +156,13 @@ export function BookingDrawer({
                   {b.source === "ai" ? "Agendó la IA" : "Manual"}
                 </Badge>
               )}
-              {b.isTest && <Badge variant="secondary">Prueba del Laboratorio</Badge>}
-              {canRetrySync(b) && <Badge variant="warning">Sin enlace</Badge>}
+              {b.isTest && <Badge variant="secondary">Teste do Laboratório</Badge>}
+              {canRetrySync(b) && <Badge variant="warning">Sem link</Badge>}
             </div>
 
             {active && endMs < nowMs && isSession && (
               <p className="rounded-sm bg-warning-tint px-3 py-2 text-xs text-warning-text">
-                La hora ya pasó: márcala como realizada o como que no asistió.
+                O horário já passou: marque como realizado ou como não compareceu.
               </p>
             )}
           </section>
@@ -185,7 +185,7 @@ export function BookingDrawer({
                   rel="noreferrer noopener"
                   className="flex items-center gap-2 break-all text-sm text-brand-text hover:underline"
                 >
-                  <Video className="h-4 w-4 shrink-0" /> Enlace de la reunión
+                  <Video className="h-4 w-4 shrink-0" /> Link da reunião
                 </a>
               )}
               {b.connector === "google" && (
@@ -209,7 +209,7 @@ export function BookingDrawer({
             <section className="border-b p-4">
               <div className="space-y-2 rounded-sm bg-subtle p-3">
                 <p className="text-sm text-text-2">
-                  Esta cita quedó sin enlace: el proveedor no respondió.
+                  Este agendamento ficou sem link: o provedor não respondeu.
                 </p>
                 <Button
                   size="sm"
@@ -217,7 +217,7 @@ export function BookingDrawer({
                   disabled={busy}
                   onClick={() => void run({ action: "retry_link" })}
                 >
-                  Reintentar enlace
+                  Tentar link novamente
                 </Button>
               </div>
             </section>
@@ -359,13 +359,13 @@ function Reschedule({
         <p className="text-sm text-text-3">
           {failed
             ? "Não foi possível verificar a disponibilidade. Tente novamente."
-            : "No hay huecos libres para mover esta cita."}
+            : "Não há horários livres para mover este agendamento."}
         </p>
       )}
 
       {days.length > 0 && (
         <>
-          <div className="-mx-1 flex gap-1.5 overflow-x-auto px-1 pb-1" role="group" aria-label="Días con huecos">
+          <div className="-mx-1 flex gap-1.5 overflow-x-auto px-1 pb-1" role="group" aria-label="Dias com horários disponíveis">
             {days.map(([d, list]) => {
               const h = dayHeading(d);
               const prefix = d === today ? "Hoje" : d === addDaysISO(today, 1) ? "Amanhã" : h.weekday;

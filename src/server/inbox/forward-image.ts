@@ -64,10 +64,10 @@ export async function forwardImage(input: {
   const source = rows[0];
   if (!source) throw new ForwardImageError(404, "not_found", "Imagen no encontrada");
   if (source.conversation.isTest) {
-    throw new SendError("sandbox_violation", "No se reenvían imágenes del Laboratorio");
+    throw new SendError("sandbox_violation", "Imagens do Laboratório não podem ser encaminhadas");
   }
   if (source.message.conversationId === input.conversationId) {
-    throw new ForwardImageError(422, "invalid", "Elige otra conversación para reenviar la imagen");
+    throw new ForwardImageError(422, "invalid", "Escolha outra conversa para encaminhar a imagem");
   }
 
   const asset = source.asset;

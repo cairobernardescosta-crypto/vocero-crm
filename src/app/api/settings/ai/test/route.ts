@@ -28,7 +28,7 @@ export const POST = withAuth(async (session, req: Request) => {
     return apiError(
       422,
       "sin_token",
-      "Pega la llave del proveedor para probar la conexión"
+      "Informe a chave do provedor para testar a conexão"
     );
   }
 

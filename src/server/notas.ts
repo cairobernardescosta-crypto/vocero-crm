@@ -35,7 +35,7 @@ async function conversacionDeLaOrganizacion(organizationId: string, conversation
     .from(schema.conversation)
     .where(scoped(schema.conversation.organizationId, organizationId, eq(schema.conversation.id, conversationId)))
     .limit(1);
-  if (!conv) throw new NotaError(404, "not_found", "Conversación no encontrada");
+  if (!conv) throw new NotaError(404, "not_found", "Conversa não encontrada");
 }
 
 function aDto(

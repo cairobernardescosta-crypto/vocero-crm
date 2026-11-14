@@ -93,7 +93,7 @@ export async function createTemplate(
     .toLowerCase()
     .replace(/\s+/g, "_")
     .replace(/[^a-z0-9_]/g, "");
-  if (!name) throw new TemplateError("invalid", "Nombre de plantilla inválido");
+  if (!name) throw new TemplateError("invalid", "Nome de modelo inválido");
 
   // Meta pide un ejemplo por variable: si faltan, rechaza la plantilla. Uno
   // realista («Ana», «martes 14») ayuda a que la aprueben; si el dueño no
@@ -329,7 +329,7 @@ export async function syncTemplates(organizationId: string): Promise<number> {
         await markReconnectRequired(organizationId);
         throw new TemplateError("reconnect_required", "El token expiró: reconecta el número");
       }
-      throw new TemplateError("meta_unavailable", "No se pudo consultar Meta");
+      throw new TemplateError("meta_unavailable", "Não foi possível consultar a Meta");
     }
     throw err;
   }
@@ -468,12 +468,12 @@ export async function sendTemplate(input: {
     )
     .limit(1);
   const row = rows[0];
-  if (!row) throw new TemplateError("not_found", "Conversación no encontrada");
+  if (!row) throw new TemplateError("not_found", "Conversa não encontrada");
   if (row.conversation.isTest) {
     // Aserción dura del sandbox (FR-031)
     throw new SendError(
       "sandbox_violation",
-      "Conversación de prueba del Laboratorio: el envío real está prohibido"
+      "Conversa de teste do Laboratório: o envio real é proibido"
     );
   }
 

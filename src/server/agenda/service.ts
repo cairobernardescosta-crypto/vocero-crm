@@ -124,7 +124,7 @@ export async function createSessionBooking(input: {
       )
       .limit(1);
     const conv = rows[0];
-    if (!conv) throw new BookingError("not_found", "Conversación no encontrada");
+    if (!conv) throw new BookingError("not_found", "Conversa não encontrada");
     isTest = conv.isTest;
     contactId = contactId ?? conv.contactId;
   }
@@ -139,14 +139,14 @@ export async function createSessionBooking(input: {
     if (!input.conversationId) {
       throw new BookingError(
         "invalid",
-        "Se necesita la conversación para validar la oferta"
+        "A conversa é necessária para validar a oferta"
       );
     }
     const offers = await getOffers(input.organizationId, input.conversationId);
     if (!findOffered(offers, input.startUtc)) {
       throw new BookingError(
         "slot_not_offered",
-        "Ese horario no se ofreció en esta conversación",
+        "Esse horário não foi oferecido nesta conversa",
         offers
       );
     }
@@ -373,14 +373,14 @@ export async function rescheduleForConversation(input: {
     )
     .limit(1);
   const conv = convRows[0];
-  if (!conv) throw new BookingError("not_found", "Conversación no encontrada");
+  if (!conv) throw new BookingError("not_found", "Conversa não encontrada");
 
   // Mismas reglas que al crear: el instante nuevo tiene que haberse ofrecido.
   const offers = await getOffers(input.organizationId, input.conversationId);
   if (!findOffered(offers, input.startUtc)) {
     throw new BookingError(
       "slot_not_offered",
-      "Ese horario no se ofreció en esta conversación",
+      "Esse horário não foi oferecido nesta conversa",
       offers
     );
   }
@@ -405,7 +405,7 @@ export async function rescheduleForConversation(input: {
 
   const target = rows[0];
   if (!target) {
-    throw new BookingError("not_found", "No hay una cita activa que mover");
+    throw new BookingError("not_found", "Não há um agendamento ativo para mover");
   }
 
   const result = await rescheduleBooking({

@@ -66,7 +66,7 @@ export function EmbeddedSignup({
   useEffect(() => {
     void (async () => {
       const res = await fetch(API, { cache: "no-store" }).catch(() => null);
-      if (!res) return setError("No pudimos comprobar si la conexión con Meta está disponible.");
+      if (!res) return setError("Não foi possível verificar se a conexão com a Meta está disponível.");
       if (res.status === 404) return setOculto(true);
       if (res.ok) setConfig((await res.json()) as Config);
     })();
@@ -114,7 +114,7 @@ export function EmbeddedSignup({
     } catch (e) {
       fallar(
         e instanceof Error && e.name === "TimeoutError"
-          ? "La confirmación tardó demasiado. Recarga la página para ver si quedó conectado antes de repetir."
+          ? "A confirmação demorou demais. Recarregue a página para verificar se conectou antes de tentar novamente."
           : "Sem conexão com o servidor."
       );
     }
@@ -125,9 +125,9 @@ export function EmbeddedSignup({
       if (!activo.current || activo.current.enviando) return;
       const e = leerEventoDeAlta(ev.origin, ev.data);
       if (!e) return;
-      if (e.kind === "cancel") return fallar("La conexión se canceló en Meta. Puedes volver a intentarlo.");
+      if (e.kind === "cancel") return fallar("A conexão foi cancelada na Meta. Você pode tentar novamente.");
       if (e.kind === "error") {
-        return fallar(`Meta reportó un error${e.message ? `: ${e.message}` : ""}. Puedes volver a intentarlo.`);
+        return fallar(`A Meta informou um erro${e.message ? `: ${e.message}` : ""}. Você pode tentar novamente.`);
       }
       if (e.kind === "coexistence") {
         return fallar(
@@ -165,7 +165,7 @@ export function EmbeddedSignup({
     try {
       f.login((r) => {
         if (activo.current !== p || p.enviando) return;
-        if (!r.authResponse?.code) return fallar("Meta no autorizó la conexión. Puedes volver a intentarlo.");
+        if (!r.authResponse?.code) return fallar("A Meta não autorizou a conexão. Você pode tentar novamente.");
         p.code = r.authResponse.code;
         void enviar();
       }, opcionesDeLogin(config.configId));
@@ -189,17 +189,17 @@ export function EmbeddedSignup({
       )}
       <CardHeader>
         <CardTitle className="flex items-center gap-2">
-          <ShieldCheck className="h-5 w-5 text-primary" /> Conectar con Meta
+          <ShieldCheck className="h-5 w-5 text-primary" /> Conectar com a Meta
         </CardTitle>
         <CardDescription>
-          La conexión oficial: autorizas tu cuenta en la ventana de Meta y el
+          Conexão oficial: você autoriza sua conta na janela da Meta e o
           CRM registra el número y el webhook sin copiar tokens.
         </CardDescription>
       </CardHeader>
       <CardContent className="space-y-4 text-sm">
-        {!config && !error && <p className="text-muted-foreground">Comprobando disponibilidad…</p>}
+        {!config && !error && <p className="text-muted-foreground">Verificando disponibilidade…</p>}
         {config && !config.canManage && (
-          <p className="text-muted-foreground">Solo quien administra la cuenta puede conectar WhatsApp.</p>
+          <p className="text-muted-foreground">Somente quem administra a conta pode conectar o WhatsApp.</p>
         )}
 
         {config?.canManage && (
@@ -220,7 +220,7 @@ export function EmbeddedSignup({
                 onChange={(e) => setPin(e.target.value.replace(/\D/g, ""))}
               />
               <p className="text-xs text-muted-foreground">
-                Solo si tu número ya tiene uno. Si lo dejas vacío, generamos
+                Somente se o número já tiver um. Se deixar vazio, geraremos
                 uno al registrar el número y te lo mostramos una vez.
               </p>
             </div>

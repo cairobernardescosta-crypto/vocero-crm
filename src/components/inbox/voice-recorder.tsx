@@ -34,15 +34,15 @@ function elegirFormato() {
 function motivoDelError(err: unknown): string {
   const nombre = err instanceof DOMException ? err.name : "";
   if (nombre === "NotAllowedError" || nombre === "SecurityError") {
-    return "Permite el micrófono en el navegador para grabar notas de voz.";
+    return "Permita o acesso ao microfone no navegador para gravar áudios.";
   }
   if (nombre === "NotFoundError" || nombre === "OverconstrainedError") {
-    return "No se encontró un micrófono en este equipo.";
+    return "Nenhum microfone foi encontrado neste dispositivo.";
   }
   if (nombre === "NotReadableError") {
-    return "Otro programa está usando el micrófono. Ciérralo y vuelve a intentar.";
+    return "Outro programa está usando o microfone. Feche-o e tente novamente.";
   }
-  return "No se pudo empezar a grabar. Vuelve a intentar.";
+  return "Não foi possível iniciar a gravação. Tente novamente.";
 }
 
 export function VoiceRecorder({
@@ -90,7 +90,7 @@ export function VoiceRecorder({
       if (!navigator.mediaDevices?.getUserMedia || !formato) {
         onError(
           window.isSecureContext
-            ? "Este navegador no puede grabar audio. Prueba con Chrome, Edge, Firefox o Safari al día."
+            ? "Este navegador não consegue gravar áudio. Tente usar uma versão atualizada do Chrome, Edge, Firefox ou Safari."
             : "Grabar notas de voz necesita abrir el CRM por https."
         );
         return;

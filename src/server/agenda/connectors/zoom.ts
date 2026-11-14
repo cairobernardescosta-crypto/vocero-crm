@@ -72,7 +72,7 @@ async function getAccessToken(creds: ZoomCreds): Promise<string> {
       headers: { Authorization: `Basic ${basic}` },
     });
   } catch (err) {
-    throw new ConnectorError("zoom", `No se pudo contactar a Zoom: ${err}`);
+    throw new ConnectorError("zoom", `Não foi possível acessar o Zoom: ${err}`);
   }
 
   if (!res.ok) {
@@ -116,7 +116,7 @@ async function zoomFetch(
       },
     });
   } catch (err) {
-    throw new ConnectorError("zoom", `No se pudo contactar a Zoom: ${err}`);
+    throw new ConnectorError("zoom", `Não foi possível acessar o Zoom: ${err}`);
   }
 
   // Idempotencia: borrar algo que ya no está es objetivo cumplido.
@@ -187,7 +187,7 @@ export const zoomConnector: AgendaConnector<ZoomCreds> = {
       return {
         ok: false,
         error:
-          err instanceof Error ? err.message : "No se pudo conectar con Zoom",
+          err instanceof Error ? err.message : "Não foi possível conectar ao Zoom",
       };
     }
   },

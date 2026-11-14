@@ -48,14 +48,14 @@ const HELP: Record<Source, { title: string; items: string[] }> = {
   zernio: {
     title: "Vincula tu Instagram en Zernio y pega aquí tu API key",
     items: [
-      "La cuenta se vincula en el panel de Zernio (Accounts → Connect), no desde aquí. Tiene que ser una cuenta profesional: de empresa o de creador.",
-      "La API key se crea en Zernio → Settings → API Keys y se muestra una sola vez (empieza con sk_).",
+      "A conta é vinculada no painel do Zernio (Accounts → Connect), não aqui. Deve ser uma conta profissional, empresarial ou de criador.",
+      "A chave de API é criada em Zernio → Settings → API Keys e exibida uma única vez (começa com sk_).",
     ],
   },
   meta: {
-    title: "Crea una app en developers.facebook.com con el producto Instagram",
+    title: "Crie um aplicativo em developers.facebook.com com o produto Instagram",
     items: [
-      "La cuenta tiene que estar en modo profesional (Empresa o Creador).",
+      "A conta deve estar no modo profissional (Empresa ou Criador).",
       "Genera el token con los permisos instagram_business_basic e instagram_business_manage_messages.",
       "Sem a revisão do aplicativo, a conta recebe mensagens apenas de perfis com função no aplicativo (administradores, desenvolvedores e testadores).",
     ],
@@ -117,7 +117,7 @@ export function InstagramClient() {
     }
     const data = (await res.json()) as { username?: string | null };
     setToken("");
-    setSaved(data.username ? `Cuenta conectada: @${data.username}` : "Conexión guardada");
+    setSaved(data.username ? `Conta conectada: @${data.username}` : "Conexão salva");
     void refetch();
   }
 
@@ -131,7 +131,7 @@ export function InstagramClient() {
     }
   }
 
-  if (!loaded) return <p className="text-sm text-muted-foreground">Cargando…</p>;
+  if (!loaded) return <p className="text-sm text-muted-foreground">Carregando…</p>;
 
   const help = HELP[source];
   const canSaveMeta = token.trim().length > 0 && igUserId.trim().length > 0;
@@ -144,11 +144,11 @@ export function InstagramClient() {
           <div>
             <p className="font-medium text-danger-text">
               {connection.source === "zernio"
-                ? "La API key de Zernio expiró o fue revocada."
-                : "El token expiró o fue revocado."}
+                ? "A chave de API do Zernio expirou ou foi revogada."
+                : "O token expirou ou foi revogado."}
             </p>
             <p className="text-danger-text opacity-80">
-              Los envíos por Instagram están pausados. Vuelve a conectar abajo.
+              Os envios pelo Instagram estão pausados. Reconecte abaixo.
             </p>
           </div>
         </div>
@@ -164,13 +164,13 @@ export function InstagramClient() {
             </p>
             <p className="text-success-text opacity-80">
               {connection.source === "zernio"
-                ? `Cuenta ${connection.accountRef}`
-                : `Cuenta ${connection.igUserId}`}{" "}
+                ? `Conta ${connection.accountRef}`
+                : `Conta ${connection.igUserId}`}{" "}
               · {connection.source === "zernio" ? "llave" : "token"} que termina en ····
               {connection.tokenLast4}
             </p>
           </div>
-          <Badge variant="success">Instagram activo</Badge>
+          <Badge variant="success">Instagram ativo</Badge>
         </div>
       )}
 
@@ -180,13 +180,13 @@ export function InstagramClient() {
             {connection ? "Reconectar Instagram" : "Conectar Instagram"}
           </CardTitle>
           <CardDescription>
-            Los mensajes directos de tu cuenta entran a la misma bandeja que
+            As mensagens diretas da sua conta chegam à mesma caixa de entrada que
             WhatsApp, con su distintivo de canal. {help.title}.
           </CardDescription>
         </CardHeader>
         <CardContent className="space-y-4">
           <div className="space-y-2">
-            <Label>¿De dónde llegan los mensajes?</Label>
+            <Label>De onde chegam as mensagens?</Label>
             <div className="flex flex-wrap gap-2">
               {(["zernio", "meta"] as const).map((s) => (
                 <button
@@ -251,7 +251,7 @@ export function InstagramClient() {
               {saved && <p className="text-sm text-success-text">{saved} ✓</p>}
 
               <Button disabled={saving || !canSaveMeta} onClick={() => void saveMeta()}>
-                {saving ? "Probando…" : "Probar y guardar"}
+                {saving ? "Testando…" : "Testar e salvar"}
               </Button>
             </>
           )}
@@ -269,7 +269,7 @@ export function InstagramClient() {
         <p className="flex items-start gap-2 text-xs text-text-2">
           <Info className="mt-0.5 h-3.5 w-3.5 shrink-0" />
           <span>
-            El webhook lo da de alta Vocero en tu Zernio al conectar, limitado a
+            O Vocero cadastra o webhook no seu Zernio ao conectar, limitado às
             tus cuentas. Si un día dejan de llegar mensajes, revisa{" "}
             <Link href="/settings/channels" className="font-semibold underline">
               el estado de los canales
@@ -283,8 +283,8 @@ export function InstagramClient() {
             <CardHeader>
               <CardTitle>Webhook de Instagram</CardTitle>
               <CardDescription>
-                En tu app de Meta: Instagram → Configuración → Webhooks. Objeto{" "}
-                <code>instagram</code>, campo <code>messages</code>. Pega esta
+                No seu aplicativo da Meta: Instagram → Configurações → Webhooks. Objeto{" "}
+                <code>instagram</code>, campo <code>messages</code>. Cole esta
                 URL y este token de verificación.
               </CardDescription>
             </CardHeader>
@@ -296,7 +296,7 @@ export function InstagramClient() {
                   <Button
                     variant="outline"
                     size="icon"
-                    aria-label="Copiar la URL"
+                    aria-label="Copiar a URL"
                     onClick={() => void copy(webhook.instagramUrl!, "url")}
                   >
                     {copied === "url" ? <CheckCircle2 className="h-4 w-4" /> : <Copy className="h-4 w-4" />}
@@ -310,7 +310,7 @@ export function InstagramClient() {
                   <Button
                     variant="outline"
                     size="icon"
-                    aria-label="Copiar el token de verificación"
+                    aria-label="Copiar o token de verificação"
                     onClick={() => void copy(webhook.verifyToken, "token")}
                   >
                     {copied === "token" ? <CheckCircle2 className="h-4 w-4" /> : <Copy className="h-4 w-4" />}

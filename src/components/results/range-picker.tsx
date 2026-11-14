@@ -67,7 +67,7 @@ export function RangePicker({
           aria-label="Hasta"
         />
       </div>
-      <span className="text-[11px] text-text-3">Días de {timezone}</span>
+      <span className="text-[11px] text-text-3">Dias de {timezone}</span>
     </div>
   );
 }

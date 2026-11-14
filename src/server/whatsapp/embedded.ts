@@ -190,7 +190,7 @@ export async function resolverNumero(
   if (elegido.platform_type === "ON_PREMISE") {
     throw new EmbeddedSignupError(
       "migration_required",
-      "Ese número usa la API local antigua y requiere una migración. No se modificó nada."
+      "Esse número usa a API local antiga e precisa de migração. Nada foi alterado."
     );
   }
   return elegido;
@@ -221,7 +221,7 @@ export async function registrarNumero(
     if (err instanceof EmbeddedSignupError && err.code === "meta_rejected") {
       throw new EmbeddedSignupError(
         "registration_failed",
-        "Meta no registró el número. Si ya tenía verificación en dos pasos, escribe su PIN y repite la conexión. No se guardó nada."
+        "A Meta não registrou o número. Se ele já tinha verificação em duas etapas, informe o PIN e repita a conexão. Nada foi salvo."
       );
     }
     throw err;

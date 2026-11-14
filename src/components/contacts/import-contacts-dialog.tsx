@@ -61,7 +61,7 @@ export function ImportContactsDialog({
       | (Result & { error?: { message?: string } })
       | null;
     if (!res?.ok || !data) {
-      setError(data?.error?.message ?? "No se pudo importar. Revisa tu conexión.");
+      setError(data?.error?.message ?? "Não foi possível importar. Verifique sua conexão.");
       return;
     }
     setResult({ created: data.created, existing: data.existing, paused: data.paused });
@@ -75,15 +75,15 @@ export function ImportContactsDialog({
     >
       <div
         role="dialog"
-        aria-label="Importar contactos"
+        aria-label="Importar contatos"
         className="max-h-[85dvh] w-full max-w-lg overflow-y-auto rounded-lg border bg-card p-5 shadow-xl"
         onClick={(e) => e.stopPropagation()}
       >
         <h3 className="mb-1 font-semibold">Importar contactos</h3>
         <p className="mb-4 text-xs text-text-3">
-          Un archivo CSV con una columna <strong>nombre</strong> y una{" "}
-          <strong>telefono</strong> en el primer renglón. El teléfono va con
-          código de país (52 para México). A quien ya exista no se le duplica ni
+          Um arquivo CSV com as colunas <strong>nome</strong> e{" "}
+          <strong>telefone</strong> na primeira linha. O telefone deve incluir
+          o código do país (55 para Brasil). Contatos existentes não serão duplicados nem
           se le cambia el nombre.
         </p>
 
@@ -91,7 +91,7 @@ export function ImportContactsDialog({
           <div className="space-y-1 rounded-md border border-success-soft bg-success-tint px-3 py-2.5 text-[13px] text-success-text">
             <p>
               <strong>{result.created}</strong>{" "}
-              {result.created === 1 ? "contacto nuevo" : "contactos nuevos"}
+              {result.created === 1 ? "novo contato" : "novos contatos"}
               {result.existing > 0 && (
                 <>
                   {" "}
@@ -103,7 +103,7 @@ export function ImportContactsDialog({
             </p>
             {result.paused > 0 && (
               <p>
-                El agente quedó apagado para <strong>{result.paused}</strong>.
+                O agente foi desativado para <strong>{result.paused}</strong>.
               </p>
             )}
           </div>
@@ -112,7 +112,7 @@ export function ImportContactsDialog({
             <input
               type="file"
               accept=".csv,text/csv,text/plain"
-              aria-label="Archivo CSV de contactos"
+              aria-label="Arquivo CSV de contatos"
               onChange={(e) => void leer(e.target.files?.[0])}
               className="block w-full text-sm file:mr-3 file:rounded-md file:border file:border-input file:bg-card file:px-3 file:py-1.5 file:text-sm"
             />
@@ -173,11 +173,11 @@ export function ImportContactsDialog({
                     className="mt-0.5 accent-primary"
                   />
                   <span>
-                    El agente no les responde
+                    O agente não responde
                     <span className="block text-[11px] text-text-3">
-                      Para clientes o miembros que quieres atender tú. Sus
-                      mensajes llegan a la Bandeja sin que el agente conteste.
-                      Aplica también a los que ya existían.
+                      Para clientes ou membros que você quer atender. As mensagens
+                      chegam à Caixa de entrada sem resposta do agente. Isso também
+                      se aplica aos contatos existentes.
                     </span>
                   </span>
                 </label>
@@ -190,7 +190,7 @@ export function ImportContactsDialog({
 
         <div className="mt-4 flex justify-end gap-2">
           <Button variant="ghost" onClick={onClose}>
-            {result ? "Cerrar" : "Cancelar"}
+            {result ? "Fechar" : "Cancelar"}
           </Button>
           {!result && (
             <Button

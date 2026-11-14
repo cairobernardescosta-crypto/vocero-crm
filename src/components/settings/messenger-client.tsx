@@ -49,15 +49,15 @@ const HELP: Record<Source, { title: string; items: string[] }> = {
   zernio: {
     title: "Vincula tu página en Zernio y pega aquí tu API key",
     items: [
-      "La página se vincula en el panel de Zernio (Accounts → Connect), no desde aquí.",
-      "La API key se crea en Zernio → Settings → API Keys y se muestra una sola vez (empieza con sk_).",
+      "A página é vinculada no painel do Zernio (Accounts → Connect), não aqui.",
+      "A chave de API é criada em Zernio → Settings → API Keys e exibida uma única vez (começa com sk_).",
     ],
   },
   meta: {
     title: "Crie um aplicativo em developers.facebook.com com o produto Messenger",
     items: [
       "O ID da página fica na seção «Informações» da página ou em Messenger → Configurações → Tokens de acesso.",
-      "Genera ahí el token de la página con el permiso pages_messaging. Uno de larga duración evita reconectar cada dos meses.",
+      "Gere ali o token da página com a permissão pages_messaging. Um token de longa duração evita reconectar a cada dois meses.",
       "Sem a revisão do aplicativo, a página recebe mensagens apenas de contas com função no aplicativo (administradores, desenvolvedores e testadores).",
     ],
   },
@@ -119,7 +119,7 @@ export function MessengerClient() {
     }
     const data = (await res.json()) as { pageName?: string | null };
     setToken("");
-    setSaved(data.pageName ? `Página conectada: ${data.pageName}` : "Conexión guardada");
+    setSaved(data.pageName ? `Página conectada: ${data.pageName}` : "Conexão salva");
     void refetch();
   }
 
@@ -133,7 +133,7 @@ export function MessengerClient() {
     }
   }
 
-  if (!loaded) return <p className="text-sm text-muted-foreground">Cargando…</p>;
+  if (!loaded) return <p className="text-sm text-muted-foreground">Carregando…</p>;
 
   const help = HELP[source];
   const canSave = token.trim().length > 0 && pageId.trim().length > 0;
@@ -145,10 +145,10 @@ export function MessengerClient() {
           <AlertTriangle className="mt-0.5 h-4 w-4 shrink-0 text-destructive" />
           <div>
             <p className="font-medium text-danger-text">
-              El token expiró o fue revocado.
+              O token expirou ou foi revogado.
             </p>
             <p className="text-danger-text opacity-80">
-              Los envíos por Messenger están pausados. Pega uno nuevo abajo para
+              Os envios pelo Messenger estão pausados. Cole um novo token abaixo para
               reconectar.
             </p>
           </div>
@@ -165,12 +165,12 @@ export function MessengerClient() {
             </p>
             <p className="text-success-text opacity-80">
               {connection.source === "zernio"
-                ? `Cuenta ${connection.accountRef}`
+                ? `Conta ${connection.accountRef}`
                 : `Página ${connection.pageId}`}{" "}
               · token que termina en ····{connection.tokenLast4}
             </p>
           </div>
-          <Badge variant="success">Messenger activo</Badge>
+          <Badge variant="success">Messenger ativo</Badge>
         </div>
       )}
 
@@ -180,13 +180,13 @@ export function MessengerClient() {
             {connection ? "Reconectar Messenger" : "Conectar Messenger"}
           </CardTitle>
           <CardDescription>
-            Los mensajes que la gente le escribe a tu página entran a la misma
+            As mensagens enviadas à sua página chegam à mesma
             bandeja que WhatsApp, con su distintivo de canal. {help.title}.
           </CardDescription>
         </CardHeader>
         <CardContent className="space-y-4">
           <div className="space-y-2">
-            <Label>¿De dónde llegan los mensajes?</Label>
+            <Label>De onde chegam as mensagens?</Label>
             <div className="flex flex-wrap gap-2">
               {(["zernio", "meta"] as const).map((s) => (
                 <button
@@ -225,7 +225,7 @@ export function MessengerClient() {
             <>
               <div className="grid gap-4 sm:grid-cols-2">
                 <div className="space-y-1.5">
-                  <Label htmlFor="fb-page-id">ID de la página</Label>
+                  <Label htmlFor="fb-page-id">ID da página</Label>
                   <Input
                     id="fb-page-id"
                     value={pageId}
@@ -235,7 +235,7 @@ export function MessengerClient() {
                   />
                 </div>
                 <div className="space-y-1.5">
-                  <Label htmlFor="fb-token">Token de la página</Label>
+                  <Label htmlFor="fb-token">Token da página</Label>
                   <Input
                     id="fb-token"
                     type="password"
@@ -251,7 +251,7 @@ export function MessengerClient() {
               {saved && <p className="text-sm text-success-text">{saved} ✓</p>}
 
               <Button disabled={saving || !canSave} onClick={() => void save()}>
-                {saving ? "Probando…" : "Probar y guardar"}
+                {saving ? "Testando…" : "Testar e salvar"}
               </Button>
             </>
           )}
@@ -262,7 +262,7 @@ export function MessengerClient() {
         <p className="flex items-start gap-2 text-xs text-text-2">
           <Info className="mt-0.5 h-3.5 w-3.5 shrink-0" />
           <span>
-            El webhook lo da de alta Vocero en tu Zernio al conectar, limitado a
+            O Vocero cadastra o webhook no seu Zernio ao conectar, limitado às
             tus cuentas. Si un día dejan de llegar mensajes, revisa{" "}
             <Link href="/settings/channels" className="font-semibold underline">
               el estado de los canales
@@ -276,8 +276,8 @@ export function MessengerClient() {
             <CardHeader>
               <CardTitle>Webhook de Messenger</CardTitle>
               <CardDescription>
-                En tu app de Meta: Messenger → Configuración → Webhooks. Objeto{" "}
-                <code>page</code>, campo <code>messages</code>. Pega esta URL y
+                No seu aplicativo da Meta: Messenger → Configurações → Webhooks. Objeto{" "}
+                <code>page</code>, campo <code>messages</code>. Cole esta URL e
                 este token de verificación, y suscribe la página a la app.
               </CardDescription>
             </CardHeader>
@@ -289,7 +289,7 @@ export function MessengerClient() {
                   <Button
                     variant="outline"
                     size="icon"
-                    aria-label="Copiar la URL"
+                    aria-label="Copiar a URL"
                     onClick={() => void copy(webhook.messengerUrl!, "url")}
                   >
                     {copied === "url" ? <CheckCircle2 className="h-4 w-4" /> : <Copy className="h-4 w-4" />}
@@ -303,7 +303,7 @@ export function MessengerClient() {
                   <Button
                     variant="outline"
                     size="icon"
-                    aria-label="Copiar el token de verificación"
+                    aria-label="Copiar o token de verificação"
                     onClick={() => void copy(webhook.verifyToken, "token")}
                   >
                     {copied === "token" ? <CheckCircle2 className="h-4 w-4" /> : <Copy className="h-4 w-4" />}

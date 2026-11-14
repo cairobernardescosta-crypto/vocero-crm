@@ -42,20 +42,20 @@ const STATUS_BADGE: Record<
   TemplateDto["status"],
   { label: string; variant: "secondary" | "warning" | "success" | "destructive"; hint: string }
 > = {
-  draft: { label: "Borrador", variant: "secondary", hint: "Guardada, todavía sin enviar a Meta." },
-  pending: { label: "En revisión", variant: "warning", hint: "Meta la está revisando. Suele tardar de unos minutos a 24 horas." },
+  draft: { label: "Rascunho", variant: "secondary", hint: "Salvo, ainda não enviado à Meta." },
+  pending: { label: "Em análise", variant: "warning", hint: "A Meta está analisando. Geralmente leva de alguns minutos a 24 horas." },
   approved: { label: "Aprovado", variant: "success", hint: "Pronto para usar em Conversas ou Contatos." },
-  rejected: { label: "Rechazada", variant: "destructive", hint: "Corrígela y créala de nuevo con otro nombre." },
+  rejected: { label: "Rejeitado", variant: "destructive", hint: "Corrija e crie novamente com outro nome." },
 };
 
 const CATEGORY: Record<Category, { label: string; description: string }> = {
   UTILITY: {
-    label: "Utilidad",
-    description: "Seguimiento de algo que el cliente pidió: una cita, una cotización, un pedido.",
+    label: "Utilidade",
+    description: "Acompanhamento de algo solicitado pelo cliente: agendamento, orçamento ou pedido.",
   },
   MARKETING: {
     label: "Marketing",
-    description: "Promociones, ofertas, invitaciones o volver a contactar a quien no compró.",
+    description: "Promoções, ofertas, convites ou novo contato com quem não comprou.",
   },
 };
 
@@ -68,25 +68,25 @@ const STARTERS: {
   examples: string[];
 }[] = [
   {
-    title: "Seguimiento de cotización",
+    title: "Acompanhamento de orçamento",
     name: "seguimiento_cotizacion",
     category: "UTILITY",
-    body: "Hola {{1}}, te escribo para dar seguimiento a la cotización que te enviamos. ¿Tienes alguna duda o quieres que la revisemos juntos?",
+    body: "Olá {{1}}, estou entrando em contato para acompanhar o orçamento que enviamos. Tem alguma dúvida ou quer revisá-lo conosco?",
     examples: ["Ana"],
   },
   {
-    title: "Recordatorio de cita",
+    title: "Lembrete de agendamento",
     name: "recordatorio_cita",
     category: "UTILITY",
-    body: "Hola {{1}}, te recordamos tu cita del {{2}} a las {{3}}. Si necesitas cambiarla, responde a este mensaje.",
-    examples: ["Ana", "martes 14 de octubre", "10:30"],
+    body: "Olá {{1}}, lembramos do seu agendamento em {{2}} às {{3}}. Se precisar alterá-lo, responda a esta mensagem.",
+    examples: ["Ana", "terça-feira, 14 de outubro", "10:30"],
   },
   {
-    title: "Retomar la conversación",
+    title: "Retomar a conversa",
     name: "retomar_conversacion",
     category: "MARKETING",
-    body: "Hola {{1}}, ¿sigues interesado en {{2}}? Esta semana tenemos lugares disponibles. Responde a este mensaje y te ayudamos.",
-    examples: ["Ana", "la limpieza dental"],
+    body: "Olá {{1}}, ainda tem interesse em {{2}}? Temos horários disponíveis esta semana. Responda a esta mensagem e ajudaremos você.",
+    examples: ["Ana", "a limpeza dentária"],
   },
 ];
 
@@ -138,7 +138,7 @@ export function TemplatesClient() {
           setSyncMsg(
             data.updated > 0
               ? `${data.updated} plantilla(s) actualizada(s)`
-              : "Todo al día"
+              : "Tudo em dia"
           );
         }
         if (!silent || data.updated > 0) void refetch();
@@ -166,7 +166,7 @@ export function TemplatesClient() {
       <section className="space-y-3" aria-labelledby="tpl-list-title">
         <div className="flex flex-wrap items-center justify-between gap-3">
           <h3 id="tpl-list-title" className="text-base font-semibold">
-            Tus plantillas
+            Seus modelos
           </h3>
           <div className="flex items-center gap-2">
             <Button
@@ -174,15 +174,15 @@ export function TemplatesClient() {
               size="sm"
               disabled={syncing}
               onClick={() => void sync()}
-              title="Consulta a Meta el estado de revisión"
+              title="Consultar na Meta o status da análise"
             >
               <RefreshCw className={`h-4 w-4 ${syncing ? "animate-spin" : ""}`} />
-              Actualizar estado
+              Atualizar status
             </Button>
             {!creating && (
               <Button size="sm" onClick={() => setCreating(true)}>
                 <Plus className="h-4 w-4" />
-                Nueva plantilla
+                Novo modelo
               </Button>
             )}
           </div>
@@ -200,18 +200,18 @@ export function TemplatesClient() {
         )}
 
         {templates === null ? (
-          <p className="text-sm text-muted-foreground">Cargando plantillas…</p>
+          <p className="text-sm text-muted-foreground">Carregando modelos…</p>
         ) : empty ? (
           !creating && (
             <EmptyState
               icon={FileText}
               className="rounded-lg border border-dashed"
-              title="Todavía no tienes plantillas"
-              description="Crea la primera para poder escribirle a un cliente cuando pasen las 24 horas. Puedes empezar con un ejemplo."
+              title="Você ainda não tem modelos"
+              description="Crie o primeiro para poder escrever a um cliente após 24 horas. Você pode começar com um exemplo."
               action={
                 <Button size="sm" onClick={() => setCreating(true)}>
                   <Plus className="h-4 w-4" />
-                  Crear mi primera plantilla
+                  Criar meu primeiro modelo
                 </Button>
               }
             />
@@ -240,7 +240,7 @@ export function TemplatesClient() {
                   )}
                 >
                   {t.status === "rejected" && t.rejectionReason
-                    ? `Motivo del rechazo: ${t.rejectionReason}. ${STATUS_BADGE.rejected.hint}`
+                    ? `Motivo da rejeição: ${t.rejectionReason}. ${STATUS_BADGE.rejected.hint}`
                     : STATUS_BADGE[t.status].hint}
                 </p>
               </li>
@@ -263,17 +263,17 @@ function HowItWorks({ defaultOpen }: { defaultOpen: boolean }) {
   const steps = [
     {
       icon: Plus,
-      title: "Créala aquí",
-      text: "Escribe el mensaje y marca con {{1}}, {{2}}… lo que cambia en cada envío, como el nombre o la fecha.",
+      title: "Crie aqui",
+      text: "Escreva a mensagem e marque com {{1}}, {{2}}… o que muda em cada envio, como nome ou data.",
     },
     {
       icon: Clock3,
-      title: "Meta la revisa",
-      text: "Tarda de unos minutos a 24 horas. El estado cambia solo a «Aprobada» o «Rechazada», con el motivo.",
+      title: "A Meta analisa",
+      text: "Leva de alguns minutos a 24 horas. O status muda para «Aprovado» ou «Rejeitado», com o motivo.",
     },
     {
       icon: Send,
-      title: "Úsala",
+      title: "Use o modelo",
       text: "Em Conversas, quando a janela de 24 horas estiver fechada, escolha o modelo, preencha as variáveis e envie. Para iniciar uma conversa, use «Escrever primeiro» em Contatos.",
     },
   ];
@@ -288,7 +288,7 @@ function HowItWorks({ defaultOpen }: { defaultOpen: boolean }) {
       >
         <Sparkles className="h-5 w-5 shrink-0 text-primary" />
         <span className="flex-1">
-          <span className="block text-sm font-semibold">¿Para qué sirven las plantillas?</span>
+          <span className="block text-sm font-semibold">Para que servem os modelos?</span>
           <span className="block text-xs text-muted-foreground">
             Son el único mensaje que WhatsApp te deja enviar pasadas 24 horas.
           </span>
@@ -317,13 +317,13 @@ function HowItWorks({ defaultOpen }: { defaultOpen: boolean }) {
             ))}
           </ol>
           <details className="rounded-md bg-subtle p-3">
-            <summary className="cursor-pointer font-medium">Consejos para que Meta la apruebe</summary>
+            <summary className="cursor-pointer font-medium">Dicas para a Meta aprovar</summary>
             <ul className="mt-2 list-disc space-y-1 pl-5 text-xs text-muted-foreground">
-              <li>No empieces ni termines el mensaje con una variable, y no pongas dos variables juntas.</li>
+              <li>Não comece nem termine a mensagem com uma variável e não coloque duas variáveis juntas.</li>
               <li>Di quién escribe y por qué: «Hola {"{{1}}"}, soy Ana de Clínica Sol…».</li>
-              <li>Escribe ejemplos reales para cada variable: es lo que ve quien la revisa.</li>
-              <li>Utilidad es solo para dar seguimiento a algo que el cliente pidió. Si el mensaje promociona algo, Meta la cambia a Marketing, que cuesta más por conversación.</li>
-              <li>El idioma que elijas debe ser el del texto.</li>
+              <li>Escreva exemplos reais para cada variável: é isso que o responsável pela análise verá.</li>
+              <li>Utilidade serve apenas para acompanhar algo solicitado pelo cliente. Se a mensagem promover algo, a Meta altera para Marketing, que custa mais por conversa.</li>
+              <li>O idioma escolhido deve ser o mesmo do texto.</li>
             </ul>
           </details>
           <p className="flex flex-wrap gap-4 text-xs">
@@ -414,7 +414,7 @@ function CreateForm({
   return (
     <Card>
       <CardHeader>
-        <CardTitle>Nueva plantilla</CardTitle>
+        <CardTitle>Novo modelo</CardTitle>
         <CardDescription>
           Se envía a revisión de Meta al crearla. Mientras la revisan puedes
           seguir usando el CRM.
@@ -422,7 +422,7 @@ function CreateForm({
       </CardHeader>
       <CardContent className="space-y-5">
         <div className="space-y-2">
-          <p className="text-xs font-medium text-muted-foreground">Empieza con un ejemplo (opcional)</p>
+          <p className="text-xs font-medium text-muted-foreground">Comece com um exemplo (opcional)</p>
           <div className="flex flex-wrap gap-2">
             {STARTERS.map((s) => (
               <Button key={s.name} type="button" variant="outline" size="sm" onClick={() => applyStarter(s)}>
@@ -434,7 +434,7 @@ function CreateForm({
 
         <div className="grid gap-4 md:grid-cols-2">
           <div className="space-y-1.5">
-            <Label htmlFor="tpl-name">Nombre interno</Label>
+            <Label htmlFor="tpl-name">Nome interno</Label>
             <Input
               id="tpl-name"
               placeholder="seguimiento_cotizacion"
@@ -443,11 +443,11 @@ function CreateForm({
               maxLength={60}
             />
             <p className="text-xs text-muted-foreground">
-              Solo minúsculas, números y guion bajo. Tus clientes no lo ven.
+              Apenas letras minúsculas, números e sublinhado. Seus clientes não verão esse nome.
             </p>
           </div>
           <div className="space-y-1.5">
-            <Label htmlFor="tpl-lang">Idioma del mensaje</Label>
+            <Label htmlFor="tpl-lang">Idioma da mensagem</Label>
             <select
               id="tpl-lang"
               value={language}
@@ -468,7 +468,7 @@ function CreateForm({
         </div>
 
         <fieldset className="space-y-1.5">
-          <legend className="text-sm font-medium">¿Para qué es?</legend>
+          <legend className="text-sm font-medium">Para que serve?</legend>
           <div className="grid gap-2 sm:grid-cols-2">
             {(Object.keys(CATEGORY) as Category[]).map((c) => (
               <label
@@ -495,7 +495,7 @@ function CreateForm({
 
         <div className="space-y-1.5">
           <div className="flex items-end justify-between gap-2">
-            <Label htmlFor="tpl-body">Mensaje</Label>
+            <Label htmlFor="tpl-body">Mensagem</Label>
             <Button type="button" variant="ghost" size="sm" onClick={insertVariable}>
               <Plus className="h-3.5 w-3.5" />
               Insertar variable {`{{${countVariables(body) + 1}}}`}
@@ -504,7 +504,7 @@ function CreateForm({
           <Textarea
             id="tpl-body"
             rows={4}
-            placeholder="Hola {{1}}, te confirmo tu sesión el {{2}} a las {{3}}. Si necesitas moverla, responde a este mensaje."
+            placeholder="Olá {{1}}, confirmamos seu atendimento em {{2}} às {{3}}. Se precisar alterá-lo, responda a esta mensagem."
             value={body}
             onChange={(e) => setBody(e.target.value)}
           />
@@ -512,7 +512,7 @@ function CreateForm({
             <p className="text-xs text-destructive">{bodyError}</p>
           ) : (
             <p className="text-xs text-muted-foreground">
-              Las variables se llenan al enviar: {"{{1}}"} puede ser el nombre
+              As variáveis são preenchidas no envio: {"{{1}}"} pode ser o nome
               del cliente, {"{{2}}"} una fecha…
             </p>
           )}
@@ -526,9 +526,9 @@ function CreateForm({
 
         {variableCount > 0 && (
           <div className="space-y-2">
-            <p className="text-sm font-medium">Ejemplo de cada variable</p>
+            <p className="text-sm font-medium">Exemplo de cada variável</p>
             <p className="text-xs text-muted-foreground">
-              Meta los usa para revisar la plantilla. No se envían a tus clientes.
+              A Meta usa esses exemplos para analisar o modelo. Eles não são enviados aos clientes.
             </p>
             <div className="grid gap-2 sm:grid-cols-2">
               {Array.from({ length: variableCount }, (_, i) => (
@@ -538,7 +538,7 @@ function CreateForm({
                   </Label>
                   <Input
                     id={`tpl-example-${i + 1}`}
-                    placeholder={i === 0 ? "Ana" : "p. ej. martes 14"}
+                    placeholder={i === 0 ? "Ana" : "ex.: terça-feira, 14"}
                     value={examples[i] ?? ""}
                     onChange={(e) => {
                       const next = [...examples];
@@ -555,7 +555,7 @@ function CreateForm({
 
         {body.trim() && !bodyError && (
           <div className="space-y-1.5">
-            <p className="text-sm font-medium">Así lo verá tu cliente</p>
+            <p className="text-sm font-medium">Assim seu cliente verá</p>
             <div className="rounded-lg bg-chat p-4">
               <div className="ml-auto max-w-[85%] rounded-lg border border-bubble-out-border bg-bubble-out px-3 py-2 text-sm text-bubble-out-text shadow-sm">
                 <p className="whitespace-pre-wrap">{preview}</p>
@@ -579,7 +579,7 @@ function CreateForm({
         </div>
         <p className="flex items-start gap-1.5 text-xs text-muted-foreground">
           <CheckCircle2 className="mt-0.5 h-3.5 w-3.5 shrink-0" />
-          Cuando Meta la apruebe aparecerá en la Bandeja, lista para enviar.
+          Quando a Meta aprovar, ela aparecerá na Caixa de entrada, pronta para envio.
         </p>
       </CardContent>
     </Card>

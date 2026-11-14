@@ -155,13 +155,13 @@ async function prepareSend(
     .limit(1);
   const row = rows[0];
   if (!row || row.conversation.organizationId !== organizationId) {
-    throw new SendError("meta_error", "Conversación no encontrada");
+    throw new SendError("meta_error", "Conversa não encontrada");
   }
 
   if (row.conversation.isTest) {
     throw new SendError(
       "sandbox_violation",
-      "Conversación de prueba del Laboratorio: el envío real está prohibido"
+      "Conversa de teste do Laboratório: o envio real é proibido"
     );
   }
 
@@ -181,13 +181,13 @@ async function prepareSend(
     if (!igCreds) {
       throw new SendError(
         "not_connected",
-        "No hay cuenta de Instagram conectada"
+        "Não há conta do Instagram conectada"
       );
     }
     if (igCreds.status === "reconnect_required") {
       throw new SendError(
         "reconnect_required",
-        "El token de Instagram expiró: reconecta la cuenta en Configuración"
+        "O token do Instagram expirou: reconecte a conta em Configurações"
       );
     }
     const igRecipient = row.contact.waIdentity.startsWith(IG_PREFIX)
@@ -219,13 +219,13 @@ async function prepareSend(
     if (!fbCreds) {
       throw new SendError(
         "not_connected",
-        "No hay página de Facebook conectada"
+        "Não há página do Facebook conectada"
       );
     }
     if (fbCreds.status === "reconnect_required") {
       throw new SendError(
         "reconnect_required",
-        "El token de la página expiró: reconecta Messenger en Configuración"
+        "O token da página expirou: reconecte o Messenger em Configurações"
       );
     }
     const fbRecipient = row.contact.waIdentity.startsWith(FB_PREFIX)
@@ -257,12 +257,12 @@ async function prepareSend(
     }
     const ttCreds = await getTiktokCredentialsByOrg(organizationId);
     if (!ttCreds) {
-      throw new SendError("not_connected", "No hay cuenta de TikTok conectada");
+      throw new SendError("not_connected", "Não há conta do TikTok conectada");
     }
     if (ttCreds.status === "reconnect_required") {
       throw new SendError(
         "reconnect_required",
-        "La llave de Zernio dejó de servir: reconecta TikTok en Configuración"
+        "A chave da Zernio deixou de funcionar: reconecte o TikTok em Configurações"
       );
     }
     if (
@@ -311,12 +311,12 @@ async function prepareSend(
 
   const credentials = await getCredentialsByOrg(organizationId);
   if (!credentials) {
-    throw new SendError("not_connected", "No hay número de WhatsApp conectado");
+    throw new SendError("not_connected", "Não há número do WhatsApp conectado");
   }
   if (credentials.status === "reconnect_required") {
     throw new SendError(
       "reconnect_required",
-      "El token de WhatsApp expiró: reconecta el número en Configuración"
+      "O token do WhatsApp expirou: reconecte o número em Configurações"
     );
   }
 
@@ -384,7 +384,7 @@ async function resolverMensajeCitado(
   if (!row) {
     throw new SendError(
       "reply_unavailable",
-      "El mensaje que quieres citar no es de esta conversación"
+      "A mensagem que você deseja citar não pertence a esta conversa"
     );
   }
   if (!row.message.waMessageId) {
@@ -636,12 +636,12 @@ export async function sendMediaMessage(input: {
       await markReconnectRequired(input.organizationId);
       sendErr = new SendError(
         "reconnect_required",
-        "El token de WhatsApp expiró: reconecta el número en Configuración"
+        "O token do WhatsApp expirou: reconecte o número em Configurações"
       );
     } else {
       sendErr = new SendError(
         "upload_failed",
-        "No se pudo subir el adjunto a WhatsApp"
+        "Não foi possível enviar o anexo ao WhatsApp"
       );
     }
     // El contenido NO se pierde: mensaje failed con el asset ya en disco.
@@ -767,7 +767,7 @@ export async function callGraphSend(
         await markReconnectRequired(credentials.organizationId);
         throw new SendError(
           "reconnect_required",
-          "El token de WhatsApp expiró: reconecta el número en Configuración"
+          "O token do WhatsApp expirou: reconecte o número em Configurações"
         );
       }
       if (err.status === 0 || err.status >= 500) {

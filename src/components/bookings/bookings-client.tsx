@@ -261,7 +261,7 @@ export function BookingsClient({
     const clamped = clampListTo(from, to);
     setNotice(
       daysBetween(from, to) > MAX_RANGE_DAYS - 1
-        ? `La lista abarca hasta ${MAX_RANGE_DAYS} días: se muestra del ${spanLabel({ from, to: clamped })}.`
+        ? `A lista abrange até ${MAX_RANGE_DAYS} dias: exibindo ${spanLabel({ from, to: clamped })}.`
         : null
     );
     setAnchor(from);
@@ -309,9 +309,9 @@ export function BookingsClient({
     return (
       <div className="flex h-full flex-col">
         <header className="border-b px-4 py-3 sm:px-6 sm:py-4">
-          <h2 className="text-[17px] font-bold tracking-tight">Citas</h2>
+          <h2 className="text-[17px] font-bold tracking-tight">Agendamentos</h2>
         </header>
-        <p className="p-6 text-sm text-text-3">Cargando…</p>
+        <p className="p-6 text-sm text-text-3">Carregando…</p>
       </div>
     );
   }
@@ -363,13 +363,13 @@ export function BookingsClient({
                     onClick={() => void reload()}
                     className="font-semibold underline"
                   >
-                    Reintentar
+                    Tentar novamente
                   </button>
                 </p>
               )}
               {loaded?.truncated && (
                 <p className="text-sm text-warning-text">
-                  Este rango tiene demasiadas citas para mostrarlas todas: acórtalo para verlas
+                  Este intervalo tem agendamentos demais para exibir: reduza-o para visualizar todos
                   completas.
                 </p>
               )}
@@ -481,8 +481,8 @@ function StatusBar({
         )}
       </span>
       <span className="hidden xl:inline">
-        Hora del negocio ({timezone})
-        {counts.google && " · Los cambios hechos en Google Calendar no se importan"}
+        Horário do negócio ({timezone})
+        {counts.google && " · Alterações feitas no Google Agenda não são importadas"}
       </span>
       <Legend />
       <div className="ml-auto flex flex-wrap items-center gap-x-4 gap-y-1.5">
@@ -514,7 +514,7 @@ function StatusBar({
 /** Qué significa cada color: sin esto, el ámbar de «no asistió» es adivinanza. */
 function Legend() {
   const items = [
-    { label: "Agendada", dot: "rounded-full bg-brand" },
+    { label: "Agendado", dot: "rounded-full bg-brand" },
     { label: "Realizada", dot: "rounded-full bg-success" },
     { label: "No asistió", dot: "rounded-full bg-warning" },
     // El rayado no se lee en un punto de 10 px: un cuadrito con borde sí.

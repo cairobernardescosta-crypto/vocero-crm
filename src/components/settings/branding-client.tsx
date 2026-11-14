@@ -107,21 +107,21 @@ export function BrandingClient({
     router.refresh();
   }
 
-  if (!loaded) return <p className="text-sm text-text-3">Cargando…</p>;
+  if (!loaded) return <p className="text-sm text-text-3">Carregando…</p>;
 
   return (
     <div className="max-w-2xl space-y-6">
       <Card>
         <CardHeader>
-          <CardTitle>Marca del CRM</CardTitle>
+          <CardTitle>Marca do CRM</CardTitle>
           <CardDescription>
-            Este CRM es tuyo: ponle el nombre de tu negocio y tu color. Se
+            Este CRM é seu: use o nome e a cor do seu negócio. As alterações
             reflejan en toda la interfaz y en la pantalla de inicio de sesión.
           </CardDescription>
         </CardHeader>
         <CardContent className="space-y-5">
           <div className="space-y-1.5">
-            <Label htmlFor="brand-name">Nombre</Label>
+            <Label htmlFor="brand-name">Nome</Label>
             <Input
               id="brand-name"
               maxLength={30}
@@ -133,7 +133,7 @@ export function BrandingClient({
           </div>
 
           <div className="space-y-1.5">
-            <Label htmlFor="brand-currency">Moneda del negocio</Label>
+            <Label htmlFor="brand-currency">Moeda do negócio</Label>
             <select
               id="brand-currency"
               value={currency}
@@ -151,13 +151,13 @@ export function BrandingClient({
               ))}
             </select>
             <p className="text-xs text-text-3">
-              Es la única que el Pipeline suma. Los montos capturados en otra
+              É a única moeda somada pelo Pipeline. Valores informados em outra
               moneda se muestran, pero quedan fuera del total de su columna.
             </p>
           </div>
 
           <div className="space-y-2">
-            <Label>Color de acento</Label>
+            <Label>Cor de destaque</Label>
             <div className="flex flex-wrap items-center gap-2">
               {Object.entries(ACCENT_PRESETS).map(([hex, preset]) => (
                 <button
@@ -205,7 +205,7 @@ export function BrandingClient({
               misma clase (`nav-dark`) y el mismo renglón activo que la de
               verdad; a la derecha la página en el tema activo, con su botón. */}
           <div
-            aria-label="Vista previa de la marca"
+            aria-label="Prévia da marca"
             className="flex flex-col overflow-hidden rounded-md border border-border-strong sm:flex-row"
           >
             <div
@@ -220,7 +220,7 @@ export function BrandingClient({
               </div>
               <span className={cn(navItemClass(true), "mt-3")}>
                 <Inbox className="h-[17px] w-[17px] text-brand" strokeWidth={1.8} />
-                <span className="flex-1">Bandeja</span>
+                <span className="flex-1">Caixa de entrada</span>
               </span>
             </div>
             <div
@@ -234,7 +234,7 @@ export function BrandingClient({
           </div>
 
           {error && <p className="text-sm text-destructive">{error}</p>}
-          {saved && <p className="text-sm" style={{ color: previewSet.text }}>Marca guardada ✓</p>}
+          {saved && <p className="text-sm" style={{ color: previewSet.text }}>Marca salva ✓</p>}
           <Button disabled={saving || !name.trim()} onClick={() => void save()}>
             {saving ? "Salvando…" : "Salvar marca"}
           </Button>

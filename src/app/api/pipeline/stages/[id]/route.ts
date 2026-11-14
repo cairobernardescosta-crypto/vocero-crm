@@ -84,7 +84,7 @@ export const DELETE = withAuth(async (session, req: Request, ctx: Params) => {
       return apiError(
         409,
         "stage_has_leads",
-        "La etapa tiene tarjetas: indica ?moveTo=<etapa destino> para reasignarlas"
+        "A etapa possui cartões: informe ?moveTo=<etapa destino> para reatribuí-los"
       );
     }
     const dest = await db

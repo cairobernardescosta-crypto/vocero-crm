@@ -33,13 +33,13 @@ describe("la bandeja vacía nombra los canales encendidos (D2)", () => {
 
   it("con solo WhatsApp, el texto de siempre", () => {
     expect(emptyInboxDescription(["WhatsApp"])).toBe(
-      "Cuando alguien escriba a tu número de WhatsApp, su conversación aparecerá aquí en tiempo real."
+      "Quando alguém escrever para seu número do WhatsApp, a conversa aparecerá aqui em tempo real."
     );
   });
 
   it("con varios canales, los nombra todos", () => {
     expect(emptyInboxDescription(["WhatsApp", "Instagram", "Messenger", "TikTok"])).toBe(
-      "Cuando alguien te escriba por WhatsApp, Instagram, Messenger o TikTok, su conversación aparecerá aquí en tiempo real."
+      "Quando alguém escrever para você por WhatsApp, Instagram, Messenger o TikTok, a conversa aparecerá aqui em tempo real."
     );
   });
 });

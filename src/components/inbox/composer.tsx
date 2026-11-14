@@ -277,7 +277,7 @@ export function Composer({
       return;
     }
     if (!textoLibre) {
-      setError("La ventana está cerrada: no se puede adjuntar una imagen. Solo sale una plantilla.");
+      setError("A janela está fechada: não é possível anexar uma imagem. Envie somente um modelo.");
       return;
     }
     const result = validarImagenAdjunta(files, origen);
@@ -369,7 +369,7 @@ export function Composer({
       } | null;
       return data?.error?.message ?? `Error ${res.status}`;
     } catch {
-      return "No se pudo conectar con el servidor. Lo que ibas a mandar sigue aquí para reintentar.";
+      return "Não foi possível conectar ao servidor. A mensagem foi mantida para você tentar novamente.";
     }
   }
 
@@ -432,7 +432,7 @@ export function Composer({
 
   /** 044 — La nota grabada sale por el mismo envío de adjuntos, marcada como voz. */
   async function enviarNota(nota: NotaGrabada): Promise<string | null> {
-    if (mediaSending.current) return "Ya se está enviando un adjunto.";
+    if (mediaSending.current) return "Um anexo já está sendo enviado.";
     mediaSending.current = true;
     setSending(true);
     setError(null);
@@ -536,7 +536,7 @@ export function Composer({
               (guardandoNota || !nota.trim()) && "opacity-40"
             )}
           >
-            {guardandoNota ? "Guardando…" : "Guardar nota"}
+            {guardandoNota ? "Salvando…" : "Salvar nota"}
           </button>
         </div>
         <div className="mt-1.5 flex items-center justify-between">
@@ -562,7 +562,7 @@ export function Composer({
         <div className="flex items-start gap-2 rounded-md border border-warning-soft bg-warning-tint p-3 text-sm text-warning-text">
           <Clock3 className="mt-0.5 h-4 w-4 shrink-0" strokeWidth={1.7} />
           <div>
-            <p className="font-medium">La ventana de 48 horas de TikTok está cerrada.</p>
+            <p className="font-medium">A janela de 48 horas do TikTok está fechada.</p>
             <p className="opacity-80">
               TikTok solo deja contestar dentro de las 48 horas siguientes al
               último mensaje del cliente, y no permite reabrir la conversación.
@@ -590,7 +590,7 @@ export function Composer({
         >
           <Clock3 className="mt-0.5 h-4 w-4 shrink-0" strokeWidth={1.7} />
           <div>
-            <p className="font-medium">La ventana de atención de {canal} está cerrada.</p>
+            <p className="font-medium">A janela de atendimento do {canal} está fechada.</p>
             <p className="opacity-80">
               {canal} deja contestar hasta 7 días después del último mensaje
               del cliente, y no tiene plantillas para reabrir la conversación.
@@ -610,7 +610,7 @@ export function Composer({
         <div className="mb-3 flex items-start gap-2 rounded-md border border-warning-soft bg-warning-tint p-3 text-sm text-warning-text">
           <Clock3 className="mt-0.5 h-4 w-4 shrink-0" strokeWidth={1.7} />
           <div>
-            <p className="font-medium">La ventana de 24 horas está cerrada.</p>
+            <p className="font-medium">A janela de 24 horas está fechada.</p>
             <p className="opacity-80">
               WhatsApp solo permite texto libre dentro de las 24 horas
               siguientes al último mensaje del cliente. Para retomar la
@@ -645,7 +645,7 @@ export function Composer({
         >
           <Clock3 className="mt-0.5 h-3.5 w-3.5 shrink-0" strokeWidth={1.7} />
           <p>
-            <span className="font-semibold">Solo puede contestar una persona.</span>{" "}
+            <span className="font-semibold">Somente uma pessoa pode responder.</span>{" "}
             Pasaron más de 24 horas desde el último mensaje del cliente: {canal}{" "}
             te deja responder a ti hasta 7 días, al agente ya no.
           </p>
@@ -683,8 +683,8 @@ export function Composer({
           />
           <button
             onClick={() => onReplyChange?.(null)}
-            aria-label="Cancelar respuesta"
-            title="Cancelar respuesta"
+            aria-label="Cancelar resposta"
+            title="Cancelar resposta"
             className="shrink-0 rounded p-1 text-text-3 hover:bg-secondary hover:text-foreground"
           >
             <X className="h-4 w-4" strokeWidth={1.7} />
@@ -773,7 +773,7 @@ export function Composer({
         )}
         <textarea
           ref={taRef}
-          placeholder={file ? "Pie del adjunto (opcional)…" : "Escribe una respuesta…"}
+          placeholder={file ? "Legenda do anexo (opcional)…" : "Escreva uma resposta…"}
           value={text}
           rows={1}
           onPaste={(e) => {
@@ -784,7 +784,7 @@ export function Composer({
             e.preventDefault();
             const files = images.map((item) => item.getAsFile());
             if (files.some((f) => !f)) {
-              setError("No se pudo leer la imagen del portapapeles. Cópiala de nuevo.");
+              setError("Não foi possível ler a imagem da área de transferência. Copie-a novamente.");
               return;
             }
             attachImage(files as File[], "paste");

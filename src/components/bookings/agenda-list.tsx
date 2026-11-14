@@ -48,7 +48,7 @@ export function AgendaList({
       <EmptyState
         icon={CalendarDays}
         className="min-h-0 flex-1 rounded-lg border bg-card p-8"
-        title={`Nada agendado del ${spanLabel(range)}`}
+        title={`Nada agendado em ${spanLabel(range)}`}
         description="Aqui aparecem os agendamentos feitos pela IA ou pela sua equipe. Os horários disponíveis são configurados em Configurações → Agenda."
       />
     );
@@ -62,7 +62,7 @@ export function AgendaList({
             {longDayLabel(day)}
             {day === today && (
               <span className="rounded-full bg-brand px-2 py-px text-[10.5px] font-semibold text-brand-fg">
-                Hoy
+                Hoje
               </span>
             )}
           </h3>
@@ -96,11 +96,11 @@ export function AgendaList({
                     <span className="block truncate text-xs text-text-3">
                       {b.kind === "block"
                         ? `Bloqueo · ${b.durationMinutes} min`
-                        : `${b.durationMinutes} min · ${b.source === "ai" ? "Agendó la IA" : "Manual"}${b.isTest ? " · Prueba" : ""}`}
+                        : `${b.durationMinutes} min · ${b.source === "ai" ? "Agendado pela IA" : "Manual"}${b.isTest ? " · Teste" : ""}`}
                     </span>
                   </span>
                   {hasDeliveryIssue(b) && (
-                    <AlertTriangle aria-label="Sin enlace de la reunión" className="h-4 w-4 shrink-0 text-warning-text" />
+                    <AlertTriangle aria-label="Sem link da reunião" className="h-4 w-4 shrink-0 text-warning-text" />
                   )}
                   {b.meetingLink && b.status === "agendada" && (
                     <Video aria-label="Tiene enlace de reunión" className="hidden h-4 w-4 shrink-0 text-text-3 sm:block" />

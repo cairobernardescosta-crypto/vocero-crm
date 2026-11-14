@@ -20,8 +20,11 @@ import { etiquetaVence, porVencer } from "@/lib/filtros-bandeja";
 /* Puntos de etapa: los tokens del tema, no hex copiados del tema claro —
    así siguen al acento white-label y se recalculan en oscuro. */
 const STAGE_DOT: Record<string, string> = {
+  Novo: "var(--text-3)",
   Nuevo: "var(--text-3)",
+  "Em conversa": "var(--accent)",
   "En conversación": "var(--accent)",
+  Interessado: "var(--warning)",
   Interesado: "var(--warning)",
   Cliente: "var(--success)",
   Perdido: "var(--danger)",
@@ -64,7 +67,7 @@ function InboxEmptyState({
     <EmptyState
       icon={Inbox}
       className="h-full"
-      title="Sin conversaciones todavía"
+      title="Ainda não há conversas"
       description={emptyInboxDescription(channels.map((ch) => CHANNEL_LABEL[ch]))}
       action={
         allowSeed && !failed && (
@@ -276,7 +279,7 @@ export function ConversationList({
                     aria-pressed={on}
                     title={
                       on
-                        ? "Ver todas las bandejas"
+                        ? "Ver todas as caixas de entrada"
                         : `Ver solo ${CHANNEL_LABEL[ch]}`
                     }
                     className={cn(
@@ -306,7 +309,7 @@ export function ConversationList({
           se ve abajo como etiquetas que se quitan con ✕. */}
       <div className="border-b px-4">
         <div className="flex items-center gap-4">
-          <div role="tablist" aria-label="Qué conversaciones ver" className="flex items-center gap-4">
+          <div role="tablist" aria-label="Quais conversas exibir" className="flex items-center gap-4">
             {pestanas.map((f) => (
               <button
                 key={f.id}
@@ -345,7 +348,7 @@ export function ConversationList({
             {menuFiltros && (
               <div
                 role="dialog"
-                aria-label="Filtros de la bandeja"
+                aria-label="Filtros da caixa de entrada"
                 className="absolute right-0 top-full z-30 mt-1 w-[min(280px,calc(100vw-2rem))] space-y-3 rounded-xl border border-border-strong bg-popover p-3 text-popover-foreground shadow-xl"
               >
                 {stages.length > 0 && (
@@ -354,7 +357,7 @@ export function ConversationList({
                     <select
                       value={stage}
                       onChange={(e) => setStage(e.target.value)}
-                      aria-label="Filtrar por etapa del embudo"
+                      aria-label="Filtrar por etapa do funil"
                       className={cn(
                         "w-full rounded-md border border-border-strong bg-background px-2 py-1.5 text-[13px]",
                         FOCO_SEPARADO
@@ -378,7 +381,7 @@ export function ConversationList({
                       onChange={(e) => setSoloPorVencer(e.target.checked)}
                       className="h-4 w-4 accent-[var(--accent)]"
                     />
-                    <span className="flex-1">Por vencer</span>
+                    <span className="flex-1">Perto do vencimento</span>
                     <span className="font-mono text-[11px] text-text-3">{venciendo.length}</span>
                   </label>
                 )}
@@ -395,7 +398,7 @@ export function ConversationList({
                   </label>
                 )}
                 {stages.length === 0 && venciendo.length === 0 && deAnuncios.length === 0 && nFiltros === 0 && (
-                  <p className="text-[13px] text-text-3">Todavía no hay nada por qué filtrar.</p>
+                  <p className="text-[13px] text-text-3">Ainda não há itens para filtrar.</p>
                 )}
                 {nFiltros > 0 && (
                   <button
@@ -417,7 +420,7 @@ export function ConversationList({
               <FiltroPuesto texto={`Etapa: ${stage}`} onQuitar={() => setStage("all")} />
             )}
             {soloPorVencer && (
-              <FiltroPuesto texto="Por vencer" onQuitar={() => setSoloPorVencer(false)} />
+              <FiltroPuesto texto="Perto do vencimento" onQuitar={() => setSoloPorVencer(false)} />
             )}
             {soloAnuncios && (
               <FiltroPuesto texto="De anuncios" onQuitar={() => setSoloAnuncios(false)} />
@@ -428,7 +431,7 @@ export function ConversationList({
 
       <div className="flex-1 overflow-y-auto">
         {loading ? (
-          <p className="p-6 text-center text-xs text-text-3">Cargando…</p>
+          <p className="p-6 text-center text-xs text-text-3">Carregando…</p>
         ) : conversations.length === 0 ? (
           <InboxEmptyState onSeeded={onSeeded} channels={channels} allowSeed={!simple} />
         ) : visible.length === 0 ? (
@@ -439,8 +442,8 @@ export function ConversationList({
             filter === "all" &&
             nFiltros === 0 &&
             !conversations.some((c) => c.channel === inbox)
-              ? `Nadie ha escrito por ${CHANNEL_LABEL[inbox]} todavía.`
-              : "Sin resultados para este filtro."}
+              ? `Ninguém escreveu pelo ${CHANNEL_LABEL[inbox]} ainda.`
+              : "Sem resultados para este filtro."}
           </p>
         ) : (
           <ul>

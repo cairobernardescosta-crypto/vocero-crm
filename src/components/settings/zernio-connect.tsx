@@ -128,7 +128,7 @@ export function ZernioConnect({
 
       {candidates.length > 0 && (
         <div className="space-y-2">
-          <p className="text-xs font-semibold text-text-2">Cuentas de este canal en esa llave:</p>
+          <p className="text-xs font-semibold text-text-2">Contas deste canal nessa chave:</p>
           <div className="flex flex-wrap gap-2">
             {candidates.map((c) => (
               <button
@@ -147,7 +147,7 @@ export function ZernioConnect({
 
       <div className="flex flex-wrap items-center gap-3">
         <Button disabled={saving || !canSave} onClick={() => void save()}>
-          {saving ? "Probando…" : "Probar y conectar"}
+          {saving ? "Testando…" : "Testar e conectar"}
         </Button>
         {!manual && (
           <button
@@ -155,7 +155,7 @@ export function ZernioConnect({
             onClick={() => setManual(true)}
             className="text-xs font-semibold text-text-2 underline-offset-2 hover:underline"
           >
-            Pegar el accountId a mano
+            Informar o accountId manualmente
           </button>
         )}
       </div>
@@ -169,8 +169,8 @@ export function ZernioConnect({
           {saved.webhook?.ok && (
             <p className="text-success-text opacity-80">
               {saved.webhook.created
-                ? "Vocero dio de alta su webhook en tu Zernio, limitado a tus cuentas conectadas."
-                : "El webhook de tu Zernio quedó actualizado y limitado a tus cuentas conectadas."}
+                ? "O Vocero cadastrou o webhook no seu Zernio, limitado às suas contas conectadas."
+                : "O webhook do seu Zernio foi atualizado e limitado às suas contas conectadas."}
             </p>
           )}
           {saved.health && saved.health.level !== "ok" && <Aviso>{saved.health.message}</Aviso>}

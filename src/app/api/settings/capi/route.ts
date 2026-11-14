@@ -54,7 +54,7 @@ export const PUT = withAuth(async (session, req: Request) => {
       return apiError(
         409,
         "sin_whatsapp",
-        "No hay conexión de WhatsApp de la cual reusar el token: pega uno explícito"
+        "Não há uma conexão do WhatsApp para reutilizar o token: informe um token explicitamente"
       );
     }
     token = credentials.token;
@@ -68,7 +68,7 @@ export const PUT = withAuth(async (session, req: Request) => {
     return apiError(
       422,
       "etapa_invalida",
-      "Esa etapa no es de este negocio"
+      "Essa etapa não pertence a este negócio"
     );
   }
 

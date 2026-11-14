@@ -52,11 +52,11 @@ export function DeleteConversationDialog({
       <div
         role="dialog"
         aria-modal="true"
-        aria-label="Eliminar conversación"
+        aria-label="Excluir conversa"
         className="w-full max-w-md rounded-lg border bg-card p-5 shadow-xl"
         onClick={(e) => e.stopPropagation()}
       >
-        <h3 className="mb-1 font-semibold">¿Eliminar esta conversación?</h3>
+        <h3 className="mb-1 font-semibold">Excluir esta conversa?</h3>
         <p className="mb-3 text-[13px] leading-relaxed text-text-2">
           Se borran los mensajes con {contactName}, sus adjuntos, la ficha y lo
           que el agente recuerda de esta conversación. Si vuelve a escribir, el
@@ -76,12 +76,12 @@ export function DeleteConversationDialog({
             <span className="mt-0.5 block text-xs text-text-3">
               {alsoContact
                 ? "Se van además sus notas, su etapa en el pipeline y sus citas pasadas. Deja de contar en Resultados."
-                : "Sin marcar, el contacto conserva sus notas, su etapa y sus citas."}
+                : "Sem marcar, o contato mantém suas notas, etapa e agendamentos."}
             </span>
           </span>
         </label>
 
-        <p className="mt-3 text-xs font-medium text-danger-text">No se puede deshacer.</p>
+        <p className="mt-3 text-xs font-medium text-danger-text">Esta ação não pode ser desfeita.</p>
 
         {error && (
           <p
@@ -98,10 +98,10 @@ export function DeleteConversationDialog({
           </Button>
           <Button variant="destructive" disabled={busy} onClick={() => void confirm()}>
             {busy
-              ? "Eliminando…"
+              ? "Excluindo…"
               : alsoContact
-                ? "Eliminar conversación y contacto"
-                : "Eliminar conversación"}
+                ? "Excluir conversa e contato"
+                : "Excluir conversa"}
           </Button>
         </div>
       </div>

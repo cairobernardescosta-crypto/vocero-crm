@@ -78,7 +78,7 @@ export function StageManager({
         setDeleting(stage);
         return;
       }
-      setError(data?.error?.message ?? "No se pudo eliminar");
+      setError(data?.error?.message ?? "Não foi possível excluir");
       return;
     }
     setDeleting(null);
@@ -97,7 +97,7 @@ export function StageManager({
         className="max-h-[85dvh] w-full max-w-lg overflow-y-auto rounded-lg border bg-popover p-5 shadow-xl"
         onClick={(e) => e.stopPropagation()}
       >
-        <h3 className="mb-4 font-semibold">Etapas del pipeline</h3>
+        <h3 className="mb-4 font-semibold">Etapas do pipeline</h3>
         <ul className="space-y-2">
           {sorted.map((s, i) => (
             <li key={s.id} className="flex items-center gap-2">
@@ -114,7 +114,7 @@ export function StageManager({
                 <Button
                   variant="ghost"
                   size="icon"
-                  aria-label="Eliminar etapa"
+                  aria-label="Excluir etapa"
                   onClick={() => void remove(s, null)}
                 >
                   <Trash2 className="h-4 w-4" />
@@ -153,7 +153,7 @@ export function StageManager({
                 onChange={(e) => setMoveTo(e.target.value)}
                 className="h-9 flex-1 rounded-md border border-input bg-card px-3 text-sm"
               >
-                <option value="">Etapa destino…</option>
+                <option value="">Etapa de destino…</option>
                 {sorted
                   .filter((s) => s.id !== deleting.id)
                   .map((s) => (
@@ -178,7 +178,7 @@ export function StageManager({
 
         <div className="mt-4 flex gap-2 border-t pt-4">
           <Input
-            placeholder="Nueva etapa…"
+            placeholder="Nova etapa…"
             value={newName}
             onChange={(e) => setNewName(e.target.value)}
             onKeyDown={(e) => {
@@ -186,13 +186,13 @@ export function StageManager({
             }}
           />
           <Button onClick={() => void add()} disabled={!newName.trim()}>
-            Agregar
+            Adicionar
           </Button>
         </div>
 
         <div className="mt-4 flex justify-end">
           <Button variant="ghost" onClick={onClose}>
-            Cerrar
+            Fechar
           </Button>
         </div>
       </div>

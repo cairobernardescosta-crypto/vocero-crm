@@ -40,9 +40,9 @@ type ActivityRow = {
 
 const STATUS_LABEL: Record<ActivityRow["status"], string> = {
   sent: "Enviado",
-  failed: "Falló",
-  skipped: "Omitido",
-  pending: "En curso",
+  failed: "Falhou",
+  skipped: "Ignorado",
+  pending: "Em andamento",
 };
 
 const STATUS_VARIANT: Record<
@@ -57,8 +57,8 @@ const STATUS_VARIANT: Record<
 
 /** Qué significa cada evento, en el idioma del negocio y no en el de Meta. */
 const EVENT_LABEL: Record<string, string> = {
-  QualifiedLead: "Lead calificado",
-  Purchase: "Venta",
+  QualifiedLead: "Lead qualificado",
+  Purchase: "Venda",
 };
 
 export function AdsClient() {
@@ -145,7 +145,7 @@ export function AdsClient() {
     <div className="max-w-3xl space-y-6">
       <Card>
         <CardHeader>
-          <CardTitle>Conversiones de anuncios</CardTitle>
+          <CardTitle>Conversões de anúncios</CardTitle>
           <CardDescription>
             Meta sabe qué conversaciones empezaron desde un anuncio, pero no
             cuáles sirvieron. Conecta tu dataset y el CRM le avisará cuándo un
@@ -165,7 +165,7 @@ export function AdsClient() {
           ) : null}
 
           <div className="space-y-1.5">
-            <Label htmlFor="capi-dataset">ID del dataset</Label>
+            <Label htmlFor="capi-dataset">ID do conjunto de dados</Label>
             <Input
               id="capi-dataset"
               value={datasetId}
@@ -184,24 +184,24 @@ export function AdsClient() {
               id="capi-token"
               value={token}
               onChange={(e) => setToken(e.target.value)}
-              placeholder="Déjalo vacío para reusar el de WhatsApp"
+              placeholder="Deixe vazio para reutilizar o do WhatsApp"
               autoComplete="off"
             />
             <p className="text-xs text-muted-foreground">
-              El token de tu conexión de WhatsApp ya suele poder publicar en el
-              dataset. Solo pega uno si Meta te dio otro distinto.
+              O token da sua conexão do WhatsApp geralmente já pode publicar no
+              conjunto de dados. Informe outro apenas se a Meta tiver fornecido um diferente.
             </p>
           </div>
 
           <div className="space-y-1.5">
-            <Label htmlFor="capi-stage">¿Qué etapa es un lead calificado?</Label>
+            <Label htmlFor="capi-stage">Qual etapa representa um lead qualificado?</Label>
             <select
               id="capi-stage"
               value={qualifiedStageId}
               onChange={(e) => setQualifiedStageId(e.target.value)}
               className="h-9 w-full rounded-md border border-input bg-card px-2 text-sm"
             >
-              <option value="">No reportar leads calificados</option>
+              <option value="">Não reportar leads qualificados</option>
               {stages
                 .filter((s) => s.kind === "open")
                 .map((s) => (
@@ -211,7 +211,7 @@ export function AdsClient() {
                 ))}
             </select>
             <p className="text-xs text-muted-foreground">
-              La venta se reporta sola cuando el trato entra a tu etapa ganada.
+              A venda é reportada automaticamente quando o negócio entra na etapa ganha.
             </p>
           </div>
 
@@ -221,7 +221,7 @@ export function AdsClient() {
             </p>
           ) : null}
           {saved ? (
-            <p className="text-sm text-success-text">Guardado.</p>
+            <p className="text-sm text-success-text">Salvo.</p>
           ) : null}
 
           <div className="flex gap-2">
@@ -239,7 +239,7 @@ export function AdsClient() {
 
       <Card>
         <CardHeader>
-          <CardTitle>Actividad reciente</CardTitle>
+          <CardTitle>Atividade recente</CardTitle>
           <CardDescription>
             Lo último que se le reportó a Meta. Si algo no salió, aquí dice por
             qué — es la forma de saber si esto funciona, sin salir del CRM.
@@ -247,13 +247,13 @@ export function AdsClient() {
         </CardHeader>
         <CardContent className="space-y-3">
           <Button variant="outline" onClick={() => void loadActivity()}>
-            Actualizar
+            Atualizar
           </Button>
           {activity === null ? (
-            <p className="text-sm text-muted-foreground">Cargando…</p>
+            <p className="text-sm text-muted-foreground">Carregando…</p>
           ) : activity.length === 0 ? (
             <p className="text-sm text-muted-foreground">
-              Todavía no hay conversiones. Aparecerán cuando un lead que llegó
+              Ainda não há conversões. Elas aparecerão quando um lead que chegou
               por un anuncio avance de etapa.
             </p>
           ) : (
@@ -262,10 +262,10 @@ export function AdsClient() {
                 <thead className="kicker text-left">
                   <tr>
                     <th className="py-2 pr-3 font-medium">Evento</th>
-                    <th className="py-2 pr-3 font-medium">Contacto</th>
+                    <th className="py-2 pr-3 font-medium">Contato</th>
                     <th className="py-2 pr-3 font-medium">Estado</th>
-                    <th className="py-2 pr-3 font-medium">Cuándo</th>
-                    <th className="py-2 font-medium">Detalle</th>
+                    <th className="py-2 pr-3 font-medium">Quando</th>
+                    <th className="py-2 font-medium">Detalhes</th>
                   </tr>
                 </thead>
                 <tbody>

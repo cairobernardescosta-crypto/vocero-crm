@@ -94,10 +94,10 @@ export function ContactsClient() {
     <div className="flex h-full flex-col">
       <header className="flex flex-wrap items-center justify-between gap-3 border-b px-4 py-3 sm:gap-4 sm:px-6 sm:py-4">
         <div className="flex flex-wrap items-center gap-2">
-          <h2 className="text-[17px] font-bold tracking-tight">Contactos</h2>
+          <h2 className="text-[17px] font-bold tracking-tight">Contatos</h2>
           <Button size="sm" onClick={() => setCreando(true)}>
             <UserPlus className="mr-1.5 h-4 w-4" strokeWidth={1.8} />
-            Nuevo contacto
+            Novo contato
           </Button>
           <Button size="sm" variant="secondary" onClick={() => setImportando(true)}>
             <Upload className="mr-1.5 h-4 w-4" strokeWidth={1.8} />
@@ -112,13 +112,13 @@ export function ContactsClient() {
               onChange={(e) => setShowArchived(e.target.checked)}
               className="accent-primary"
             />
-            Ver archivados
+            Ver arquivados
           </label>
           {stages.length > 0 && (
             <select
               value={stage}
               onChange={(e) => setStage(e.target.value)}
-              aria-label="Filtrar por etapa del embudo"
+              aria-label="Filtrar por etapa do funil"
               className="h-9 rounded-md border border-input bg-card px-2 text-sm"
             >
               <option value="all">Toda etapa</option>
@@ -149,7 +149,7 @@ export function ContactsClient() {
             <EmptyState
               icon={Search}
               className="h-full"
-              title="Sin resultados"
+              title="Sem resultados"
               description={
                 <>
                   Nadie coincide con
@@ -163,8 +163,8 @@ export function ContactsClient() {
             <EmptyState
               icon={Users}
               className="h-full"
-              title="Sin contactos"
-              description="Cada persona que escriba a tu WhatsApp quedará registrada aquí automáticamente."
+              title="Sem contatos"
+              description="Cada pessoa que escrever para o seu WhatsApp será registrada aqui automaticamente."
             />
           )
         ) : (
@@ -192,10 +192,10 @@ export function ContactsClient() {
                     {c.aiPaused && (
                       <Badge
                         variant="warning"
-                        title="El agente no le responde a este contacto: lo atiendes tú"
+                        title="O agente não responde a este contato: você faz o atendimento"
                       >
                         <BotOff className="mr-1 h-3 w-3" strokeWidth={1.8} />
-                        Sin agente
+                        Sem agente
                       </Badge>
                     )}
                     {/* Solo la fuente que alguien capturó: presentar una
@@ -232,7 +232,7 @@ export function ContactsClient() {
                     <Send className="h-4 w-4" />
                   </Button>
                   <Link href={`/inbox?contact=${c.id}`}>
-                    <Button variant="ghost" size="icon" aria-label="Abrir conversación">
+                    <Button variant="ghost" size="icon" aria-label="Abrir conversa">
                       <MessageSquareText className="h-4 w-4" />
                     </Button>
                   </Link>
@@ -279,7 +279,7 @@ export function ContactsClient() {
                 Escribir a {escribiendo.name}
               </h3>
               <Button variant="ghost" size="sm" onClick={() => setEscribiendo(null)}>
-                Cerrar
+                Fechar
               </Button>
             </div>
             <StartConversation
@@ -342,11 +342,11 @@ function EditDialog({
         className="max-h-[85dvh] w-full max-w-md overflow-y-auto rounded-lg border bg-popover p-5 shadow-xl"
         onClick={(e) => e.stopPropagation()}
       >
-        <h3 className="mb-4 font-semibold">Editar contacto</h3>
+        <h3 className="mb-4 font-semibold">Editar contato</h3>
         <div className="space-y-3">
           <div className="space-y-1.5">
             <label className="text-sm font-medium" htmlFor="edit-name">
-              Nombre
+              Nome
             </label>
             <Input
               id="edit-name"
@@ -374,7 +374,7 @@ function EditDialog({
               className="mt-0.5 accent-primary"
             />
             <span>
-              El agente no le responde
+              O agente não responde
               <span className="block text-[11px] text-text-3">
                 Sus mensajes llegan a la Bandeja y los atiendes tú.
               </span>
@@ -397,7 +397,7 @@ function EditDialog({
               })
             }
           >
-            Guardar
+            Salvar
           </Button>
         </div>
       </div>

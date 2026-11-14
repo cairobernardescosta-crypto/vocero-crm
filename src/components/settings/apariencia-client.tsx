@@ -76,7 +76,7 @@ export function AparienciaClient({
 
   function usarLaDelNegocio() {
     guardarAparienciaPropia(null);
-    setAviso("Ahora ves la apariencia del equipo.");
+    setAviso("Agora você vê a aparência da equipe.");
     router.refresh();
     setTimeout(() => window.location.reload(), 50);
   }
@@ -97,7 +97,7 @@ export function AparienciaClient({
       setError(d?.error?.message ?? "Não foi possível salvar. Verifique a conexão.");
       return;
     }
-    setAviso("Aplicada a todo el equipo: la ve quien no eligió la suya.");
+    setAviso("Aplicada a toda a equipe: será usada por quem não escolheu uma aparência própria.");
     router.refresh();
   }
 
@@ -107,7 +107,7 @@ export function AparienciaClient({
         <CardHeader>
           <CardTitle>Tema</CardTitle>
           <CardDescription>
-            Cambia los colores, el fondo y la forma de toda la app. El acento de tu
+            Altere as cores, o fundo e a aparência de todo o aplicativo. A cor de destaque da sua
             marca se queda en todos.
           </CardDescription>
         </CardHeader>
@@ -115,7 +115,7 @@ export function AparienciaClient({
           <div role="radiogroup" aria-label="Tema" className="grid grid-cols-2 gap-3 sm:grid-cols-3">
             {[...TEMA_IDS, "propio" as const].map((id) => {
               const activo = a.tema === id;
-              const nombre = id === "propio" ? "Propio" : TEMAS[id].nombre;
+              const nombre = id === "propio" ? "Personalizado" : TEMAS[id].nombre;
               const t = tokensMiniatura(id === "propio" ? { tema: "propio", propio: colores } : { tema: id });
               return (
                 <button
@@ -137,7 +137,7 @@ export function AparienciaClient({
                     {activo && <Check className="h-4 w-4 shrink-0 text-brand-ink" strokeWidth={2.2} aria-hidden />}
                   </span>
                   <span className="block px-1 pb-0.5 text-[11.5px] leading-snug text-text-3">
-                    {id === "propio" ? "Tus tres colores." : TEMAS[id].descripcion}
+                    {id === "propio" ? "Suas três cores." : TEMAS[id].descripcion}
                   </span>
                 </button>
               );
@@ -186,12 +186,12 @@ export function AparienciaClient({
 
       <Card>
         <CardHeader>
-          <CardTitle>Letra, tamaño y densidad</CardTitle>
-          <CardDescription>Para ver mejor o para ver más a la vez.</CardDescription>
+          <CardTitle>Fonte, tamanho e densidade</CardTitle>
+          <CardDescription>Para enxergar melhor ou ver mais itens de uma vez.</CardDescription>
         </CardHeader>
         <CardContent className="space-y-5">
           <fieldset>
-            <legend className="mb-2 text-[13px] font-semibold">Letra</legend>
+            <legend className="mb-2 text-[13px] font-semibold">Fonte</legend>
             <div role="radiogroup" aria-label="Letra" className="grid grid-cols-2 gap-2 sm:grid-cols-4">
               {(Object.keys(LETRAS) as LetraId[]).map((id) => (
                 <button
@@ -208,13 +208,13 @@ export function AparienciaClient({
                   style={{ fontFamily: `var(${LETRAS[id].variable})` }}
                 >
                   <span className="block text-[15px] font-semibold">Aa · {LETRAS[id].nombre}</span>
-                  <span className="block truncate text-[12px] text-text-3">Hola, ¿tienen envíos?</span>
+                  <span className="block truncate text-[12px] text-text-3">Olá, vocês fazem entregas?</span>
                 </button>
               ))}
             </div>
           </fieldset>
           <Segmentos
-            titulo="Tamaño"
+            titulo="Tamanho"
             opciones={(Object.keys(TAMANOS) as TamanoId[]).map((id) => [id, TAMANOS[id].nombre])}
             valor={a.tamano}
             onCambio={(v) => cambiar((x) => ({ ...x, tamano: v as TamanoId }))}
@@ -231,10 +231,10 @@ export function AparienciaClient({
       <div className="space-y-3">
         <p className="text-[13px] text-text-3">
           {propia
-            ? "Tus cambios se guardan solos, solo para ti y en este equipo."
+            ? "Suas alterações são salvas automaticamente, apenas para você nesta equipe."
             : delNegocio
-              ? "Estás viendo la apariencia del equipo. Lo que cambies se guarda solo para ti."
-              : "Estás viendo la apariencia de siempre de Vocero. Lo que cambies se guarda solo para ti."}
+              ? "Você está vendo a aparência da equipe. Suas alterações serão salvas apenas para você."
+              : "Você está vendo a aparência padrão do Vocero. Suas alterações serão salvas apenas para você."}
         </p>
         <div className="flex flex-wrap gap-2">
           {/* Solo dueño y administradores: lo ven todos los que no eligieron la suya. */}

@@ -108,7 +108,7 @@ export async function probeProvider(input: {
           code: "unreachable",
           httpStatus: null,
           message:
-            "No se pudo conectar con el proveedor: revisa la base URL y la red del servidor",
+            "Não foi possível conectar ao provedor: verifique a URL base e a rede do servidor",
         };
   } finally {
     clearTimeout(timer);
@@ -281,7 +281,7 @@ export async function listModels(input: {
           code: "unreachable",
           httpStatus: null,
           message:
-            "No se pudo conectar con el proveedor: revisa la base URL y la red del servidor",
+            "Não foi possível conectar ao provedor: verifique a URL base e a rede do servidor",
         };
   } finally {
     clearTimeout(timer);

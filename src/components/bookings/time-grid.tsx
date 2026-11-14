@@ -286,10 +286,10 @@ function EventBlock({
           <Sparkles aria-label="Agendó la IA" className="h-3 w-3 shrink-0" strokeWidth={2} />
         )}
         {hasDeliveryIssue(b) && (
-          <AlertTriangle aria-label="Sin enlace de la reunión" className="h-3 w-3 shrink-0" strokeWidth={2} />
+          <AlertTriangle aria-label="Sem link da reunião" className="h-3 w-3 shrink-0" strokeWidth={2} />
         )}
         <span className="truncate">
-          {b.isTest && "Prueba · "}
+          {b.isTest && "Teste · "}
           {title}
         </span>
       </span>

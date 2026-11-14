@@ -44,7 +44,7 @@ export async function pensarPorElCerebro(input: {
       code: "sin_credencial",
       message:
         r.estado.motivo === "sin_configurar"
-          ? "No hay proveedor de IA configurado. Ponlo en Ajustes → IA."
+          ? "Não há provedor de IA configurado. Configure em Configurações → IA."
           : "La llave de IA está pausada (el proveedor la rechazó). Revísala en Ajustes → IA.",
     };
   }
@@ -86,7 +86,7 @@ export async function pensarPorElCerebro(input: {
       ok: false,
       status: 504,
       code: "proveedor_sin_respuesta",
-      message: err instanceof Error && err.name === "AbortError" ? "El proveedor no contestó a tiempo" : "No se pudo hablar con el proveedor",
+      message: err instanceof Error && err.name === "AbortError" ? "O provedor não respondeu a tempo" : "Não foi possível falar com o provedor",
     };
   } finally {
     clearTimeout(timer);

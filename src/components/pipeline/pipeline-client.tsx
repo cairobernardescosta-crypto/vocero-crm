@@ -373,7 +373,7 @@ function StageFooter({ leads, currency }: { leads: BoardLead[]; currency: string
     <div className="border-t px-3 py-2 text-[11px]">
       {conMonto === 0 ? (
         // Un "$0.00" aquí se lee como un error del sistema, no como un dato.
-        <p className="text-muted-foreground">Sin montos capturados</p>
+        <p className="text-muted-foreground">Sem valores registrados</p>
       ) : (
         <div className="flex items-baseline justify-between gap-2">
           <span className="text-muted-foreground">
@@ -388,7 +388,7 @@ function StageFooter({ leads, currency }: { leads: BoardLead[]; currency: string
         // Descartarlos en silencio haría que el total mintiera sin que nadie
         // pudiera notarlo.
         <p className="mt-0.5 text-warning-text">
-          {otraMoneda} en otra moneda, fuera del total
+          {otraMoneda} em outra moeda, fora do total
         </p>
       )}
     </div>
@@ -464,7 +464,7 @@ function LeadCard({
           <p className="text-[11px] text-muted-foreground">
             {lead.lastActivityAt
               ? `Actividad: ${formatTime(lead.lastActivityAt)}`
-              : "Sin actividad"}
+              : "Sem atividade"}
           </p>
         </div>
         {lead.conversationId && (
@@ -472,7 +472,7 @@ function LeadCard({
             href={lead.source === "baileys" ? "/baileys/inbox" : `/inbox?contact=${lead.contact.id}`}
             onPointerDown={(e) => e.stopPropagation()}
             onClick={(e) => e.stopPropagation()}
-            aria-label="Abrir conversación"
+            aria-label="Abrir conversa"
             className="rounded p-1 text-muted-foreground hover:bg-accent hover:text-foreground"
           >
             <MessageSquareText className="h-4 w-4" />
@@ -498,7 +498,7 @@ function LeadCard({
           )}
         >
           {lead.amountCents === null
-            ? "+ monto"
+            ? "+ valor"
             : formatMoneyCents(lead.amountCents, lead.currency ?? currency)}
         </button>
       )}

@@ -175,7 +175,7 @@ export async function downloadGraphMedia(
       headers: { Authorization: `Bearer ${token}` },
     });
   } catch {
-    throw new MediaFetchError("No se pudo descargar el adjunto");
+    throw new MediaFetchError("Não foi possível baixar o anexo");
   }
   if (!res.ok) {
     throw new MediaFetchError(
@@ -313,7 +313,7 @@ export async function uploadGraphMedia(
       body: form,
     });
   } catch (cause) {
-    throw new MetaApiError("No se pudo contactar la API de Meta", {
+    throw new MetaApiError("Não foi possível acessar a API da Meta", {
       status: 0,
       details: cause,
     });

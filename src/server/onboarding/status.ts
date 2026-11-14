@@ -190,10 +190,10 @@ function pasoPerfil(profile: Perfil | undefined, hayConocimiento: boolean): Read
     (Boolean(profile?.instructions?.trim()) || hayConocimiento);
   return {
     key: "profile",
-    label: "Configuración del agente",
+    label: "Configuração do agente",
     status: listo ? "ready" : "pending",
     nextAction: listo
-      ? "Nombre, instrucciones y conocimiento revisados"
+      ? "Nome, instruções e conhecimento revisados"
       : "Dale un nombre y escribe sus instrucciones o carga conocimiento del negocio",
     href: "/agent",
     problem: null,

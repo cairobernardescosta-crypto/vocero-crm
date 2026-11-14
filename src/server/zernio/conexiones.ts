@@ -251,7 +251,7 @@ export async function ensureWebhookForOrg(
     return {
       ok: false,
       code: "sin_conexiones",
-      message: "No hay ningún canal conectado por Zernio.",
+      message: "Não há nenhum canal conectado pela Zernio.",
     };
   }
 
@@ -321,7 +321,7 @@ export async function ensureWebhookForOrg(
       ? {
           ok: false,
           code: "zernio_unavailable",
-          message: "No se pudo contactar a Zernio para dar de alta el webhook. Reinténtalo desde Canales → Estado.",
+          message: "Não foi possível acessar a Zernio para cadastrar o webhook. Tente novamente em Canais → Status.",
         }
       : {
           ok: false,

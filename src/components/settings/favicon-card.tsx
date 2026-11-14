@@ -34,7 +34,7 @@ export function FaviconCard({ branding }: { branding: Branding }) {
     setError(null);
     if (file.size > MAX_FAVICON_BYTES) {
       setError(
-        `El icono no puede pasar de ${Math.round(MAX_FAVICON_BYTES / 1024)} KB.`
+        `O ícone não pode ultrapassar ${Math.round(MAX_FAVICON_BYTES / 1024)} KB.`
       );
       return;
     }
@@ -101,8 +101,8 @@ export function FaviconCard({ branding }: { branding: Branding }) {
             </p>
             <p className="mt-0.5 text-xs text-text-3">
               {actual
-                ? "Reemplaza al generado en la pestaña y en la barra lateral. Puedes quitarlo para volver a él."
-                : "La inicial sobre tu color de acento. Sube tu logo para reemplazarla."}
+                ? "Substitui o ícone gerado na aba e na barra lateral. Você pode removê-lo para voltar ao anterior."
+                : "A inicial sobre sua cor de destaque. Envie seu logotipo para substituí-la."}
             </p>
           </div>
         </div>
@@ -132,7 +132,7 @@ export function FaviconCard({ branding }: { branding: Branding }) {
           </Button>
           {actual && (
             <Button variant="ghost" disabled={subiendo} onClick={() => void quitar()}>
-              <Trash2 className="h-4 w-4" /> Quitar
+              <Trash2 className="h-4 w-4" /> Remover
             </Button>
           )}
         </div>

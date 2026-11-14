@@ -45,7 +45,7 @@ export function TemplateSender({
   }, []);
 
   if (templates === null) {
-    return <p className="text-xs text-muted-foreground">Cargando plantillas…</p>;
+    return <p className="text-xs text-muted-foreground">Carregando modelos…</p>;
   }
 
   if (templates.length === 0) {
@@ -53,7 +53,7 @@ export function TemplateSender({
       <p className="text-sm text-muted-foreground">
         Aún no hay plantillas aprobadas. Créalas en{" "}
         <a href="/settings/templates" className="text-primary hover:underline">
-          Configuración → Plantillas
+          Configurações → Modelos
         </a>{" "}
         y espera la aprobación de Meta.
       </p>
@@ -87,7 +87,7 @@ export function TemplateSender({
       const data = (await res.json().catch(() => null)) as {
         error?: { message?: string };
       } | null;
-      setError(data?.error?.message ?? "No se pudo enviar la plantilla");
+      setError(data?.error?.message ?? "Não foi possível enviar o modelo");
       return;
     }
     setSelectedId("");
@@ -108,7 +108,7 @@ export function TemplateSender({
           }}
           className="flex h-9 w-full rounded-md border border-input bg-card px-3 py-1 text-sm focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring"
         >
-          <option value="">Elige una plantilla…</option>
+          <option value="">Escolha um modelo…</option>
           {templates.map((t) => (
             <option key={t.id} value={t.id}>
               {t.name} ({templateLanguageName(t.language)})
@@ -138,7 +138,7 @@ export function TemplateSender({
               })
             }
             placeholder={
-              i === 0 ? "p. ej. el nombre del cliente" : "p. ej. 12 de agosto"
+              i === 0 ? "ex.: nome do cliente" : "ex.: 12 de agosto"
             }
           />
         </div>

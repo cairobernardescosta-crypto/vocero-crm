@@ -181,9 +181,9 @@ export function LabClient() {
         >
           <Cable aria-hidden className="mt-0.5 h-5 w-5 shrink-0 text-text-3" strokeWidth={1.7} />
           <div className="min-w-0 text-sm">
-            <p className="font-semibold">Sin agente conectado</p>
+            <p className="font-semibold">Nenhum agente conectado</p>
             <p className="mt-0.5 leading-relaxed text-text-2">
-              El Laboratorio prueba al agente que contesta a tus clientes:
+              O Laboratório testa o agente que responde aos seus clientes:
               clientes simulados conversan con él y un juez califica cada
               conversación. Vocero no trae agente propio, y esta instancia aún
               no tiene uno conectado.{" "}
@@ -234,9 +234,9 @@ export function LabClient() {
             description={
               runs.length === 0
                 ? brainConnected
-                  ? "Corre tu primera evaluación: 6 clientes simulados conversarán con tu agente y un juez calificará cada conversación."
-                  : "Cuando conectes tu agente, aquí aparecerán sus evaluaciones."
-                : "Abre una corrida del historial para ver su reporte."
+                  ? "Execute sua primeira avaliação: 6 clientes simulados conversarão com seu agente e um avaliador analisará cada conversa."
+                  : "Quando você conectar seu agente, as avaliações aparecerão aqui."
+                : "Abra uma execução do histórico para ver o relatório."
             }
           />
         )}
@@ -260,7 +260,7 @@ function Header({
     <header className="flex flex-wrap items-center justify-between gap-2 border-b px-4 py-3 sm:px-6 sm:py-4">
       <div>
         <h2 className="flex items-center gap-2 text-[17px] font-bold tracking-tight">
-          <FlaskConical className="h-4 w-4 text-primary" /> Laboratorio
+          <FlaskConical className="h-4 w-4 text-primary" /> Laboratório
         </h2>
         <p className="text-xs text-muted-foreground">
           Sandbox interno — no envía mensajes reales
@@ -289,7 +289,7 @@ function HistoryList({
         Historial
       </p>
       {runs.length === 0 && (
-        <p className="text-xs text-muted-foreground">Sin corridas todavía.</p>
+        <p className="text-xs text-muted-foreground">Ainda não há execuções.</p>
       )}
       {runs.map((run) => (
         <button
@@ -332,7 +332,7 @@ function HistoryList({
 }
 
 function ScoreBadge({ run }: { run: Run }) {
-  if (run.status === "running") return <Badge variant="secondary">En curso…</Badge>;
+  if (run.status === "running") return <Badge variant="secondary">Em execução…</Badge>;
   if (run.status === "failed") return <Badge variant="destructive">Fallida</Badge>;
   const score = run.score ?? 0;
   const variant = score >= 80 ? "success" : score >= 50 ? "warning" : "destructive";
@@ -357,13 +357,13 @@ function Report({
           </div>
           {run.status === "failed" && (
             <p className="text-sm text-destructive">
-              La corrida falló: {run.error ?? "error desconocido"}. Vuelve a
+              A execução falhou: {run.error ?? "erro desconhecido"}. Tente
               intentarlo.
             </p>
           )}
           {run.status === "done" && run.error && (
             <p className="text-sm text-warning-text">
-              Sin respuesta del agente: {run.error}
+              Sem resposta do agente: {run.error}
             </p>
           )}
         </CardHeader>

@@ -34,11 +34,11 @@ export const GET = withAuth(async (session, _req: Request, ctx: Params) => {
     )
     .limit(1);
   let asset = rows[0];
-  if (!asset) return apiError(404, "not_found", "Adjunto no encontrado");
+  if (!asset) return apiError(404, "not_found", "Anexo não encontrado");
 
   if (asset.kind === "location" || asset.kind === "contacts") {
     // Sin binario: el payload viaja en el DTO del mensaje.
-    return apiError(404, "no_binary", "Este adjunto no tiene archivo");
+    return apiError(404, "no_binary", "Este anexo não possui arquivo");
   }
 
   if (asset.fetchStatus !== "available") {
@@ -49,7 +49,7 @@ export const GET = withAuth(async (session, _req: Request, ctx: Params) => {
     return apiError(
       410,
       "gone",
-      "El contenido ya no está disponible (expiró en WhatsApp antes de poder copiarse)"
+      "O conteúdo não está mais disponível (expirou no WhatsApp antes de ser copiado)"
     );
   }
 
@@ -59,7 +59,7 @@ export const GET = withAuth(async (session, _req: Request, ctx: Params) => {
     return apiError(
       410,
       "gone",
-      "El archivo del adjunto ya no está en el volumen ni en WhatsApp"
+      "O arquivo do anexo não está mais disponível no armazenamento nem no WhatsApp"
     );
   }
   // #78: nosniff + CSP sandbox siempre; inline solo para lo previsualizable.

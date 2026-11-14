@@ -86,7 +86,7 @@ async function getAccessToken(creds: GoogleCreds): Promise<string> {
       }).toString(),
     });
   } catch (err) {
-    throw new ConnectorError("google", `No se pudo contactar a Google: ${err}`);
+    throw new ConnectorError("google", `Não foi possível acessar o Google: ${err}`);
   }
 
   if (!res.ok) {
@@ -128,7 +128,7 @@ async function googleFetch(
       },
     });
   } catch (err) {
-    throw new ConnectorError("google", `No se pudo contactar a Google: ${err}`);
+    throw new ConnectorError("google", `Não foi possível acessar o Google: ${err}`);
   }
 
   if (res.status === 404 && init.allow404) return null;
@@ -272,7 +272,7 @@ export const googleConnector: AgendaConnector<GoogleCreds> = {
       return {
         ok: false,
         error:
-          err instanceof Error ? err.message : "No se pudo conectar con Google",
+          err instanceof Error ? err.message : "Não foi possível conectar ao Google",
       };
     }
   },

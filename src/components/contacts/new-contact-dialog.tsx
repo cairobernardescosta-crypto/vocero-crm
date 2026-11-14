@@ -8,8 +8,8 @@ import { Textarea } from "@/components/ui/textarea";
 
 const SOURCES: { value: SourceValue; label: string }[] = [
   { value: "referido", label: "Referido" },
-  { value: "organico", label: "Contenido orgánico" },
-  { value: "conocido", label: "Conocido" },
+  { value: "organico", label: "Conteúdo orgânico" },
+  { value: "conocido", label: "Conhecido" },
   { value: "anuncio", label: "Anuncio" },
   { value: "otro", label: "Otro" },
 ];
@@ -70,7 +70,7 @@ export function NewContactDialog({
     setSaving(false);
 
     if (!res) {
-      setError("No se pudo guardar. Revisa tu conexión.");
+      setError("Não foi possível salvar. Verifique sua conexão.");
       return;
     }
     const data = (await res.json().catch(() => null)) as {
@@ -83,7 +83,7 @@ export function NewContactDialog({
       return;
     }
     if (!res.ok) {
-      setError(data?.error?.message ?? "No se pudo guardar el contacto");
+      setError(data?.error?.message ?? "Não foi possível salvar o contato");
       return;
     }
     onCreated();
@@ -100,20 +100,20 @@ export function NewContactDialog({
     >
       <div
         role="dialog"
-        aria-label="Nuevo contacto"
+        aria-label="Novo contato"
         className="w-full max-w-md rounded-lg border bg-popover p-5 shadow-xl"
         onClick={(e) => e.stopPropagation()}
       >
-        <h3 className="mb-1 font-semibold">Nuevo contacto</h3>
+        <h3 className="mb-1 font-semibold">Novo contato</h3>
         <p className="mb-4 text-xs text-text-3">
-          Para prospectos que no llegaron por WhatsApp: referidos, gente que te
-          escribió por otra red, conocidos.
+          Para prospectos que não chegaram pelo WhatsApp: indicações, pessoas de
+          outras redes e conhecidos.
         </p>
 
         <div className="space-y-3">
           <div className="space-y-1.5">
             <label className="text-sm font-medium" htmlFor="nc-name">
-              Nombre
+              Nome
             </label>
             <Input
               id="nc-name"
@@ -125,7 +125,7 @@ export function NewContactDialog({
 
           <div className="space-y-1.5">
             <label className="text-sm font-medium" htmlFor="nc-phone">
-              Teléfono con código de país
+              Telefone com código do país
             </label>
             <Input
               id="nc-phone"
@@ -134,9 +134,9 @@ export function NewContactDialog({
               placeholder="52 555 000 1234"
             />
             <p className="text-[11px] text-text-3">
-              Escríbelo con espacios si quieres, pero{" "}
-              <strong>incluye el código de país</strong> (52 para México). Sin
-              él, WhatsApp no lo reconoce como la misma persona que te escriba
+              Digite com espaços se quiser, mas{" "}
+              <strong>inclua o código do país</strong> (55 para Brasil). Sem
+              ele, o WhatsApp não reconhece a mesma pessoa quando ela escrever
               después.
             </p>
           </div>
@@ -196,7 +196,7 @@ export function NewContactDialog({
           <div className="mt-3 rounded-md border border-warning-soft bg-warning-tint px-3 py-2.5">
             <p className="text-[13px] text-warning-text">
               Ese teléfono ya es de <strong>{duplicado.name}</strong>. No se creó
-              un duplicado.
+              um contato duplicado.
             </p>
             <Button
               size="sm"
@@ -211,7 +211,7 @@ export function NewContactDialog({
         {error && <p className="mt-3 text-xs text-danger-text">{error}</p>}
         {stages.length === 0 && (
           <p className="mt-3 text-xs text-warning-text">
-            Tu embudo no tiene etapas abiertas. Crea una en el Pipeline antes de
+            Seu funil não tem etapas abertas. Crie uma no Pipeline antes de
             capturar contactos.
           </p>
         )}
@@ -224,7 +224,7 @@ export function NewContactDialog({
             disabled={!listo || saving || stages.length === 0}
             onClick={() => void guardar()}
           >
-            {saving ? "Guardando…" : "Crear contacto"}
+            {saving ? "Salvando…" : "Criar contato"}
           </Button>
         </div>
       </div>

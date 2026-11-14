@@ -100,7 +100,7 @@ export function ResultsClient({
         <div className="min-w-0">
           <h2 className="text-[17px] font-bold tracking-tight">Resultados</h2>
           <p className="text-xs text-text-3">
-            Ventas, el trabajo del agente, de dónde llegan y qué se está cayendo.
+            Vendas, trabalho do agente, origem dos contatos e oportunidades perdidas.
           </p>
         </div>
         <RangePicker value={range} onChange={setRange} today={today} timezone={timezone} />

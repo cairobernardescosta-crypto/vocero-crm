@@ -75,16 +75,16 @@ export function TeamClient() {
     <div className="max-w-2xl space-y-6">
       <Card>
         <CardHeader>
-          <CardTitle>Crear cuenta de equipo</CardTitle>
+          <CardTitle>Criar conta da equipe</CardTitle>
           <CardDescription>
-            Sin correos ni invitaciones: comparte tú mismo la contraseña
+            Sem e-mails ou convites: compartilhe você mesmo a senha
             temporal con tu compañero (se muestra UNA sola vez).
           </CardDescription>
         </CardHeader>
         <CardContent className="space-y-4">
           <div className="grid gap-4 md:grid-cols-2">
             <div className="space-y-1.5">
-              <Label htmlFor="team-name">Nombre</Label>
+              <Label htmlFor="team-name">Nome</Label>
               <Input
                 id="team-name"
                 value={name}
@@ -92,7 +92,7 @@ export function TeamClient() {
               />
             </div>
             <div className="space-y-1.5">
-              <Label htmlFor="team-email">Correo</Label>
+              <Label htmlFor="team-email">E-mail</Label>
               <Input
                 id="team-email"
                 type="email"
@@ -102,7 +102,7 @@ export function TeamClient() {
             </div>
           </div>
           <div className="space-y-1.5">
-            <Label htmlFor="team-password">Contraseña temporal</Label>
+            <Label htmlFor="team-password">Senha temporária</Label>
             <div className="flex gap-2">
               <Input
                 id="team-password"
@@ -118,7 +118,7 @@ export function TeamClient() {
           {error && <p className="text-sm text-destructive">{error}</p>}
           {created && (
             <div className="rounded-md border border-success-soft bg-success-tint p-3 text-sm">
-              <p className="font-medium text-success-text">Cuenta creada ✓</p>
+              <p className="font-medium text-success-text">Conta criada ✓</p>
               <p className="mt-1 text-success-text opacity-90">
                 Comparte estos datos ahora (no se volverán a mostrar):
                 <br />

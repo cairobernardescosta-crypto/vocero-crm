@@ -107,7 +107,7 @@ export function LeadDrawer({
     <>
       {/* Velo: cerrar tocando fuera es lo que uno intenta primero. */}
       <button
-        aria-label="Cerrar el trato"
+        aria-label="Fechar negócio"
         tabIndex={-1}
         onClick={onClose}
         className="fixed inset-0 z-40 bg-overlay"
@@ -125,7 +125,7 @@ export function LeadDrawer({
           </h3>
           <button
             onClick={onClose}
-            aria-label="Cerrar el panel del trato"
+            aria-label="Fechar painel do negócio"
             className="rounded p-1 text-text-3 hover:bg-accent hover:text-foreground"
           >
             <X className="h-4 w-4" strokeWidth={1.7} />
@@ -158,7 +158,7 @@ export function LeadDrawer({
               </Link>
             ) : (
               <p className="mt-3 text-xs text-text-3">
-                Todavía no hay conversación con este contacto.
+                Ainda não há conversa com este contato.
               </p>
             )}
 
@@ -172,7 +172,7 @@ export function LeadDrawer({
           {/* Cuánto */}
           <section className="border-b p-4">
             <p className="mb-2 kicker">
-              Monto ({moneda})
+              Valor ({moneda})
             </p>
             {editandoMonto ? (
               <>
@@ -188,14 +188,14 @@ export function LeadDrawer({
                     if (e.key === "Escape") setEditandoMonto(false);
                   }}
                   placeholder="12,500"
-                  aria-label="Monto del trato"
+                  aria-label="Valor do negócio"
                   className="h-8 text-sm"
                 />
                 <p className="mt-1 text-xs text-text-3">
                   {montoInvalido
-                    ? "No se entiende ese importe."
+                    ? "Esse valor não foi reconhecido."
                     : montoParseado === null
-                      ? "Déjalo vacío para quitar el monto."
+                      ? "Deixe vazio para remover o valor."
                       : `Se guardará como ${formatMoneyCents(montoParseado, moneda)}`}
                 </p>
                 <div className="mt-2 flex gap-1.5">
@@ -207,7 +207,7 @@ export function LeadDrawer({
                       onAmount(montoParseado);
                     }}
                   >
-                    Guardar
+                    Salvar
                   </Button>
                   <Button
                     size="sm"
@@ -221,7 +221,7 @@ export function LeadDrawer({
             ) : (
               <button
                 onClick={() => setEditandoMonto(true)}
-                aria-label="Editar el monto"
+                aria-label="Editar o valor"
                 className={cn(
                   "w-full rounded px-1 py-1 text-left text-sm tabular-nums hover:bg-accent",
                   lead.amountCents === null
@@ -230,7 +230,7 @@ export function LeadDrawer({
                 )}
               >
                 {lead.amountCents === null
-                  ? "Sin monto — captúralo"
+                  ? "Sem valor — adicione agora"
                   : formatMoneyCents(lead.amountCents, moneda)}
               </button>
             )}

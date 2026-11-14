@@ -164,7 +164,7 @@ export function OnboardingClient({
                   : "Tu agente ya está contestando"}
               </h2>
               <p className="mt-1 text-sm text-muted-foreground">
-                El agente está encendido y atiende a tus clientes. Puedes
+                O agente está ativo e atende seus clientes. Você pode
                 apagarlo cuando quieras desde Agente.
               </p>
               <Link href="/inbox" className={cn(buttonVariants({ size: "sm" }), "mt-3")}>
@@ -195,7 +195,7 @@ export function OnboardingClient({
                 Listo: Vocero funciona como bandeja manual
               </h2>
               <p className="mt-1 text-sm text-muted-foreground">
-                Los mensajes llegan a la Bandeja y contestas tú. Para que un
+                As mensagens chegam à Caixa de entrada e você responde. Para que um
                 agente conteste, conéctalo: después lo enciendes aquí.
               </p>
               <div className="mt-3 flex flex-wrap gap-2">

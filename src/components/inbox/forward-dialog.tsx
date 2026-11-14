@@ -78,12 +78,12 @@ export function ForwardDialog({
         const data = (await res.json().catch(() => null)) as {
           error?: { message?: string };
         } | null;
-        setError(data?.error?.message ?? "No se pudo reenviar. Intenta de nuevo.");
+        setError(data?.error?.message ?? "Não foi possível encaminhar. Tente novamente.");
         return;
       }
       onSent(selected.contact.name);
     } catch {
-      setError("No se pudo conectar con el servidor. Intenta reenviar de nuevo.");
+      setError("Não foi possível conectar ao servidor. Tente encaminhar novamente.");
     } finally {
       busy.current = false;
       setSending(false);
@@ -111,7 +111,7 @@ export function ForwardDialog({
           // eslint-disable-next-line @next/next/no-img-element
           <img
             src={`/api/media/${message.media.assetId}`}
-            alt="Imagen para reenviar"
+            alt="Imagem para encaminhar"
             className="mx-auto mb-3 max-h-40 max-w-full rounded-md object-contain"
           />
         ) : message.media ? (
@@ -141,17 +141,17 @@ export function ForwardDialog({
           </label>
         )}
         <label className="mb-2 block text-xs text-text-2">
-          Buscar destinatario
+          Buscar destinatário
           <Input
             value={query}
             onChange={(e) => setQuery(e.target.value)}
             disabled={sending}
-            placeholder="Nombre o teléfono"
+            placeholder="Nome ou telefone"
             className="mt-1"
           />
         </label>
         <fieldset disabled={sending} className="mb-3 max-h-56 min-h-0 space-y-1 overflow-y-auto">
-          <legend className="sr-only">Conversación de destino</legend>
+          <legend className="sr-only">Conversa de destino</legend>
           {targets.map((c) => (
             <label
               key={c.id}
@@ -183,7 +183,7 @@ export function ForwardDialog({
             </label>
           ))}
           {targets.length === 0 && (
-            <p className="p-2.5 text-sm text-text-3">No hay conversaciones que coincidan.</p>
+            <p className="p-2.5 text-sm text-text-3">Não há conversas correspondentes.</p>
           )}
         </fieldset>
         {error && (
@@ -207,7 +207,7 @@ export function ForwardDialog({
               ? "Reenviando…"
               : selected
                 ? `Reenviar a ${selected.contact.name}`
-                : "Elige a quién"}
+                : "Escolha o destinatário"}
           </Button>
         </div>
       </div>

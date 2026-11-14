@@ -32,7 +32,7 @@ export async function resolveZernioAccount(
         response: apiError(
           503,
           "platform_unavailable",
-          "No se pudo contactar a Zernio; intenta de nuevo"
+          "Não foi possível acessar a Zernio; tente novamente"
         ),
       };
     }

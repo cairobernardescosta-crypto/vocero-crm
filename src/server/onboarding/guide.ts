@@ -69,7 +69,7 @@ export function guideFrom(status: OnboardingStatus): Guide {
         "Ponle nombre y cuéntale a qué se dedica tu negocio. Si quieres ver un ejemplo primero, carga la demo desde la Bandeja y cámbiala por tus datos.",
       done: ready(profile),
       href: "/agent",
-      cta: "Ir a Agente",
+      cta: "Ir para Agente",
       hint: ready(profile) ? null : (profile?.nextAction ?? null),
     },
     {
@@ -89,7 +89,7 @@ export function guideFrom(status: OnboardingStatus): Guide {
         "Conecta el número donde te escriben tus clientes. El CRM registra el webhook en Meta por ti al guardar.",
       done: ready(whatsapp),
       href: "/settings/whatsapp",
-      cta: "Conectar WhatsApp",
+      cta: "Conectar o WhatsApp",
       hint: whatsapp?.problem ?? null,
     },
     {

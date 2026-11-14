@@ -109,7 +109,7 @@ export function FichaPanel({
                     />
                     <button
                       onClick={() => void confirmarEdicion(clave)}
-                      aria-label="Guardar"
+                      aria-label="Salvar"
                       className="rounded p-1 text-text-3 hover:bg-accent hover:text-foreground"
                     >
                       <Check className="h-3.5 w-3.5" />
@@ -167,7 +167,7 @@ export function FichaPanel({
             onChange={(e) => setClaveNueva(e.target.value)}
             placeholder="Qué dato (ej. presupuesto)"
             className="h-7 py-0 text-xs"
-            aria-label="Nombre del dato"
+            aria-label="Nome do dado"
           />
           <Input
             value={valorNuevo}

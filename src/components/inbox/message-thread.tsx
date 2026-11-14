@@ -107,7 +107,7 @@ function MediaBlock({ media }: { media: MessageMediaDto }) {
             const name =
               typeof c.name === "string"
                 ? c.name
-                : c.name?.formatted_name ?? c.name?.first_name ?? "Contacto";
+                : c.name?.formatted_name ?? c.name?.first_name ?? "Contato";
             const phone = c.phones?.[0]?.phone ?? c.phone ?? null;
             return (
               <span key={i} className="flex items-center gap-1.5">
@@ -122,7 +122,7 @@ function MediaBlock({ media }: { media: MessageMediaDto }) {
             );
           })
         ) : (
-          <span className="text-text-3">Contacto compartido</span>
+          <span className="text-text-3">Contato compartilhado</span>
         )}
       </span>
     );
@@ -199,8 +199,8 @@ function dayLabel(iso: string): string {
   const d = new Date(iso);
   const today = new Date();
   const yesterday = new Date(today.getTime() - 86400000);
-  if (d.toDateString() === today.toDateString()) return "Hoy";
-  if (d.toDateString() === yesterday.toDateString()) return "Ayer";
+  if (d.toDateString() === today.toDateString()) return "Hoje";
+  if (d.toDateString() === yesterday.toDateString()) return "Ontem";
   return d.toLocaleDateString("pt-BR", { day: "numeric", month: "long" });
 }
 
@@ -219,7 +219,7 @@ function NotaInterna({ nota, onBorrar }: { nota: NotaDto; onBorrar?: (n: NotaDto
         <Lock className="h-3 w-3" strokeWidth={2} aria-hidden />
         <span>Nota interna</span>
         <span className="font-normal opacity-80">
-          · {nota.autor?.nombre ?? "Alguien del equipo"} · {bubbleTime(nota.createdAt)}
+          · {nota.autor?.nombre ?? "Alguém da equipe"} · {bubbleTime(nota.createdAt)}
         </span>
         {nota.puedeBorrar && onBorrar && (
           <button
@@ -487,7 +487,7 @@ export function MessageThread({
                 }
               : undefined
           }
-          onCopied={(ok) => setNotice(ok ? "Texto copiado" : "No se pudo copiar el texto")}
+          onCopied={(ok) => setNotice(ok ? "Texto copiado" : "Não foi possível copiar o texto")}
         />
       )}
       {(() => {
@@ -616,7 +616,7 @@ export function MessageThread({
                       strokeWidth={1.8}
                     />
                     <span>
-                      <span className="font-semibold">No se entregó.</span>{" "}
+                      <span className="font-semibold">Não foi entregue.</span>{" "}
                       {m.error ?? "Meta no informó el motivo."}
                     </span>
                   </p>
@@ -739,7 +739,7 @@ function MenuMensaje({
     <div className="fixed inset-0 z-50 bg-overlay" onClick={onClose}>
       <div
         role="menu"
-        aria-label="Acciones del mensaje"
+        aria-label="Ações da mensagem"
         className="fixed inset-x-0 bottom-0 rounded-t-2xl border-t bg-card p-2 pb-[max(env(safe-area-inset-bottom),0.5rem)] text-card-foreground shadow-xl"
         onClick={(e) => e.stopPropagation()}
       >

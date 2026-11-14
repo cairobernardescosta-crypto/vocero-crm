@@ -40,11 +40,11 @@ type Settings = {
 };
 
 const DAYS: { key: DayKey; label: string }[] = [
-  { key: "mon", label: "Lunes" },
-  { key: "tue", label: "Martes" },
-  { key: "wed", label: "Miércoles" },
-  { key: "thu", label: "Jueves" },
-  { key: "fri", label: "Viernes" },
+  { key: "mon", label: "Segunda-feira" },
+  { key: "tue", label: "Terça-feira" },
+  { key: "wed", label: "Quarta-feira" },
+  { key: "thu", label: "Quinta-feira" },
+  { key: "fri", label: "Sexta-feira" },
   { key: "sat", label: "Sábado" },
   { key: "sun", label: "Domingo" },
 ];
@@ -160,15 +160,15 @@ export function AgendaClient() {
     void refreshPreview();
   }
 
-  if (!settings) return <p className="text-sm text-text-3">Cargando…</p>;
+  if (!settings) return <p className="text-sm text-text-3">Carregando…</p>;
 
   return (
     <div className="max-w-2xl space-y-4">
       <Card>
         <CardHeader>
-          <CardTitle>Horario de atención</CardTitle>
+          <CardTitle>Horário de atendimento</CardTitle>
           <CardDescription>
-            En qué franjas puede agendarte un cliente. Las horas son las de tu
+            Períodos em que um cliente pode agendar. Os horários seguem o seu
             zona; un día sin franjas está cerrado.
           </CardDescription>
         </CardHeader>
@@ -191,7 +191,7 @@ export function AgendaClient() {
                   {day.label}
                 </button>
                 <div className="flex-1 space-y-1.5">
-                  {!open && <span className="text-sm text-text-3">Cerrado</span>}
+                  {!open && <span className="text-sm text-text-3">Fechado</span>}
                   {intervals.map((iv, i) => (
                     <div key={i} className="flex items-center gap-2">
                       <Input
@@ -215,7 +215,7 @@ export function AgendaClient() {
                         type="button"
                         onClick={() => removeInterval(day.key, i)}
                         className="text-sm text-text-3 hover:text-foreground"
-                        aria-label="Quitar franja"
+                        aria-label="Remover período"
                       >
                         ×
                       </button>
@@ -239,11 +239,11 @@ export function AgendaClient() {
 
       <Card>
         <CardHeader>
-          <CardTitle>Cómo se generan los huecos</CardTitle>
+          <CardTitle>Como os horários são gerados</CardTitle>
         </CardHeader>
         <CardContent className="grid grid-cols-2 gap-4">
           <div className="space-y-1.5">
-            <Label htmlFor="slot">Duración de la cita (min)</Label>
+            <Label htmlFor="slot">Duração do agendamento (min)</Label>
             <Input
               id="slot"
               type="number"
@@ -254,7 +254,7 @@ export function AgendaClient() {
             />
           </div>
           <div className="space-y-1.5">
-            <Label htmlFor="buffer">Respiro entre citas (min)</Label>
+            <Label htmlFor="buffer">Intervalo entre agendamentos (min)</Label>
             <Input
               id="buffer"
               type="number"
@@ -265,7 +265,7 @@ export function AgendaClient() {
             />
           </div>
           <div className="space-y-1.5">
-            <Label htmlFor="notice">Aviso mínimo (horas)</Label>
+            <Label htmlFor="notice">Antecedência mínima (horas)</Label>
             <Input
               id="notice"
               type="number"
@@ -276,7 +276,7 @@ export function AgendaClient() {
             />
           </div>
           <div className="space-y-1.5">
-            <Label htmlFor="ahead">Agenda abierta (días)</Label>
+            <Label htmlFor="ahead">Agenda aberta (dias)</Label>
             <Input
               id="ahead"
               type="number"
@@ -287,7 +287,7 @@ export function AgendaClient() {
             />
           </div>
           <div className="col-span-2 space-y-1.5">
-            <Label htmlFor="tz">Zona horaria</Label>
+            <Label htmlFor="tz">Fuso horário</Label>
             <Input
               id="tz"
               value={settings.timezone}
@@ -300,9 +300,9 @@ export function AgendaClient() {
 
       <Card>
         <CardHeader>
-          <CardTitle>Cómo se entrega la reunión</CardTitle>
+          <CardTitle>Como a reunião será realizada</CardTitle>
           <CardDescription>
-            El enlace fijo no depende de nadie. Los demás conectan con tu propia
+            O link fixo não depende de terceiros. As outras opções se conectam à sua própria
             cuenta del proveedor y, si alguna vez falla, la cita se agenda igual
             y el enlace queda pendiente de reintentar.
           </CardDescription>
@@ -348,7 +348,7 @@ export function AgendaClient() {
       {settings.connector === "enlace-fijo" && (
         <Card>
           <CardHeader>
-            <CardTitle>Tu sala de siempre</CardTitle>
+            <CardTitle>Sua sala de sempre</CardTitle>
             <CardDescription>
               Se comparte tal cual al confirmar una cita. Si lo dejas vacío, las
               citas se agendan igual y sin enlace — nadie promete un enlace que
@@ -369,7 +369,7 @@ export function AgendaClient() {
         <Button onClick={save} disabled={saving}>
           {saving ? "Salvando…" : "Salvar"}
         </Button>
-        {saved && <span className="text-sm text-brand-text">Guardado</span>}
+        {saved && <span className="text-sm text-brand-text">Salvo</span>}
         {error && <span className="text-sm text-destructive">{error}</span>}
       </div>
 
@@ -381,7 +381,7 @@ export function AgendaClient() {
 
       <Card>
         <CardHeader>
-          <CardTitle>Próximos huecos</CardTitle>
+          <CardTitle>Próximos horários</CardTitle>
           <CardDescription>
             Lo que se le ofrecería a un cliente ahora mismo.
           </CardDescription>
@@ -390,8 +390,8 @@ export function AgendaClient() {
           {slots === null && <p className="text-sm text-text-3">Calculando…</p>}
           {slots?.length === 0 && (
             <p className="text-sm text-text-3">
-              Sin huecos: revisa el horario, el aviso mínimo o si ya está todo
-              ocupado.
+              Sem horários disponíveis: revise o expediente, a antecedência mínima ou verifique se todos já estão
+              ocupados.
             </p>
           )}
           {slots && slots.length > 0 && (

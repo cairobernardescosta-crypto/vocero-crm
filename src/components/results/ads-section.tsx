@@ -34,12 +34,12 @@ export function AdsSection({
     <Section
       id="origen"
       title="Origen y anuncios"
-      hint="Por dónde llegan las conversaciones y qué anuncio trae gente que compra."
+      hint="De onde vêm as conversas e quais anúncios trazem compradores."
       loading={loading}
       error={error}
       hasData={!!data}
       empty={!!data?.empty}
-      emptyText="No empezó ninguna conversación en este periodo."
+      emptyText="Nenhuma conversa começou neste período."
     >
       {data && (
         <div className="space-y-6">
@@ -52,12 +52,12 @@ export function AdsSection({
             <RateCard
               label="Llegaron por un anuncio"
               rate={data.adShare}
-              unit="conversaciones"
+              unit="conversas"
             />
           </div>
 
           <div>
-            <Subhead>Por origen</Subhead>
+            <Subhead>Por origem</Subhead>
             <Filas
               primera="Origen"
               filas={data.sources.map((s) => ({
@@ -69,10 +69,10 @@ export function AdsSection({
           </div>
 
           <div>
-            <Subhead>Por anuncio</Subhead>
+            <Subhead>Por anúncio</Subhead>
             {data.ads.length === 0 ? (
               <p className="text-sm text-text-3">
-                Ninguna conversación de este periodo llegó por un anuncio de Click a WhatsApp.
+                Nenhuma conversa deste período veio de um anúncio Click to WhatsApp.
               </p>
             ) : (
               <Filas
@@ -93,7 +93,7 @@ export function AdsSection({
               ventas entre prospectos, atenuado con menos de 10 (muestra chica).
             </p>
             <p>
-              El origen es el que capturaste en el contacto; si no hay, se deduce «Anuncio»
+              A origem é a registrada no contato; quando não houver, será considerada «Anúncio»
               cuando Meta dijo de qué anuncio llegó. Aquí solo se cuenta: el costo por
               prospecto y el retorno necesitarían el gasto de cada anuncio.
             </p>
@@ -115,7 +115,7 @@ function Filas({ primera, filas }: { primera: string; filas: Fila[] }) {
           <li key={f.key} className="py-2.5" data-anuncio={f.sourceId ?? undefined}>
             {f.titulo}
             <dl className="mt-2 grid grid-cols-4 gap-2 text-center">
-              <Dato etiqueta="conversaciones" valor={f.conteos.conversations} />
+              <Dato etiqueta="conversas" valor={f.conteos.conversations} />
               <Dato etiqueta="prospectos" valor={f.conteos.leads} />
               <Dato etiqueta="ventas" valor={f.conteos.won} />
               <div className="min-w-0">
@@ -139,7 +139,7 @@ function Filas({ primera, filas }: { primera: string; filas: Fila[] }) {
               <th scope="col" className="py-1.5 pr-2 text-left font-medium">
                 {primera}
               </th>
-              <Num>Conversaciones</Num>
+              <Num>Conversas</Num>
               <Num>Prospectos</Num>
               <Num>Ventas</Num>
               <Num>Cierre</Num>

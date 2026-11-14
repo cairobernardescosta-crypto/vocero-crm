@@ -281,7 +281,7 @@ export function AudioPlayer({ src, className }: { src: string; className?: strin
   if (estado === "error") {
     return (
       <span className="text-[12.5px] text-text-3">
-        No se pudo cargar el audio.{" "}
+        Não foi possível carregar o áudio.{" "}
         <a href={src} className="text-brand-ink underline-offset-2 hover:underline" download>
           Descargarlo
         </a>
@@ -315,7 +315,7 @@ export function AudioPlayer({ src, className }: { src: string; className?: strin
           ref={ondaRef}
           role="slider"
           tabIndex={0}
-          aria-label="Posición del audio"
+          aria-label="Posição do áudio"
           aria-valuemin={0}
           aria-valuemax={Math.round(duracion ?? 0)}
           aria-valuenow={Math.round(actual)}

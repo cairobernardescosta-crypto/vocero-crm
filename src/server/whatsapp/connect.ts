@@ -199,7 +199,7 @@ export async function registerWebhookForNumber(opts: {
       // ya partidas: lo que hace llegar los mensajes es la Cuenta de
       // mensajes. Se decide abajo, con su resultado a la vista.
       if (!esCuentaPartida(err)) {
-        return registrationError(err, "No se pudo suscribir la app a la cuenta de WhatsApp");
+        return registrationError(err, "Não foi possível vincular o aplicativo à conta do WhatsApp");
       }
       cuentaPartida = true;
     }
@@ -268,7 +268,7 @@ export async function registerWebhookForNumber(opts: {
       ...(messagingAccount ? { messagingAccount } : {}),
     };
   } catch (err) {
-    return registrationError(err, "No se pudo confirmar el webhook en Meta");
+    return registrationError(err, "Não foi possível confirmar o webhook na Meta");
   }
 }
 
@@ -345,7 +345,7 @@ async function registerWebhookForMessagingAccount(opts: {
       body: { override_callback_uri: webhookUrl, verify_token: verifyToken },
     });
   } catch (err) {
-    return messagingAccountError(err, "No se pudo suscribir la app a la Cuenta de mensajes");
+    return messagingAccountError(err, "Não foi possível vincular o aplicativo à Conta de mensagens");
   }
 
   try {
@@ -363,7 +363,7 @@ async function registerWebhookForMessagingAccount(opts: {
     }
     return { ok: true };
   } catch (err) {
-    return messagingAccountError(err, "No se pudo confirmar el webhook en la Cuenta de mensajes");
+    return messagingAccountError(err, "Não foi possível confirmar o webhook na Conta de mensagens");
   }
 }
 

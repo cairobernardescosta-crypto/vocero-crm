@@ -72,7 +72,7 @@ export type ResultadoEtapa =
 function listaParaElModelo(stages: readonly { name: string }[]): string {
   return stages.length
     ? `Puedes moverlo a: ${stages.map((s) => s.name).join(", ")}.`
-    : "No hay etapas a las que puedas moverlo.";
+    : "Não há etapas para as quais você possa movê-lo.";
 }
 
 export async function moverEtapaPorElCerebro(input: {
@@ -101,7 +101,7 @@ export async function moverEtapaPorElCerebro(input: {
     .limit(1);
   const conv = convRows[0];
   if (!conv) {
-    return { ok: false, status: 404, code: "not_found", message: "Conversación no encontrada" };
+    return { ok: false, status: 404, code: "not_found", message: "Conversa não encontrada" };
   }
   // Misma regla que `/api/bot/messages`: con una persona al frente, el
   // cerebro no toca la conversación.
@@ -110,7 +110,7 @@ export async function moverEtapaPorElCerebro(input: {
       ok: false,
       status: 409,
       code: "ai_paused",
-      message: "La IA está en pausa en esta conversación",
+      message: "A IA está pausada nesta conversa",
     };
   }
 

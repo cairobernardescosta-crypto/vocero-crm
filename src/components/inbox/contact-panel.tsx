@@ -219,7 +219,7 @@ export function ContactPanel({
               </p>
               <p className="mt-1 text-xs text-warning-text opacity-80">
                 {HANDOFF_LABELS[conversation.handoffReason ?? ""] ??
-                  "La IA está en pausa en esta conversación."}
+                  "A IA está pausada nesta conversa."}
               </p>
               <Button
                 size="sm"
@@ -249,7 +249,7 @@ export function ContactPanel({
               <Switch
                 size="sm"
                 checked={aiActive}
-                label="IA en esta conversación"
+                label="IA nesta conversa"
                 onCheckedChange={() => {
                   void onPatchConversation({
                     aiEnabled: !conversation.aiEnabled,
@@ -371,10 +371,10 @@ export function ContactPanel({
 
         {/* Notas */}
         <section className={cn("p-4", onDeleteConversation && "border-b")}>
-          <p className="kicker mb-2">Notas del contacto</p>
+          <p className="kicker mb-2">Notas do contato</p>
           <Textarea
             rows={5}
-            placeholder="Lo fijo del cliente: dirección, cómo prefiere pagar… (lo de esta conversación va en Nota interna)"
+            placeholder="Dados fixos do cliente: endereço, forma de pagamento… (informações desta conversa vão em Nota interna)"
             value={notes}
             disabled={!notesLoaded}
             onChange={(e) => setNotes(e.target.value)}
@@ -386,7 +386,7 @@ export function ContactPanel({
             disabled={savingNotes || !notesLoaded}
             onClick={() => void saveNotes()}
           >
-            {savingNotes ? "Guardando…" : "Guardar notas del contacto"}
+            {savingNotes ? "Salvando…" : "Salvar notas do contato"}
           </Button>
         </section>
 
@@ -400,7 +400,7 @@ export function ContactPanel({
               className="flex items-center gap-1.5 rounded text-[13px] text-text-3 transition-colors hover:text-danger-text focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
             >
               <Trash2 className="h-3.5 w-3.5" strokeWidth={1.7} />
-              Eliminar conversación…
+              Excluir conversa…
             </button>
           </section>
         )}

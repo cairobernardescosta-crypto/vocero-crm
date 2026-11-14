@@ -34,15 +34,15 @@ type Connection = {
 };
 
 const PASOS = [
-  "La cuenta se vincula en el panel de Zernio (Accounts → Connect), no desde aquí.",
-  "La API key se crea en Zernio → Settings → API Keys y se muestra una sola vez (empieza con sk_).",
+  "A conta é vinculada no painel do Zernio (Accounts → Connect), não aqui.",
+  "A chave de API é criada em Zernio → Settings → API Keys e exibida uma única vez (começa com sk_).",
 ];
 
 const REGLAS = [
-  "La cuenta tiene que ser TikTok Business, registrada fuera de la Unión Europea, Suiza y Reino Unido, y con los mensajes directos abiertos.",
-  "Tú no puedes iniciar una conversación: solo contestar a quien te escribió.",
-  "Después del último mensaje del cliente puedes mandar hasta 10 mensajes, durante 48 horas. Para seguir, el cliente tiene que volver a escribir.",
-  "Cada mensaje es texto, de hasta 6,000 caracteres. Todavía no se envían imágenes desde aquí.",
+  "A conta deve ser TikTok Business, registrada fora da União Europeia, Suíça e Reino Unido, com mensagens diretas abertas.",
+  "Você não pode iniciar uma conversa: apenas responder a quem escreveu.",
+  "Após a última mensagem do cliente, você pode enviar até dez mensagens durante 48 horas. Para continuar, o cliente precisa escrever novamente.",
+  "Cada mensagem é de texto, com até 6.000 caracteres. Ainda não é possível enviar imagens por aqui.",
 ];
 
 export function TiktokClient() {
@@ -61,7 +61,7 @@ export function TiktokClient() {
     void refetch();
   }, [refetch]);
 
-  if (!loaded) return <p className="text-sm text-muted-foreground">Cargando…</p>;
+  if (!loaded) return <p className="text-sm text-muted-foreground">Carregando…</p>;
 
   return (
     <div className="max-w-3xl space-y-6">
@@ -70,10 +70,10 @@ export function TiktokClient() {
           <AlertTriangle className="mt-0.5 h-4 w-4 shrink-0 text-destructive" />
           <div>
             <p className="font-medium text-danger-text">
-              La API key de Zernio expiró o fue revocada.
+              A chave de API do Zernio expirou ou foi revogada.
             </p>
             <p className="text-danger-text opacity-80">
-              Los envíos por TikTok están pausados. Pega una nueva abajo para
+              Os envios pelo TikTok estão pausados. Cole uma nova chave abaixo para
               reconectar.
             </p>
           </div>
@@ -89,20 +89,20 @@ export function TiktokClient() {
               {connection.username ? `: @${connection.username}` : ""}
             </p>
             <p className="text-success-text opacity-80">
-              Cuenta {connection.accountRef} · llave que termina en ····
+              Conta {connection.accountRef} · chave terminada em ····
               {connection.tokenLast4}
-              {connection.hasWebhookSecret ? " · firma del webhook activa" : ""}
+              {connection.hasWebhookSecret ? " · assinatura do webhook ativa" : ""}
             </p>
           </div>
-          <Badge variant="success">TikTok activo</Badge>
+          <Badge variant="success">TikTok ativo</Badge>
         </div>
       )}
 
       <Card>
         <CardHeader>
-          <CardTitle>Antes de conectar: lo que TikTok exige</CardTitle>
+          <CardTitle>Antes de conectar: requisitos do TikTok</CardTitle>
           <CardDescription>
-            No son límites de este CRM: los pone TikTok a los mensajes directos
+            Estes limites não são do CRM: são definidos pelo TikTok para mensagens diretas
             de una cuenta de negocio.
           </CardDescription>
         </CardHeader>
@@ -119,7 +119,7 @@ export function TiktokClient() {
         <CardHeader>
           <CardTitle>{connection ? "Reconectar TikTok" : "Conectar TikTok"}</CardTitle>
           <CardDescription>
-            Los mensajes directos de tu cuenta entran a la misma bandeja que
+            As mensagens diretas da sua conta chegam à mesma caixa de entrada que
             WhatsApp, con su distintivo de canal. Llegan por Zernio, con tu
             propia cuenta de Zernio.
           </CardDescription>
@@ -143,7 +143,7 @@ export function TiktokClient() {
       <p className="flex items-start gap-2 text-xs text-text-2">
         <Info className="mt-0.5 h-3.5 w-3.5 shrink-0" />
         <span>
-          El webhook lo da de alta Vocero en tu Zernio al conectar, limitado a
+          O Vocero cadastra o webhook no seu Zernio ao conectar, limitado às
           tus cuentas. Si un día dejan de llegar mensajes, revisa{" "}
           <Link href="/settings/channels" className="font-semibold underline">
             el estado de los canales

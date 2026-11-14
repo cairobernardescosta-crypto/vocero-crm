@@ -56,11 +56,11 @@ export function CalendarToolbar({
 
   return (
     <header className="flex flex-wrap items-center gap-x-3 gap-y-2 border-b px-4 py-3 sm:px-6">
-      <h2 className="mr-1 text-[17px] font-bold tracking-tight">Citas</h2>
+      <h2 className="mr-1 text-[17px] font-bold tracking-tight">Agendamentos</h2>
 
       <div className="flex items-center gap-1">
         <Button variant="outline" size="sm" onClick={onToday}>
-          Hoy
+          Hoje
         </Button>
         <NavButton label={`${PERIOD[view]} anterior`} onClick={() => onShift(-1)}>
           <ChevronLeft className="h-4 w-4" />
@@ -73,7 +73,7 @@ export function CalendarToolbar({
       {view === "lista" ? (
         <div className="flex flex-wrap items-center gap-1.5 text-sm">
           <label className="sr-only" htmlFor="lista-desde">
-            Desde
+            De
           </label>
           <input
             id="lista-desde"
@@ -84,7 +84,7 @@ export function CalendarToolbar({
           />
           <span className="text-text-3">al</span>
           <label className="sr-only" htmlFor="lista-hasta">
-            Hasta
+            Até
           </label>
           <input
             id="lista-hasta"

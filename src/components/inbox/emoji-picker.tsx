@@ -92,7 +92,7 @@ export function EmojiPicker({
             <p className="text-sm font-semibold">Emojis</p>
             <button
               type="button"
-              aria-label="Cerrar emojis"
+              aria-label="Fechar emojis"
               className="rounded p-1 text-text-3 hover:bg-secondary hover:text-foreground"
               onClick={() => {
                 setOpen(false);
@@ -167,7 +167,7 @@ export function EmojiPicker({
               </div>
             ) : (
               <p role="status" className="py-6 text-center text-sm text-text-3">
-                No hay emojis que coincidan.
+                Nenhum emoji encontrado.
               </p>
             )}
           </div>
