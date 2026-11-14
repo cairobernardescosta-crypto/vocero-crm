@@ -130,12 +130,20 @@ function MediaBlock({ media }: { media: MessageMediaDto }) {
 
   if (media.fetchStatus !== "available") {
     return (
-      <span className="inline-flex items-center gap-1.5 text-text-3">
-        <Paperclip className="h-3.5 w-3.5" strokeWidth={1.7} />
-        {mediaLabel(media.kind)}
-        {media.fetchStatus === "failed"
-          ? " — contenido no disponible"
-          : " — descargando…"}
+      <span className="inline-flex min-w-48 items-center gap-2 rounded-md border border-border-strong bg-subtle px-3 py-2 text-text-3">
+        {media.fetchStatus === "failed" ? (
+          <AlertTriangle className="h-4 w-4 shrink-0 text-warning-text" strokeWidth={1.7} />
+        ) : (
+          <Paperclip className="h-4 w-4 shrink-0" strokeWidth={1.7} />
+        )}
+        <span>
+          <span className="block font-medium text-foreground">{mediaLabel(media.kind)}</span>
+          <span className="block text-[11.5px]">
+            {media.fetchStatus === "failed"
+              ? "Mídia histórica indisponível"
+              : "Baixando mídia…"}
+          </span>
+        </span>
       </span>
     );
   }

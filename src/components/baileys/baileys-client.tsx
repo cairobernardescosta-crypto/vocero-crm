@@ -22,7 +22,7 @@ type Snapshot = { connection: Connection; qr: string | null; syncing: boolean; s
 const STATUS: Record<string, string> = { disconnected: "Desconectado", waiting_qr: "Aguardando QR", connecting: "Conectando", connected: "Conectado", reconnecting: "Reconectando", error: "Erro" };
 
 function toConversation(chat: Chat, connected: boolean): ConversationDto {
-  return { id: chat.id, channel: "whatsapp", contact: { id: `baileys:${chat.id}`, name: chat.name || chat.phone || "Conversa", phone: chat.phone }, stageName: chat.stageName, aiEnabled: false, handoffAt: null, handoffReason: null, lastInboundAt: chat.lastMessageAt, lastMessageAt: chat.lastMessageAt, unreadCount: chat.unreadCount, windowOpen: connected, windowRemainingMs: connected ? Number.MAX_SAFE_INTEGER : 0, humanWindow: null, composer: { media: false, structured: false, quoteReply: false }, preview: chat.lastMessage, anuncio: null };
+  return { id: chat.id, channel: "whatsapp", contact: { id: `baileys:${chat.id}`, name: chat.name || chat.phone || "Conversa", phone: chat.phone, avatarUrl: chat.avatarUrl }, stageName: chat.stageName, aiEnabled: false, handoffAt: null, handoffReason: null, lastInboundAt: chat.lastMessageAt, lastMessageAt: chat.lastMessageAt, unreadCount: chat.unreadCount, windowOpen: connected, windowRemainingMs: connected ? Number.MAX_SAFE_INTEGER : 0, humanWindow: null, composer: { media: false, structured: false, quoteReply: false }, preview: chat.lastMessage, anuncio: null };
 }
 
 function toMessage(message: RawMessage): MessageDto {
@@ -86,7 +86,7 @@ export function BaileysClient() {
         <header className="flex items-center justify-between gap-1 border-b bg-background px-2 py-2.5 md:px-4 lg:tarjeta lg:border-b-0 lg:px-5 lg:py-3">
           <button onClick={() => setSelectedId(null)} aria-label="Voltar às conversas" className="shrink-0 rounded-md p-1.5 text-text-2 hover:bg-accent md:hidden"><ChevronLeft className="h-5 w-5" /></button>
           <div className="flex min-w-0 flex-1 items-center gap-3 p-1">
-            {selectedChat?.avatarUrl ? <span aria-label={`Foto de ${selected.contact.name}`} className="h-9 w-9 shrink-0 rounded-full bg-cover bg-center" style={{ backgroundImage: `url(${JSON.stringify(selectedChat.avatarUrl).slice(1, -1)})` }} /> : <ContactAvatar name={selected.contact.name} seed={selected.contact.id} size="md" />}
+            <ContactAvatar name={selected.contact.name} seed={selected.contact.id} src={selected.contact.avatarUrl} size="md" />
             <div className="min-w-0"><p className="truncate text-[15px] font-bold leading-tight lg:text-[18px] lg:font-semibold">{selected.contact.name}</p><p className="mt-0.5 font-mono text-[10.5px] tracking-[0.04em] text-text-3">{selectedChat?.isGroup ? `Grupo · ${selectedChat.participants?.length ?? 0} participantes` : selected.contact.phone ? formatPhone(selected.contact.phone) : "WhatsApp Web"}</p>{selectedChat?.isGroup && selectedChat.participants?.length ? <p className="max-w-lg truncate text-[10px] text-text-3" title={selectedChat.participants.map((p) => p.jid).join(", ")}>{selectedChat.participants.slice(0, 5).map((p) => p.jid.split("@")[0]).join(", ")}{selectedChat.participants.length > 5 ? "…" : ""}</p> : null}</div>
           </div>
           <select

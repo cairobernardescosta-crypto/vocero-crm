@@ -9,7 +9,7 @@ export type BaileysContent = {
 type Message = proto.IMessage;
 
 /** Retira envelopes usados pelo WhatsApp sem transformar eventos internos em conversas. */
-function unwrap(message: Message | null | undefined): Message | null {
+export function unwrapBaileysMessage(message: Message | null | undefined): Message | null {
   if (!message) return null;
   const nested =
     message.ephemeralMessage?.message ??
@@ -17,11 +17,11 @@ function unwrap(message: Message | null | undefined): Message | null {
     message.viewOnceMessageV2?.message ??
     message.viewOnceMessageV2Extension?.message ??
     message.documentWithCaptionMessage?.message;
-  return nested ? unwrap(nested) : message;
+  return nested ? unwrapBaileysMessage(nested) : message;
 }
 
 export function baileysMessageContent(raw: Message | null | undefined): BaileysContent | null {
-  const message = unwrap(raw);
+  const message = unwrapBaileysMessage(raw);
   if (!message) return null;
 
   // ACKs, revogações, reações e chaves de sessão não são mensagens de usuário.

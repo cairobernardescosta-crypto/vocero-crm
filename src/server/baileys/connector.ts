@@ -5,7 +5,7 @@ import QRCode from "qrcode";
 import { getDb, getSql, schema } from "@/lib/db";
 import { newId } from "@/lib/db/ids";
 import { publish } from "@/server/events/bus";
-import { baileysMessageContent } from "@/server/baileys/message-content";
+import { baileysMessageContent, unwrapBaileysMessage } from "@/server/baileys/message-content";
 import { saveMediaFile } from "@/server/whatsapp/media";
 
 type ConnectionStatus =
@@ -60,6 +60,57 @@ function authDir(organizationId: string): string {
   return path.resolve(base, organizationId.replace(/[^a-zA-Z0-9_-]/g, "_"));
 }
 
+function ignoredJid(jid: string): boolean {
+  return jid === "status@broadcast" || jid.endsWith("@newsletter");
+}
+
+function contactName(contact: import("@whiskeysockets/baileys").Contact): string | null {
+  return contact.name ?? contact.notify ?? contact.verifiedName ?? null;
+}
+
+async function persistContact(
+  organizationId: string,
+  contact: import("@whiskeysockets/baileys").Contact,
+  socket: import("@whiskeysockets/baileys").WASocket
+): Promise<void> {
+  const aliases = [...new Set([contact.id, contact.lid, contact.jid].filter((id): id is string => Boolean(id)))];
+  if (!aliases.length || aliases.every(ignoredJid)) return;
+  const phoneJid = contact.jid?.endsWith("@s.whatsapp.net") ? contact.jid : null;
+  const phone = phoneJid?.split("@")[0] ?? null;
+  let avatarUrl = contact.imgUrl && contact.imgUrl !== "changed" ? contact.imgUrl : null;
+  if (!avatarUrl) {
+    for (const alias of aliases) {
+      try {
+        avatarUrl = (await socket.profilePictureUrl(alias, "image")) ?? null;
+        if (avatarUrl) break;
+      } catch {}
+    }
+  }
+  await getDb().update(schema.baileysChat).set({
+    name: contactName(contact) ?? undefined,
+    phone: phone ?? undefined,
+    avatarUrl: avatarUrl ?? undefined,
+    updatedAt: new Date(),
+  }).where(and(
+    eq(schema.baileysChat.organizationId, organizationId),
+    inArray(schema.baileysChat.remoteJid, aliases)
+  ));
+}
+
+async function persistChatInfo(
+  organizationId: string,
+  chat: import("@whiskeysockets/baileys").Chat
+): Promise<void> {
+  if (!chat.id || ignoredJid(chat.id)) return;
+  await getDb().update(schema.baileysChat).set({
+    name: chat.name ?? undefined,
+    updatedAt: new Date(),
+  }).where(and(
+    eq(schema.baileysChat.organizationId, organizationId),
+    eq(schema.baileysChat.remoteJid, chat.id)
+  ));
+}
+
 async function setStatus(
   organizationId: string,
   status: ConnectionStatus,
@@ -96,7 +147,7 @@ async function persistMessage(
 ) {
   const jid = message.key.remoteJid;
   const providerId = message.key.id;
-  if (!jid || !providerId || jid === "status@broadcast") return;
+  if (!jid || !providerId || ignoredJid(jid)) return;
   const content = baileysMessageContent(message.message);
   if (!content) return;
   const occurredAt = new Date(Number(message.messageTimestamp ?? Math.floor(Date.now() / 1000)) * 1000);
@@ -151,31 +202,58 @@ async function persistMessage(
     .where(and(eq(schema.baileysChat.organizationId, organizationId), eq(schema.baileysChat.remoteJid, jid)))
     .limit(1);
   if (!chat) return;
+  const [existing] = await db
+    .select({ id: schema.baileysMessage.id, mediaAssetId: schema.baileysMessage.mediaAssetId })
+    .from(schema.baileysMessage)
+    .where(and(
+      eq(schema.baileysMessage.organizationId, organizationId),
+      eq(schema.baileysMessage.providerId, providerId)
+    ))
+    .limit(1);
+  if (existing?.mediaAssetId || (existing && content.type === "text")) return;
   let mediaAssetId: string | null = null;
-  if (!options.history && ["image", "audio", "video", "document", "sticker"].includes(content.type)) {
+  if (["image", "audio", "video", "document", "sticker"].includes(content.type)) {
+    const raw = unwrapBaileysMessage(message.message);
+    const media = raw?.imageMessage ?? raw?.audioMessage ?? raw?.videoMessage ?? raw?.documentMessage ?? raw?.stickerMessage;
+    const mimeType = media?.mimetype ?? null;
+    const fileName = raw?.documentMessage?.fileName ?? null;
+    mediaAssetId = newId("mediaAsset");
+    let storagePath: string | null = null;
+    let fileSize: number | null = null;
+    let fetchStatus: "available" | "failed" = "failed";
+    let fetchError: string | null = null;
     try {
+      if (options.history && (!media?.mediaKey || !media.directPath)) {
+        throw new Error("Mídia histórica sem chave de recuperação");
+      }
       const baileys = await import("@whiskeysockets/baileys");
       const bytes = await baileys.downloadMediaMessage(message, "buffer", {}, { logger: silentLogger as never, reuploadRequest: socket.updateMediaMessage });
-      const raw = message.message;
-      const media = raw?.imageMessage ?? raw?.audioMessage ?? raw?.videoMessage ?? raw?.documentMessage ?? raw?.stickerMessage;
-      const mimeType = media?.mimetype ?? null;
-      const fileName = raw?.documentMessage?.fileName ?? null;
-      mediaAssetId = newId("mediaAsset");
-      const storagePath = await saveMediaFile(organizationId, mediaAssetId, bytes, mimeType ?? undefined);
-      await db.insert(schema.mediaAsset).values({
-        id: mediaAssetId,
-        organizationId,
-        kind: content.type as "image" | "audio" | "video" | "document" | "sticker",
-        mimeType,
-        fileName,
-        fileSize: bytes.byteLength,
-        caption: content.text,
-        storagePath,
-        fetchStatus: "available",
-      });
+      storagePath = await saveMediaFile(organizationId, mediaAssetId, bytes, mimeType ?? undefined);
+      fileSize = bytes.byteLength;
+      fetchStatus = "available";
     } catch (error) {
-      console.warn(`[baileys] falha ao guardar mídia (${content.type}): ${error instanceof Error ? error.message : "erro"}`);
+      fetchError = error instanceof Error ? error.message.slice(0, 240) : "Mídia indisponível";
+      if (!options.history) console.warn(`[baileys] falha ao guardar mídia (${content.type}): ${fetchError}`);
     }
+    await db.insert(schema.mediaAsset).values({
+      id: mediaAssetId,
+      organizationId,
+      kind: content.type as "image" | "audio" | "video" | "document" | "sticker",
+      mimeType,
+      fileName,
+      fileSize,
+      caption: content.text,
+      storagePath,
+      fetchStatus,
+      fetchError,
+    });
+  }
+  if (existing) {
+    if (mediaAssetId) {
+      await db.update(schema.baileysMessage).set({ mediaAssetId }).where(eq(schema.baileysMessage.id, existing.id));
+      publish(organizationId, { type: "baileys.updated", data: { chatId: chat.id, messageId: existing.id } });
+    }
+    return;
   }
   const messageId = newId("baileysMessage");
   const [inserted] = await db
@@ -248,8 +326,30 @@ async function startInternal(organizationId: string): Promise<void> {
     }
   }, 30000);
   socket.ev.on("creds.update", saveCreds);
-  socket.ev.on("messages.upsert", ({ messages }) => {
-    for (const message of messages) void persistMessage(organizationId, message, socket).catch(() => undefined);
+  socket.ev.on("messages.upsert", ({ messages, type }) => {
+    const history = type !== "notify";
+    for (const message of messages) void persistMessage(organizationId, message, socket, { history }).catch(() => undefined);
+  });
+  socket.ev.on("contacts.upsert", (contacts) => {
+    for (const contact of contacts) void persistContact(organizationId, contact, socket).catch(() => undefined);
+  });
+  socket.ev.on("contacts.update", (contacts) => {
+    for (const contact of contacts) {
+      if (!contact.id) continue;
+      void persistContact(organizationId, contact as import("@whiskeysockets/baileys").Contact, socket).catch(() => undefined);
+    }
+  });
+  socket.ev.on("chats.upsert", (chats) => {
+    for (const chat of chats) void persistChatInfo(organizationId, chat).catch(() => undefined);
+  });
+  socket.ev.on("chats.update", (chats) => {
+    for (const chat of chats) {
+      if (!chat.id) continue;
+      void persistChatInfo(organizationId, chat as import("@whiskeysockets/baileys").Chat).catch(() => undefined);
+    }
+  });
+  socket.ev.on("chats.phoneNumberShare", ({ lid, jid }) => {
+    void persistContact(organizationId, { id: lid, lid, jid }, socket).catch(() => undefined);
   });
   socket.ev.on("messaging-history.set", ({ chats, contacts, messages, isLatest, progress }) => {
     void (async () => {
@@ -257,9 +357,14 @@ async function startInternal(organizationId: string): Promise<void> {
       runtime.syncProgress = Math.max(runtime.syncProgress, Math.min(99, Math.round(progress ?? 0)));
       publish(organizationId, { type: "baileys.updated", data: { status: "syncing", progress: runtime.syncProgress } });
       const names = new Map(contacts.map((contact) => [contact.id, contact.notify ?? contact.name ?? contact.verifiedName ?? null]));
+      for (const contact of contacts) {
+        const name = contactName(contact);
+        for (const alias of [contact.id, contact.lid, contact.jid]) if (alias) names.set(alias, name);
+        await persistContact(organizationId, contact, socket).catch(() => undefined);
+      }
       const db = getDb();
       for (const chat of chats) {
-        if (!chat.id || chat.id === "status@broadcast") continue;
+        if (!chat.id || ignoredJid(chat.id)) continue;
         const timestamp = chat.conversationTimestamp
           ? new Date(Number(chat.conversationTimestamp) * 1000)
           : null;
@@ -277,6 +382,18 @@ async function startInternal(organizationId: string): Promise<void> {
           target: [schema.baileysChat.organizationId, schema.baileysChat.remoteJid],
           set: { name: chat.name ?? names.get(chat.id) ?? undefined, updatedAt: new Date() },
         });
+        try {
+          const avatarUrl = await socket.profilePictureUrl(chat.id, "image");
+          if (avatarUrl) await db.update(schema.baileysChat).set({ avatarUrl }).where(and(
+            eq(schema.baileysChat.organizationId, organizationId),
+            eq(schema.baileysChat.remoteJid, chat.id)
+          ));
+        } catch {}
+      }
+      // Agora que os chats existem, aplica também aliases LID→telefone e
+      // fotos/nome vindos do catálogo de contatos deste lote.
+      for (const contact of contacts) {
+        await persistContact(organizationId, contact, socket).catch(() => undefined);
       }
       const ordered = [...messages].sort((a, b) => Number(a.messageTimestamp ?? 0) - Number(b.messageTimestamp ?? 0));
       for (let index = 0; index < ordered.length; index++) {
