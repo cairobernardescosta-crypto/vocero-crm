@@ -122,7 +122,7 @@ export function HygieneSection({
                         {c.name}
                       </Link>
                       <span className="shrink-0 text-xs text-warning-text tabular-nums">
-                        quedan {c.hoursLeft} h
+                        restam {c.hoursLeft} h
                       </span>
                     </li>
                   ))}

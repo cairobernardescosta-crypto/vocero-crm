@@ -44,7 +44,7 @@ const MEDIA_LABELS: Record<string, string> = {
 };
 
 export function mediaLabel(type: string): string {
-  return MEDIA_LABELS[type] ?? "Contenido";
+  return MEDIA_LABELS[type] ?? "Conteúdo";
 }
 
 /** 008 — Tamaño humano de un adjunto. */

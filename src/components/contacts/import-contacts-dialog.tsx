@@ -152,7 +152,7 @@ export function ImportContactsDialog({
                       {preview.problems.length}{" "}
                       {preview.problems.length === 1
                         ? "renglón se queda fuera"
-                        : "renglones se quedan fuera"}
+                        : "linhas ficarão de fora"}
                     </summary>
                     <ul className="mt-2 max-h-32 space-y-0.5 overflow-y-auto">
                       {preview.problems.map((p) => (

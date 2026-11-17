@@ -252,7 +252,7 @@ export function AppNav({
         setSonido(v);
         guardarSonido(v);
       }}
-      aria-label={sonido ? "Sonido de mensajes: activado" : "Sonido de mensajes: silenciado"}
+      aria-label={sonido ? "Som de mensagens: ativado" : "Som de mensagens: silenciado"}
       aria-pressed={sonido}
       title={sonido ? "Silenciar el sonido de mensajes nuevos" : "Activar el sonido de mensajes nuevos"}
       className="rounded p-1 text-text-3 transition-colors hover:text-foreground"
@@ -336,7 +336,7 @@ export function AppNav({
       {/* Grupos con encabezado pequeño, sin letras ni colapsables: se leen
           de arriba abajo como una lista de lo que hay. Un grupo sin título
           (Resultados) es una entrada suelta separada por el espacio. */}
-      <nav className="flex flex-col gap-4" aria-label="Secciones">
+      <nav className="flex flex-col gap-4" aria-label="Seções">
         {groups.map((group, i) => (
           <div key={group.title ?? i} className="flex flex-col gap-0.5">
             {group.title && (
@@ -490,7 +490,7 @@ function Riel({
 
   return (
     <nav
-      aria-label="Secciones"
+      aria-label="Seções"
       className="tarjeta hidden w-[76px] shrink-0 flex-col items-center py-4 lg:flex"
     >
       <Link href={modo === "baileys" ? "/baileys/inbox" : "/inbox"} aria-label={branding.name} title={branding.name} className="rounded-[14px] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring">
@@ -530,7 +530,7 @@ function Riel({
           <button
             type="button"
             onClick={() => setCuenta((v) => !v)}
-            aria-label="Tu cuenta"
+            aria-label="Sua conta"
             aria-expanded={cuenta}
             aria-haspopup="dialog"
             title={userName}
@@ -541,7 +541,7 @@ function Riel({
           {cuenta && (
             <div
               role="dialog"
-              aria-label="Tu cuenta"
+              aria-label="Sua conta"
               className="absolute bottom-0 left-full z-50 ml-3 w-64 space-y-1 rounded-2xl border bg-popover p-2 text-popover-foreground shadow-pop"
             >
               <div className="px-2.5 pb-1.5 pt-1">

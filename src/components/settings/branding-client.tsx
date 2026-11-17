@@ -152,7 +152,7 @@ export function BrandingClient({
             </select>
             <p className="text-xs text-text-3">
               É a única moeda somada pelo Pipeline. Valores informados em outra
-              moneda se muestran, pero quedan fuera del total de su columna.
+              moeda são exibidos, mas ficam fora do total da coluna.
             </p>
           </div>
 

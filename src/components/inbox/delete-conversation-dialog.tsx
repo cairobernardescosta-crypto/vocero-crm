@@ -72,7 +72,7 @@ export function DeleteConversationDialog({
             onChange={(e) => setAlsoContact(e.target.checked)}
           />
           <span className="text-[13px] leading-snug">
-            <span className="font-medium">Borrar también el contacto y su lead</span>
+            <span className="font-medium">Excluir também o contato e seu lead</span>
             <span className="mt-0.5 block text-xs text-text-3">
               {alsoContact
                 ? "Se van además sus notas, su etapa en el pipeline y sus citas pasadas. Deja de contar en Resultados."

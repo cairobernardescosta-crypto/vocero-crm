@@ -164,7 +164,7 @@ describe("paso 2: el proveedor de IA (la fila manda, el entorno es respaldo)", (
     });
     const rechazada = await paso("ai");
     expect(rechazada?.status).toBe("pending");
-    expect(rechazada?.problem).toMatch(/rechazó/);
+    expect(rechazada?.problem).toMatch(/rejeitou/);
 
     estadoIaDe.mockResolvedValue({
       activa: false,

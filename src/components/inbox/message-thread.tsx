@@ -1,6 +1,6 @@
 "use client";
 
-import { useCallback, useEffect, useRef, useState } from "react";
+import { useCallback, useEffect, useLayoutEffect, useRef, useState } from "react";
 import {
   AlertTriangle,
   Check,
@@ -68,16 +68,17 @@ function MediaBlock({ media }: { media: MessageMediaDto }) {
   const src = `/api/media/${media.assetId}`;
 
   if (media.kind === "location") {
-    const loc = (media.payload ?? {}) as LocationPayload;
+    const loc = media.payload && typeof media.payload === "object" ? media.payload as LocationPayload : {};
     const coords =
-      typeof loc.latitude === "number" && typeof loc.longitude === "number"
+      typeof loc.latitude === "number" && Number.isFinite(loc.latitude) && loc.latitude >= -90 && loc.latitude <= 90 &&
+      typeof loc.longitude === "number" && Number.isFinite(loc.longitude) && loc.longitude >= -180 && loc.longitude <= 180
         ? `${loc.latitude.toFixed(5)}, ${loc.longitude.toFixed(5)}`
         : null;
     return (
       <span className="flex items-start gap-1.5">
         <MapPin className="mt-0.5 h-4 w-4 shrink-0 text-brand" strokeWidth={1.7} />
         <span className="min-w-0">
-          <span className="block font-medium">{loc.name ?? "Ubicación"}</span>
+          <span className="block font-medium">{loc.name ?? "Localização"}</span>
           {loc.address && (
             <span className="block text-[12.5px] text-text-3">{loc.address}</span>
           )}
@@ -98,7 +99,7 @@ function MediaBlock({ media }: { media: MessageMediaDto }) {
 
   if (media.kind === "contacts") {
     const list = Array.isArray(media.payload)
-      ? (media.payload as ContactPayload[])
+      ? (media.payload as unknown[]).filter((item): item is ContactPayload => Boolean(item) && typeof item === "object")
       : [];
     return (
       <span className="flex flex-col gap-1">
@@ -162,8 +163,9 @@ function MediaBlock({ media }: { media: MessageMediaDto }) {
     );
   }
   if (media.kind === "video") {
+    const isGif = Boolean((media.payload as { gifPlayback?: boolean } | null)?.gifPlayback);
     return (
-      <video controls preload="metadata" className="max-h-72 max-w-full rounded-md">
+      <video controls={!isGif} autoPlay={isGif} loop={isGif} muted={isGif} playsInline preload="metadata" className="max-h-72 max-w-full rounded-md">
         <source src={src} type={media.mimeType ?? undefined} />
       </video>
     );
@@ -225,8 +227,8 @@ function NotaInterna({ nota, onBorrar }: { nota: NotaDto; onBorrar?: (n: NotaDto
           <button
             type="button"
             onClick={() => onBorrar(nota)}
-            aria-label="Borrar nota interna"
-            title="Borrar nota"
+            aria-label="Excluir nota interna"
+            title="Excluir nota"
             className="ml-auto rounded p-0.5 opacity-70 hover:bg-warning-soft hover:opacity-100"
           >
             <Trash2 className="h-3.5 w-3.5" strokeWidth={1.8} />
@@ -385,6 +387,8 @@ export function MessageThread({
   notas = [],
   onBorrarNota,
   eventos = [],
+  preserveScrollOnPrepend = false,
+  focusMessageId,
 }: {
   messages: MessageDto[];
   /** 039: quién firma las citas del cliente. */
@@ -399,12 +403,17 @@ export function MessageThread({
   onBorrarNota?: (n: NotaDto) => void;
   /** 054 — Cambios de etapa y traspaso, intercalados por hora. */
   eventos?: EventoHiloDto[];
+  /** Mantém a posição visual quando páginas antigas são adicionadas no início. */
+  preserveScrollOnPrepend?: boolean;
+  /** Mensagem que deve ser centralizada e destacada ao abrir uma busca. */
+  focusMessageId?: string | null;
 }) {
   const scrollRef = useRef<HTMLDivElement>(null);
   // 045 — El hilo se queda abajo mientras crece (una foto o un audio que
   // terminan de cargar), salvo que el operador haya subido a leer.
   const contenidoRef = useRef<HTMLDivElement>(null);
   const pegadoAbajo = useRef(true);
+  const pageSnapshot = useRef<{ firstId: string | null; height: number }>({ firstId: null, height: 0 });
   const [forwarding, setForwarding] = useState<MessageDto | null>(null);
   // 059 · D6 — El mensaje cuyo menú (mantener presionado) está abierto.
   const [menuDe, setMenuDe] = useState<MessageDto | null>(null);
@@ -424,6 +433,10 @@ export function MessageThread({
     resaltadoTimer.current = setTimeout(() => setResaltado(null), 1600);
   }, []);
 
+  useEffect(() => {
+    if (focusMessageId) irAlCitado(focusMessageId);
+  }, [focusMessageId, irAlCitado, messages]);
+
   useEffect(
     () => () => {
       if (resaltadoTimer.current) clearTimeout(resaltadoTimer.current);
@@ -431,12 +444,23 @@ export function MessageThread({
     []
   );
 
-  useEffect(() => {
+  useLayoutEffect(() => {
     const el = scrollRef.current;
     if (!el) return;
-    el.scrollTop = el.scrollHeight;
-    pegadoAbajo.current = true;
-  }, [messages.length, notas.length, eventos.length, notice]);
+    const firstId = messages[0]?.id ?? null;
+    const previous = pageSnapshot.current;
+    const prepended = preserveScrollOnPrepend && previous.firstId !== null
+      && firstId !== previous.firstId
+      && messages.some((message) => message.id === previous.firstId);
+    if (prepended) {
+      el.scrollTop += el.scrollHeight - previous.height;
+      pegadoAbajo.current = false;
+    } else {
+      el.scrollTop = el.scrollHeight;
+      pegadoAbajo.current = true;
+    }
+    pageSnapshot.current = { firstId, height: el.scrollHeight };
+  }, [messages, notas.length, eventos.length, notice, preserveScrollOnPrepend]);
 
   // Sin esto, una conversación corta con una foto quedaba en el primer
   // mensaje: al bajar al final todavía cabía todo (scroll 0) y, cuando la foto

@@ -218,6 +218,34 @@
       "when": 1794690000000,
       "tag": "0030_pipeline_portugues",
       "breakpoints": true
+    },
+    {
+      "idx": 31,
+      "version": "7",
+      "when": 1794776400000,
+      "tag": "0031_baileys_paginacao",
+      "breakpoints": true
+    },
+    {
+      "idx": 32,
+      "version": "7",
+      "when": 1794862800000,
+      "tag": "0032_baileys_respostas_citadas",
+      "breakpoints": true
+    },
+    {
+      "idx": 33,
+      "version": "7",
+      "when": 1794949200000,
+      "tag": "0033_baileys_busca",
+      "breakpoints": true
+    },
+    {
+      "idx": 34,
+      "version": "7",
+      "when": 1795035600000,
+      "tag": "0034_baileys_ordem_whatsapp",
+      "breakpoints": true
     }
   ]
 }

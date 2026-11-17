@@ -1460,11 +1460,15 @@ export const baileysMessage = pgTable(
       .notNull()
       .references(() => baileysChat.id, { onDelete: "cascade" }),
     providerId: text("provider_id").notNull(),
+    senderJid: text("sender_jid"),
     direction: text("direction", { enum: ["in", "out"] }).notNull(),
     type: text("type").notNull().default("text"),
     text: text("text"),
-      mediaAssetId: text("media_asset_id").references(() => mediaAsset.id, { onDelete: "set null" }),
-    status: text("status", { enum: ["pending", "sent", "failed"] }).notNull().default("sent"),
+    replyToProviderId: text("reply_to_provider_id"),
+    replyToType: text("reply_to_type"),
+    replyToText: text("reply_to_text"),
+    mediaAssetId: text("media_asset_id").references(() => mediaAsset.id, { onDelete: "set null" }),
+    status: text("status", { enum: ["pending", "sent", "delivered", "read", "failed"] }).notNull().default("sent"),
     error: text("error"),
     occurredAt: timestamp("occurred_at").notNull(),
     createdAt: timestamp("created_at").notNull().defaultNow(),
@@ -1472,5 +1476,6 @@ export const baileysMessage = pgTable(
   (t) => [
     uniqueIndex("baileys_message_org_provider_uq").on(t.organizationId, t.providerId),
     index("baileys_message_org_chat_idx").on(t.organizationId, t.chatId, t.occurredAt),
+    index("baileys_message_org_reply_idx").on(t.organizationId, t.replyToProviderId),
   ]
 );

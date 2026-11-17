@@ -58,8 +58,9 @@ export async function loadEncryptedAuthState(folder: string): Promise<{
         if (isEnvelope(parsed)) return JSON.parse(decryptSecret(parsed), BufferJSON.reviver) as unknown;
         legacy = JSON.parse(raw, BufferJSON.reviver) as unknown;
         return legacy;
-      } catch {
-        return null;
+      } catch (error) {
+        if ((error as NodeJS.ErrnoException)?.code === "ENOENT") return null;
+        throw new Error(`Estado Baileys inválido em ${safeName(name)}`, { cause: error });
       }
     });
     // Migração preguiçosa dos arquivos JSON antigos, fora do mutex de leitura.

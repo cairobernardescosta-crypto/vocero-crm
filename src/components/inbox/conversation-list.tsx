@@ -95,6 +95,9 @@ export function ConversationList({
   title = "Conversas",
   simple = false,
   headerAction,
+  hasMore = false,
+  loadingMore = false,
+  onLoadMore,
 }: {
   conversations: ConversationDto[] | null;
   /** Canales encendidos en esta instancia (ADR-001). */
@@ -107,6 +110,9 @@ export function ConversationList({
   /** Oculta filtros y acciones exclusivas del dominio Meta/pipeline. */
   simple?: boolean;
   headerAction?: React.ReactNode;
+  hasMore?: boolean;
+  loadingMore?: boolean;
+  onLoadMore?: () => void;
 }) {
   const [query, setQuery] = useState("");
   // 052 (enmienda) — Dos pestañas y un botón «Filtrar» con lo demás.
@@ -446,6 +452,7 @@ export function ConversationList({
               : "Sem resultados para este filtro."}
           </p>
         ) : (
+          <>
           <ul>
             {visible.map((c) => {
               const unread = c.unreadCount > 0;
@@ -563,6 +570,8 @@ export function ConversationList({
               );
             })}
           </ul>
+          {hasMore && <div className="p-3 text-center"><button type="button" disabled={loadingMore} onClick={onLoadMore} className="rounded-lg border border-border-strong px-3 py-2 text-xs font-semibold disabled:opacity-50">{loadingMore ? "Carregando…" : "Carregar mais conversas"}</button></div>}
+          </>
         )}
       </div>
       </div>

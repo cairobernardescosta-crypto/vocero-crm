@@ -91,7 +91,7 @@ export function VoiceRecorder({
         onError(
           window.isSecureContext
             ? "Este navegador não consegue gravar áudio. Tente usar uma versão atualizada do Chrome, Edge, Firefox ou Safari."
-            : "Grabar notas de voz necesita abrir el CRM por https."
+            : "Para gravar mensagens de voz, abra o CRM por HTTPS."
         );
         return;
       }

@@ -1,4 +1,4 @@
-import { mkdtemp, readFile, rm } from "node:fs/promises";
+import { mkdtemp, readFile, rm, writeFile } from "node:fs/promises";
 import os from "node:os";
 import path from "node:path";
 import { afterEach, beforeAll, describe, expect, it } from "vitest";
@@ -33,5 +33,13 @@ describe("estado cifrado do Baileys", () => {
 
     const second = await loadEncryptedAuthState(dir);
     expect(second.state.creds.registrationId).toBe(registrationId);
+  });
+
+  it("falha explicitamente quando a sessão está corrompida", async () => {
+    const dir = await mkdtemp(path.join(os.tmpdir(), "vocero-baileys-auth-corrupt-"));
+    dirs.push(dir);
+    await writeFile(path.join(dir, "creds.json"), "{conteudo-invalido", "utf8");
+    const { loadEncryptedAuthState } = await import("@/server/baileys/auth-state");
+    await expect(loadEncryptedAuthState(dir)).rejects.toThrow("Estado Baileys inválido em creds.json");
   });
 });

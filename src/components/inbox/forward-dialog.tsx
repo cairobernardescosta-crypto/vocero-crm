@@ -177,7 +177,7 @@ export function ForwardDialog({
                 <span className="block text-xs text-text-3">
                   {c.windowOpen
                     ? c.contact.phone ?? CHANNEL_LABEL[c.channel]
-                    : "Ventana de 24 horas cerrada"}
+                    : "Janela de 24 horas encerrada"}
                 </span>
               </span>
             </label>

@@ -62,7 +62,7 @@ export function EmojiPicker({
         type="button"
         disabled={disabled}
         aria-label="Emojis"
-        title="Insertar emoji"
+        title="Inserir emoji"
         aria-expanded={visible}
         aria-controls={visible ? id : undefined}
         aria-haspopup="dialog"

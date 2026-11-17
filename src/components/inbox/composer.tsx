@@ -53,6 +53,7 @@ export function Composer({
   children,
   onNota,
   templatesEnabled = true,
+  mediaEndpoint,
 }: {
   conversation: ConversationDto;
   onSend: (text: string, replyTo: MessageDto | null) => Promise<string | null>;
@@ -70,6 +71,8 @@ export function Composer({
   onNota?: (texto: string) => Promise<string | null>;
   /** Conectores de texto que não usam plantillas oficiales de Meta. */
   templatesEnabled?: boolean;
+  /** Endpoint multipart alternativo para conectores que reutilizam o compositor. */
+  mediaEndpoint?: string;
 }) {
   // 051 — Lo que quedó escrito en esta conversación vuelve al regresar a ella.
   const [text, setText] = useState(() => leerBorrador("responder", conversation.id));
@@ -308,7 +311,7 @@ export function Composer({
     return (
       <div
         role="region"
-        aria-label="Chat: adjuntar imagen"
+        aria-label="Conversa: anexar imagem"
         // 061 — El hilo con su compositor es una tarjeta en escritorio. El
         // fondo (con sus dibujos) es de la tarjeta: hilo y compositor van
         // transparentes encima, así los dibujos no se cortan entre los dos.
@@ -390,7 +393,7 @@ export function Composer({
       if (caption) form.set("caption", caption);
       if (replyTo) form.set("replyToMessageId", replyTo.id);
       const err = await apiSend(
-        `/api/conversations/${conversation.id}/messages/media`,
+        mediaEndpoint ?? `/api/conversations/${conversation.id}/messages/media`,
         { method: "POST", body: form }
       );
       setSending(false);
@@ -440,7 +443,7 @@ export function Composer({
     form.set("file", nota.archivo);
     form.set("voice", "1");
     if (replyTo) form.set("replyToMessageId", replyTo.id);
-    const err = await apiSend(`/api/conversations/${conversation.id}/messages/media`, {
+    const err = await apiSend(mediaEndpoint ?? `/api/conversations/${conversation.id}/messages/media`, {
       method: "POST",
       body: form,
     });
@@ -764,8 +767,8 @@ export function Composer({
           <button
             onClick={() => fileRef.current?.click()}
             disabled={sending}
-            aria-label="Adjuntar archivo"
-            title="Adjuntar imagen, video, audio o documento"
+            aria-label="Anexar arquivo"
+            title="Anexar imagem, vídeo, áudio ou documento"
             className="shrink-0 rounded p-1.5 text-text-3 transition-colors hover:bg-secondary hover:text-foreground"
           >
             <Paperclip className="h-[18px] w-[18px]" strokeWidth={1.7} />
@@ -835,8 +838,8 @@ export function Composer({
               setGrabando(true);
             }}
             disabled={sending}
-            aria-label="Grabar nota de voz"
-            title="Grabar nota de voz"
+            aria-label="Gravar mensagem de voz"
+            title="Gravar mensagem de voz"
             className={cn(
               "flex h-11 w-11 shrink-0 items-center justify-center rounded-full bg-enviar text-enviar-texto shadow-sm transition-[opacity,transform] hover:scale-105 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring",
               sending && "opacity-40"
@@ -869,8 +872,8 @@ export function Composer({
         )}
         <p className="font-mono text-[10.5px] tracking-[0.04em] text-text-3">
           {soloPersona
-            ? `Ventana humana · quedan ${formatRemainingLong(human!.remainingMs)}`
-            : `Ventana abierta · quedan ${formatRemaining(conversation.windowRemainingMs)}`}
+            ? `Janela humana · restam ${formatRemainingLong(human!.remainingMs)}`
+            : `Janela aberta · restam ${formatRemaining(conversation.windowRemainingMs)}`}
         </p>
       </div>
     </div>
