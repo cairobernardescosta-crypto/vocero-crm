@@ -152,6 +152,7 @@ export function settingsSections({
   if (agenda) agente.push({ href: "/settings/calendar", label: "Agenda" });
 
   const negocio: SettingsLink[] = [
+    { href: "/settings/account", label: "Meu usuário" },
     { href: "/settings/branding", label: "Marca" },
     // 062 — Tema, letra, tamaño y densidad (cada quien la suya).
     { href: "/settings/appearance", label: "Apariencia" },

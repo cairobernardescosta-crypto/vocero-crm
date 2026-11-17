@@ -4,6 +4,7 @@ import { getSessionOrNull } from "@/lib/auth/session";
 import { isValidHex, resolveAccentSet } from "@/lib/branding";
 import { CURRENCIES } from "@/lib/money";
 import { getBranding, saveBranding } from "@/server/branding";
+import { syncDesktopShortcut } from "@/server/desktop-shortcut";
 
 export const dynamic = "force-dynamic";
 
@@ -31,9 +32,11 @@ export const PUT = withAuth(async (session, req: Request) => {
   // sube y se quita por su propia ruta. Sin esto, guardar el nombre borraría
   // el logo sin que nadie lo pidiera.
   const actual = await getBranding(session.organizationId);
-  await saveBranding(session.organizationId, {
+  const updated = {
     ...body.data,
     favicon: actual.favicon,
-  });
-  return Response.json({ ok: true });
+  };
+  await saveBranding(session.organizationId, updated);
+  const shortcutUpdated = await syncDesktopShortcut(updated).catch(() => false);
+  return Response.json({ ok: true, shortcutUpdated });
 });

@@ -116,7 +116,7 @@ export function BrandingClient({
           <CardTitle>Marca do CRM</CardTitle>
           <CardDescription>
             Este CRM é seu: use o nome e a cor do seu negócio. As alterações
-            reflejan en toda la interfaz y en la pantalla de inicio de sesión.
+            aparecem em toda a interface, na tela de login e no atalho local.
           </CardDescription>
         </CardHeader>
         <CardContent className="space-y-5">
@@ -234,10 +234,15 @@ export function BrandingClient({
           </div>
 
           {error && <p className="text-sm text-destructive">{error}</p>}
-          {saved && <p className="text-sm" style={{ color: previewSet.text }}>Marca salva ✓</p>}
-          <Button disabled={saving || !name.trim()} onClick={() => void save()}>
-            {saving ? "Salvando…" : "Salvar marca"}
-          </Button>
+          {saved && <p className="text-sm" style={{ color: previewSet.text }}>Marca e atalho atualizados ✓</p>}
+          <div className="flex flex-wrap gap-2">
+            <Button disabled={saving || !name.trim()} onClick={() => void save()}>
+              {saving ? "Salvando…" : "Salvar marca"}
+            </Button>
+            <Button variant="outline" disabled={saving} onClick={() => { setName(DEFAULT_BRANDING.name); setAccent(DEFAULT_BRANDING.accent); setCurrency(DEFAULT_CURRENCY); setSaved(false); }}>
+              Restaurar padrão
+            </Button>
+          </div>
         </CardContent>
       </Card>
     </div>

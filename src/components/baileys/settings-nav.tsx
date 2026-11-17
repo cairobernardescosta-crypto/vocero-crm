@@ -6,6 +6,7 @@ import { cn } from "@/lib/utils";
 
 const links = [
   { href: "/baileys/settings", label: "WhatsApp Baileys" },
+  { href: "/baileys/settings/account", label: "Meu usuário" },
   { href: "/baileys/settings/branding", label: "Marca" },
   { href: "/baileys/settings/appearance", label: "Aparência" },
   { href: "/baileys/settings/quick-replies", label: "Respostas rápidas" },

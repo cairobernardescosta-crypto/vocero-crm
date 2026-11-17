@@ -6,6 +6,7 @@ import {
 } from "@/lib/favicon";
 import { getBranding, saveBranding } from "@/server/branding";
 import { deleteMediaFile, saveMediaFile } from "@/server/whatsapp/media";
+import { syncDesktopShortcut } from "@/server/desktop-shortcut";
 
 export const dynamic = "force-dynamic";
 
@@ -51,10 +52,12 @@ export const PUT = withAuth(async (session, req: Request) => {
   // `?v=u1` sería la MISMA que la del logo anterior — el navegador seguiría
   // enseñando el viejo, que es justo lo que este número existe para evitar.
   const version = Date.now();
-  await saveBranding(session.organizationId, {
+  const updated = {
     ...branding,
     favicon: { mime, version },
-  });
+  };
+  await saveBranding(session.organizationId, updated);
+  await syncDesktopShortcut(updated).catch(() => false);
 
   return Response.json({ favicon: { mime, version } });
 });
@@ -67,6 +70,7 @@ export const DELETE = withAuth(async (session) => {
 
   const branding = await getBranding(session.organizationId);
   await saveBranding(session.organizationId, { ...branding, favicon: null });
+  await syncDesktopShortcut({ ...branding, favicon: null }).catch(() => false);
   // El archivo se borra DESPUÉS de que la marca ya no lo referencia: si esto
   // falla, queda un archivo huérfano —inofensivo— en vez de una marca
   // apuntando a algo que ya no está.
