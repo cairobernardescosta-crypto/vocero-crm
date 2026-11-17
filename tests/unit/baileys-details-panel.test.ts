@@ -35,5 +35,9 @@ describe("painel de detalhes Baileys", () => {
     expect(client).toContain("Última mensagem");
     expect(client).toContain("Etapa da pipeline");
     expect(client).toContain("Status do WhatsApp");
+    expect(client).toContain("Salvar contato");
+    expect(client).toContain("Salvar resposta rápida");
+    expect(client).toContain("Copiar número");
+    expect(connector).toContain("updateBaileysContact");
   });
 });

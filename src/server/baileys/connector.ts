@@ -276,9 +276,10 @@ async function persistContact(
       } catch {}
     }
   }
+  const providerName = contactName(contact);
   await getDb().update(schema.baileysChat).set({
-    name: contactName(contact) ?? undefined,
-    phone: phone ?? undefined,
+    name: providerName ? sql`coalesce(${schema.baileysChat.name}, ${providerName})` : undefined,
+    phone: phone ? sql`coalesce(${schema.baileysChat.phone}, ${phone})` : undefined,
     avatarUrl: avatarUrl ?? undefined,
     updatedAt: new Date(),
   }).where(and(
@@ -391,8 +392,8 @@ async function persistMessage(
     .onConflictDoUpdate({
       target: [schema.baileysChat.organizationId, schema.baileysChat.remoteJid],
       set: {
-        name: name ?? undefined,
-        phone: phone ?? undefined,
+        name: name ? sql`coalesce(${schema.baileysChat.name}, ${name})` : undefined,
+        phone: phone ? sql`coalesce(${schema.baileysChat.phone}, ${phone})` : undefined,
         isGroup,
         avatarUrl: avatarUrl ?? undefined,
         participants: participants ?? undefined,
@@ -1087,6 +1088,24 @@ export async function setBaileysChatStage(
     .where(and(eq(schema.baileysChat.organizationId, organizationId), eq(schema.baileysChat.id, chatId)))
     .returning({ id: schema.baileysChat.id });
   if (!chat) throw new Error("Conversa não encontrada");
+  publish(organizationId, { type: "baileys.updated", data: { chatId } });
+}
+
+export async function updateBaileysContact(
+  organizationId: string,
+  chatId: string,
+  input: { name: string; phone: string | null }
+): Promise<void> {
+  const [updated] = await getDb().update(schema.baileysChat).set({
+    name: input.name.trim(),
+    phone: input.phone,
+    updatedAt: new Date(),
+  }).where(and(
+    eq(schema.baileysChat.organizationId, organizationId),
+    eq(schema.baileysChat.id, chatId),
+    eq(schema.baileysChat.isGroup, false)
+  )).returning({ id: schema.baileysChat.id });
+  if (!updated) throw new Error("Contato não encontrado");
   publish(organizationId, { type: "baileys.updated", data: { chatId } });
 }
 

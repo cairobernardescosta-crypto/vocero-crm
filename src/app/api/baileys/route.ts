@@ -2,7 +2,7 @@ import { z } from "zod";
 import { apiError, parseBody, withAuth } from "@/lib/api";
 import { canConfigure } from "@/lib/auth/roles";
 import { baileysDisabledResponse, baileysEnabled } from "@/server/baileys/flag";
-import { baileysSnapshot, markBaileysChatRead, pairBaileys, sendBaileysMedia, sendText, setBaileysChatStage, stopBaileys } from "@/server/baileys/connector";
+import { baileysSnapshot, markBaileysChatRead, pairBaileys, sendBaileysMedia, sendText, setBaileysChatStage, stopBaileys, updateBaileysContact } from "@/server/baileys/connector";
 import { MediaValidationError } from "@/server/whatsapp/media";
 
 export const dynamic = "force-dynamic";
@@ -16,6 +16,7 @@ const actionSchema = z.discriminatedUnion("action", [
   z.object({ action: z.literal("disconnect") }),
   z.object({ action: z.literal("mark_read"), chatId: z.string().min(1).max(80) }),
   z.object({ action: z.literal("set_stage"), chatId: z.string().min(1).max(80), stageId: z.string().min(1).max(80) }),
+  z.object({ action: z.literal("update_contact"), chatId: z.string().min(1).max(80), name: z.string().trim().min(1).max(120), phone: z.string().regex(/^\+?[1-9]\d{7,14}$/).nullable() }),
   z.object({
     action: z.literal("send"),
     chatId: z.string().min(1).max(80),
@@ -111,6 +112,16 @@ export const POST = withAuth(async (session, req: Request) => {
       await setBaileysChatStage(session.organizationId, body.data.chatId, body.data.stageId);
     } catch (error) {
       return apiError(404, "stage_or_chat_not_found", error instanceof Error ? error.message : "Etapa ou conversa não encontrada");
+    }
+  }
+  if (body.data.action === "update_contact") {
+    try {
+      await updateBaileysContact(session.organizationId, body.data.chatId, {
+        name: body.data.name,
+        phone: body.data.phone?.replace(/^\+/, "") ?? null,
+      });
+    } catch (error) {
+      return apiError(404, "contact_not_found", error instanceof Error ? error.message : "Contato não encontrado");
     }
   }
   if (body.data.action === "send") {

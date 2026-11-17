@@ -20,6 +20,7 @@ type Stage = { id: string; name: string; kind: string };
 type ParticipantDetail = { jid: string; name: string | null; phone: string | null; admin: "admin" | "superadmin" | null };
 type Snapshot = { connection: Connection; qr: string | null; syncing: boolean; syncProgress: number; syncError: string | null; chats: Chat[]; stages: Stage[]; selectedDetails: { participants: ParticipantDetail[]; messageCount: number; firstMessageAt: string | null; lastMessageAt: string | null } | null; messages: RawMessage[]; pagination: { chatsNextCursor: string | null; messagesNextCursor: string | null } };
 type SearchResult = { messageId: string; chatId: string; chatName: string | null; chatPhone: string | null; avatarUrl: string | null; text: string | null; direction: "in" | "out"; occurredAt: string };
+type QuickReply = { id: string; atajo: string; texto: string };
 
 const STATUS: Record<string, string> = { disconnected: "Desconectado", waiting_qr: "Aguardando QR", connecting: "Conectando", connected: "Conectado", reconnecting: "Reconectando", error: "Erro" };
 
@@ -52,6 +53,11 @@ export function BaileysClient() {
   const [searchLoading, setSearchLoading] = useState(false);
   const [searchError, setSearchError] = useState<string | null>(null);
   const [focusMessageId, setFocusMessageId] = useState<string | null>(null);
+  const [contactNameDraft, setContactNameDraft] = useState("");
+  const [contactPhoneDraft, setContactPhoneDraft] = useState("");
+  const [quickReplies, setQuickReplies] = useState<QuickReply[]>([]);
+  const [newShortcut, setNewShortcut] = useState("");
+  const [newReplyText, setNewReplyText] = useState("");
   const selectedRef = useRef<string | null>(null);
   const initializedRef = useRef(false);
   const detailsTriggerRef = useRef<HTMLButtonElement | null>(null);
@@ -142,6 +148,19 @@ export function BaileysClient() {
     return () => window.removeEventListener("keydown", close);
   }, [searchOpen]);
   useEffect(() => { setDetailsOpen(false); setReplyTo(null); }, [selectedId]);
+  const draftContact = useMemo(() => data?.chats.find((chat) => chat.id === selectedId) ?? null, [data?.chats, selectedId]);
+  useEffect(() => {
+    setContactNameDraft(draftContact?.name || draftContact?.phone || "Conversa");
+    setContactPhoneDraft(draftContact?.phone ?? "");
+  }, [draftContact?.name, draftContact?.phone]);
+  useEffect(() => {
+    if (!detailsOpen) return;
+    void fetch("/api/quick-replies", { cache: "no-store" }).then(async (response) => {
+      if (!response.ok) return;
+      const body = await response.json() as { respostas?: QuickReply[] };
+      setQuickReplies(body.respostas ?? []);
+    }).catch(() => undefined);
+  }, [detailsOpen]);
 
   async function action(payload: object, refresh = true): Promise<string | null> {
     setBusy(true); setError(null);
@@ -153,6 +172,14 @@ export function BaileysClient() {
       return null;
     } catch (e) { const message = e instanceof Error ? e.message : "Operação falhou"; setError(message); return message; }
     finally { setBusy(false); }
+  }
+
+  async function saveQuickReply() {
+    const response = await fetch("/api/quick-replies", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ atajo: newShortcut, texto: newReplyText }) });
+    if (!response.ok) { setError("Não foi possível salvar a resposta rápida"); return; }
+    const body = await response.json() as { resposta: QuickReply };
+    setQuickReplies((current) => [...current, body.resposta]);
+    setNewShortcut(""); setNewReplyText("");
   }
 
   async function searchMessages(append = false) {
@@ -242,6 +269,7 @@ export function BaileysClient() {
       {!selectedChat?.isGroup && <section className="mt-6 space-y-3" aria-label="Informações do contato">
         <div className="rounded-xl border bg-subtle/40 p-3">
           <h3 className="text-xs font-semibold uppercase tracking-wide text-text-3">Contato</h3>
+          <div className="mt-3 space-y-2"><label className="block text-xs text-text-3">Nome<input value={contactNameDraft} maxLength={120} onChange={(event) => setContactNameDraft(event.target.value)} className="mt-1 w-full rounded-lg border bg-background px-3 py-2 text-sm text-foreground" /></label><label className="block text-xs text-text-3">Telefone internacional<input value={contactPhoneDraft} inputMode="tel" placeholder="5511999999999" onChange={(event) => setContactPhoneDraft(event.target.value.replace(/[^\d+]/g, ""))} className="mt-1 w-full rounded-lg border bg-background px-3 py-2 text-sm text-foreground" /></label><button type="button" disabled={!contactNameDraft.trim() || (contactPhoneDraft.length > 0 && !/^\+?[1-9]\d{7,14}$/.test(contactPhoneDraft))} onClick={() => void action({ action: "update_contact", chatId: selected.id, name: contactNameDraft, phone: contactPhoneDraft || null })} className="w-full rounded-lg bg-brand px-3 py-2 text-xs font-semibold text-brand-fg disabled:opacity-50">Salvar contato</button></div>
           <dl className="mt-3 space-y-3 text-sm">
             <div className="flex items-center gap-3"><Phone className="h-4 w-4 shrink-0 text-text-3" /><div><dt className="text-xs text-text-3">Telefone</dt><dd className="font-medium">{selected.contact.phone ? formatPhone(selected.contact.phone) : "Não identificado"}</dd></div></div>
             <div className="flex items-center gap-3"><MessageCircle className="h-4 w-4 shrink-0 text-text-3" /><div><dt className="text-xs text-text-3">Mensagens salvas</dt><dd className="font-medium">{data?.selectedDetails?.messageCount ?? 0}</dd></div></div>
@@ -252,6 +280,7 @@ export function BaileysClient() {
         </div>
         <label className="block rounded-xl border p-3 text-left text-sm"><span className="mb-2 block text-xs font-semibold uppercase tracking-wide text-text-3">Etapa da pipeline</span><select aria-label="Etapa do contato" value={selectedChat?.stageId ?? ""} onChange={(event) => void action({ action: "set_stage", chatId: selected.id, stageId: event.target.value })} className="w-full rounded-lg border bg-background px-3 py-2"><option value="" disabled>Selecionar etapa</option>{(data?.stages ?? []).map((stage) => <option key={stage.id} value={stage.id}>{stage.name}</option>)}</select></label>
         <div className="flex items-center justify-between rounded-xl border p-3 text-sm"><span>Status do WhatsApp</span><span className={cn("rounded-full px-2 py-1 text-xs font-semibold", connected ? "bg-success-soft text-success-text" : "bg-warning-soft text-warning-text")}>{STATUS[data?.connection.status ?? "disconnected"]}</span></div>
+        <section className="rounded-xl border p-3 text-left"><h3 className="text-xs font-semibold uppercase tracking-wide text-text-3">Respostas rápidas</h3><div className="mt-2 max-h-44 space-y-2 overflow-y-auto">{quickReplies.map((reply) => <div key={reply.id} className="rounded-lg border bg-background p-2"><p className="font-mono text-xs font-semibold">/{reply.atajo}</p><p className="mt-1 line-clamp-2 text-xs text-text-2">{reply.texto}</p><button type="button" disabled={!connected} onClick={() => void action({ action: "send", chatId: selected.id, text: reply.texto.replaceAll("{nombre}", selected.contact.name.split(" ")[0] ?? selected.contact.name) })} className="mt-2 rounded-md border px-2 py-1 text-xs font-semibold disabled:opacity-50">Enviar</button></div>)}{!quickReplies.length && <p className="text-xs text-text-3">Nenhuma resposta salva.</p>}</div><div className="mt-3 space-y-2 border-t pt-3"><input value={newShortcut} onChange={(event) => setNewShortcut(event.target.value)} placeholder="Atalho" className="w-full rounded-lg border bg-background px-2 py-1.5 text-xs" /><textarea value={newReplyText} onChange={(event) => setNewReplyText(event.target.value)} placeholder="Mensagem para salvar" rows={3} className="w-full rounded-lg border bg-background px-2 py-1.5 text-xs" /><button type="button" disabled={!newShortcut.trim() || !newReplyText.trim()} onClick={() => void saveQuickReply()} className="w-full rounded-lg border px-3 py-2 text-xs font-semibold disabled:opacity-50">Salvar resposta rápida</button></div></section>
       </section>}
       {selectedChat?.isGroup && <section className="mt-6" aria-labelledby="baileys-participants-title">
         <h3 id="baileys-participants-title" className="flex items-center gap-2 text-sm font-semibold"><Users className="h-4 w-4" /> Participantes</h3>
