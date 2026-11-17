@@ -164,7 +164,7 @@ function MediaBlock({ media }: { media: MessageMediaDto }) {
         <img
           src={src}
           alt={media.caption ?? mediaLabel(media.kind)}
-          className="max-h-72 max-w-full rounded-md object-contain"
+          className={cn(media.kind === "sticker" ? "max-h-32 max-w-32" : "max-h-72 max-w-full", "rounded-md object-contain")}
           loading="lazy"
         />
       </a>
@@ -173,7 +173,7 @@ function MediaBlock({ media }: { media: MessageMediaDto }) {
   if (media.kind === "video") {
     const isGif = Boolean((media.payload as { gifPlayback?: boolean } | null)?.gifPlayback);
     return (
-      <video controls={!isGif} autoPlay={isGif} loop={isGif} muted={isGif} playsInline preload="metadata" className="max-h-72 max-w-full rounded-md">
+      <video controls={!isGif} autoPlay={isGif} loop={isGif} muted={isGif} playsInline preload="metadata" className={cn(isGif ? "max-h-40 max-w-56" : "max-h-72 max-w-full", "rounded-md")}>
         <source src={src} type={media.mimeType ?? undefined} />
       </video>
     );

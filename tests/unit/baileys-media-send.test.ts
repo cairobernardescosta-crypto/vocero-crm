@@ -27,5 +27,7 @@ describe("envio de mídia pelo Baileys", () => {
     expect(connector).toContain("10 * 1024 * 1024");
     expect(connector).toContain("animated: true");
     expect(thread).toContain("loop={isGif}");
+    expect(thread).toContain('media.kind === "sticker" ? "max-h-32 max-w-32"');
+    expect(thread).toContain('isGif ? "max-h-40 max-w-56"');
   });
 });

@@ -7,7 +7,7 @@ describe("ordem de persistência Baileys", () => {
   it("serializa as mensagens novas na mesma fila", () => {
     expect(connector).toContain("persistenceQueue: Promise<void>");
     expect(connector).toContain("enqueueBaileysPersistence(runtime");
-    expect(connector).toContain('if (type !== "notify") return');
+    expect(connector).toContain("shouldPersistBaileysUpsert(type, message.messageTimestamp");
   });
 
   it("protege a prévia com comparação atômica no banco", () => {

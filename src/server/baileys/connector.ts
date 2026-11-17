@@ -40,6 +40,7 @@ type Runtime = {
   backfill: Promise<void> | null;
   backfillCompleted: boolean;
   persistenceQueue: Promise<void>;
+  acceptMessagesAfter: number | null;
 };
 
 const globalRuntime = globalThis as unknown as { __voceroBaileys?: Map<string, Runtime> };
@@ -121,7 +122,7 @@ const silentLogger = {
 function runtimeFor(organizationId: string): Runtime {
   const existing = runtimes.get(organizationId);
   if (existing) return existing;
-  const value: Runtime = { socket: null, qrDataUrl: null, starting: null, manualStop: false, lock: null, retryTimer: null, watchdog: null, historyTimer: null, syncing: false, syncProgress: 0, syncFailures: 0, syncError: null, historyObserved: false, retryAttempt: 0, backfill: null, backfillCompleted: false, persistenceQueue: Promise.resolve() };
+  const value: Runtime = { socket: null, qrDataUrl: null, starting: null, manualStop: false, lock: null, retryTimer: null, watchdog: null, historyTimer: null, syncing: false, syncProgress: 0, syncFailures: 0, syncError: null, historyObserved: false, retryAttempt: 0, backfill: null, backfillCompleted: false, persistenceQueue: Promise.resolve(), acceptMessagesAfter: null };
   runtimes.set(organizationId, value);
   return value;
 }
@@ -193,6 +194,17 @@ function authDir(organizationId: string): string {
 
 export function ignoredJid(jid: string): boolean {
   return jid === "status@broadcast" || jid.endsWith("@newsletter") || jid.endsWith("@g.us");
+}
+
+export function shouldPersistBaileysUpsert(
+  type: string,
+  messageTimestamp: unknown,
+  acceptMessagesAfter: number | null
+): boolean {
+  if (acceptMessagesAfter == null || (type !== "notify" && type !== "append")) return false;
+  const timestamp = Number(messageTimestamp);
+  if (!Number.isFinite(timestamp) || timestamp <= 0) return false;
+  return timestamp * 1000 >= acceptMessagesAfter;
 }
 
 /** Mapeia somente confirmações documentadas em WebMessageInfo.Status. */
@@ -548,6 +560,9 @@ async function startInternal(organizationId: string): Promise<void> {
   installBaileysLogGuard();
   const runtime = runtimeFor(organizationId);
   runtime.manualStop = false;
+  // Tolera mensagens que chegaram durante o handshake, mas recusa qualquer
+  // lote histórico anterior à conexão atual.
+  runtime.acceptMessagesAfter = Date.now() - 30_000;
   if (!runtime.lock) {
     const reserved = await getSql().reserve();
     const result = (await reserved.unsafe(
@@ -584,8 +599,8 @@ async function startInternal(organizationId: string): Promise<void> {
   }, 30000);
   socket.ev.on("creds.update", saveCreds);
   socket.ev.on("messages.upsert", ({ messages, type }) => {
-    if (type !== "notify") return;
     for (const message of messages) {
+      if (!shouldPersistBaileysUpsert(type, message.messageTimestamp, runtime.acceptMessagesAfter)) continue;
       void enqueueBaileysPersistence(runtime, () => retryBaileysPersistence(() => persistMessage(organizationId, message, socket)))
         .catch((error: unknown) => {
           const providerId = message.key.id ?? "sem-id";
@@ -701,6 +716,7 @@ export async function stopBaileys(organizationId: string): Promise<void> {
   if (runtime.historyTimer) clearTimeout(runtime.historyTimer);
   runtime.syncing = false;
   runtime.syncProgress = 0;
+  runtime.acceptMessagesAfter = null;
   runtime.backfillCompleted = false;
   if (socket) {
     await closeBaileysSocket(socket);
