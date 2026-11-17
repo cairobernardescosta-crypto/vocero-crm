@@ -26,4 +26,14 @@ describe("painel de detalhes Baileys", () => {
     expect(client).not.toContain('p.jid.split("@")[0]');
     expect(client).not.toContain('title={selectedChat.participants.map((p) => p.jid)');
   });
+
+  it("preenche a aba do contato com dados e configuração úteis", () => {
+    expect(connector).toContain("messageCount: sql<number>");
+    expect(connector).toContain("firstMessageAt:");
+    expect(client).toContain("Mensagens salvas");
+    expect(client).toContain("Primeira mensagem");
+    expect(client).toContain("Última mensagem");
+    expect(client).toContain("Etapa da pipeline");
+    expect(client).toContain("Status do WhatsApp");
+  });
 });

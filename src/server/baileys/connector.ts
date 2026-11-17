@@ -415,7 +415,14 @@ async function persistMessage(
       if (options.history && (!media?.mediaKey || !media.directPath)) {
         throw new Error("Mídia histórica sem chave de recuperação");
       }
-      const maxBytes = MEDIA_LIMITS[mediaKind].maxBytes;
+      // Stickers animados (frequentemente chamados de GIF no WhatsApp) podem
+      // ultrapassar o limite de 100 KB da Cloud API. No recebimento Baileys,
+      // mantemos um teto próprio e seguro para não descartá-los.
+      const maxBytes = mediaKind === "sticker"
+        ? 10 * 1024 * 1024
+        : mediaKind === "video"
+          ? 64 * 1024 * 1024
+          : MEDIA_LIMITS[mediaKind].maxBytes;
       const declaredSize = Number(media?.fileLength ?? 0);
       if (Number.isFinite(declaredSize) && declaredSize > maxBytes) {
         throw new MediaValidationError("too_large", "A mídia recebida excede o limite permitido");
@@ -438,7 +445,11 @@ async function persistMessage(
       fileName,
       fileSize,
       caption: content.text,
-      payload: mediaKind === "video" && raw?.videoMessage?.gifPlayback ? { gifPlayback: true } : null,
+      payload: mediaKind === "video" && raw?.videoMessage?.gifPlayback
+        ? { gifPlayback: true }
+        : mediaKind === "sticker" && raw?.stickerMessage?.isAnimated
+          ? { animated: true }
+          : null,
       storagePath,
       fetchStatus,
       fetchError,
@@ -1172,6 +1183,16 @@ export async function baileysSnapshot(
         eq(schema.baileysChat.id, chatId)
       )).limit(1))[0] ?? null
     : null;
+  const [selectedStats] = selectedChat
+    ? await db.select({
+        messageCount: sql<number>`count(*)::int`,
+        firstMessageAt: sql<Date | null>`min(${schema.baileysMessage.occurredAt})`,
+        lastMessageAt: sql<Date | null>`max(${schema.baileysMessage.occurredAt})`,
+      }).from(schema.baileysMessage).where(and(
+        eq(schema.baileysMessage.organizationId, organizationId),
+        eq(schema.baileysMessage.chatId, selectedChat.id)
+      ))
+    : [];
   const rawParticipants = selectedChat?.isGroup && Array.isArray(selectedChat.participants)
     ? selectedChat.participants as Array<{ jid?: unknown; admin?: unknown }>
     : [];
@@ -1184,6 +1205,9 @@ export async function baileysSnapshot(
     : [];
   const chatByJid = new Map([...chats, ...knownParticipants].map((chat) => [chat.remoteJid, chat]));
   const selectedDetails = selectedChat ? {
+    messageCount: selectedStats?.messageCount ?? 0,
+    firstMessageAt: selectedStats?.firstMessageAt ?? null,
+    lastMessageAt: selectedStats?.lastMessageAt ?? null,
     participants: rawParticipants.flatMap((participant) => {
       if (typeof participant.jid !== "string") return [];
       const known = chatByJid.get(participant.jid);

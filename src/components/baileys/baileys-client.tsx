@@ -3,7 +3,7 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import Image from "next/image";
 import { useSearchParams } from "next/navigation";
-import { ChevronLeft, LoaderCircle, LogOut, QrCode, Search, Users, X } from "lucide-react";
+import { CalendarDays, ChevronLeft, LoaderCircle, LogOut, MessageCircle, Phone, QrCode, Search, Users, X } from "lucide-react";
 import { ContactAvatar } from "@/components/avatar";
 import { Composer } from "@/components/inbox/composer";
 import { ConversationList } from "@/components/inbox/conversation-list";
@@ -18,7 +18,7 @@ type RawMedia = { id: string; kind: "image" | "video" | "audio" | "document" | "
 type RawMessage = { id: string; chatId: string; providerId: string; direction: "in" | "out"; type: string; text: string | null; status: string; occurredAt: string; media: RawMedia | null; replyTo: MessageDto["replyTo"] };
 type Stage = { id: string; name: string; kind: string };
 type ParticipantDetail = { jid: string; name: string | null; phone: string | null; admin: "admin" | "superadmin" | null };
-type Snapshot = { connection: Connection; qr: string | null; syncing: boolean; syncProgress: number; syncError: string | null; chats: Chat[]; stages: Stage[]; selectedDetails: { participants: ParticipantDetail[] } | null; messages: RawMessage[]; pagination: { chatsNextCursor: string | null; messagesNextCursor: string | null } };
+type Snapshot = { connection: Connection; qr: string | null; syncing: boolean; syncProgress: number; syncError: string | null; chats: Chat[]; stages: Stage[]; selectedDetails: { participants: ParticipantDetail[]; messageCount: number; firstMessageAt: string | null; lastMessageAt: string | null } | null; messages: RawMessage[]; pagination: { chatsNextCursor: string | null; messagesNextCursor: string | null } };
 type SearchResult = { messageId: string; chatId: string; chatName: string | null; chatPhone: string | null; avatarUrl: string | null; text: string | null; direction: "in" | "out"; occurredAt: string };
 
 const STATUS: Record<string, string> = { disconnected: "Desconectado", waiting_qr: "Aguardando QR", connecting: "Conectando", connected: "Conectado", reconnecting: "Reconectando", error: "Erro" };
@@ -238,6 +238,19 @@ export function BaileysClient() {
         <h2 className="mt-3 break-words text-lg font-semibold">{selected.contact.name}</h2>
         <p className="mt-1 text-sm text-text-3">{selectedChat?.isGroup ? `${data?.selectedDetails?.participants.length ?? 0} participantes` : selected.contact.phone ? formatPhone(selected.contact.phone) : "WhatsApp Web"}</p>
       </div>
+      {!selectedChat?.isGroup && <section className="mt-6 space-y-3" aria-label="Informações do contato">
+        <div className="rounded-xl border bg-subtle/40 p-3">
+          <h3 className="text-xs font-semibold uppercase tracking-wide text-text-3">Contato</h3>
+          <dl className="mt-3 space-y-3 text-sm">
+            <div className="flex items-center gap-3"><Phone className="h-4 w-4 shrink-0 text-text-3" /><div><dt className="text-xs text-text-3">Telefone</dt><dd className="font-medium">{selected.contact.phone ? formatPhone(selected.contact.phone) : "Não identificado"}</dd></div></div>
+            <div className="flex items-center gap-3"><MessageCircle className="h-4 w-4 shrink-0 text-text-3" /><div><dt className="text-xs text-text-3">Mensagens salvas</dt><dd className="font-medium">{data?.selectedDetails?.messageCount ?? 0}</dd></div></div>
+            <div className="flex items-center gap-3"><CalendarDays className="h-4 w-4 shrink-0 text-text-3" /><div><dt className="text-xs text-text-3">Primeira mensagem</dt><dd className="font-medium">{data?.selectedDetails?.firstMessageAt ? new Date(data.selectedDetails.firstMessageAt).toLocaleString("pt-BR") : "Ainda não disponível"}</dd></div></div>
+            <div className="flex items-center gap-3"><CalendarDays className="h-4 w-4 shrink-0 text-text-3" /><div><dt className="text-xs text-text-3">Última mensagem</dt><dd className="font-medium">{data?.selectedDetails?.lastMessageAt ? new Date(data.selectedDetails.lastMessageAt).toLocaleString("pt-BR") : "Ainda não disponível"}</dd></div></div>
+          </dl>
+        </div>
+        <label className="block rounded-xl border p-3 text-left text-sm"><span className="mb-2 block text-xs font-semibold uppercase tracking-wide text-text-3">Etapa da pipeline</span><select aria-label="Etapa do contato" value={selectedChat?.stageId ?? ""} onChange={(event) => void action({ action: "set_stage", chatId: selected.id, stageId: event.target.value })} className="w-full rounded-lg border bg-background px-3 py-2"><option value="" disabled>Selecionar etapa</option>{(data?.stages ?? []).map((stage) => <option key={stage.id} value={stage.id}>{stage.name}</option>)}</select></label>
+        <div className="flex items-center justify-between rounded-xl border p-3 text-sm"><span>Status do WhatsApp</span><span className={cn("rounded-full px-2 py-1 text-xs font-semibold", connected ? "bg-success-soft text-success-text" : "bg-warning-soft text-warning-text")}>{STATUS[data?.connection.status ?? "disconnected"]}</span></div>
+      </section>}
       {selectedChat?.isGroup && <section className="mt-6" aria-labelledby="baileys-participants-title">
         <h3 id="baileys-participants-title" className="flex items-center gap-2 text-sm font-semibold"><Users className="h-4 w-4" /> Participantes</h3>
         <ul className="mt-3 space-y-2">

@@ -23,6 +23,9 @@ describe("envio de mídia pelo Baileys", () => {
     const connector = readFileSync("src/server/baileys/connector.ts", "utf8");
     const thread = readFileSync("src/components/inbox/message-thread.tsx", "utf8");
     expect(connector).toContain("gifPlayback: true");
+    expect(connector).toContain('mediaKind === "sticker"');
+    expect(connector).toContain("10 * 1024 * 1024");
+    expect(connector).toContain("animated: true");
     expect(thread).toContain("loop={isGif}");
   });
 });

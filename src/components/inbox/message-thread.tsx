@@ -39,6 +39,14 @@ import { ForwardDialog } from "./forward-dialog";
 import { LinkedText } from "./linked-text";
 import { QuoteBlock } from "./quote-block";
 
+export function isEmojiOnly(text: string | null | undefined): boolean {
+  const value = text?.trim();
+  if (!value) return false;
+  const allowed = /^(?:\p{Extended_Pictographic}|\p{Regional_Indicator}|\p{Emoji_Modifier}|[\u200D\uFE0F\u20E3\s0-9#*])+$/u;
+  const marker = /(?:\p{Extended_Pictographic}|\p{Regional_Indicator}|\u20E3)/u;
+  return allowed.test(value) && marker.test(value);
+}
+
 function StatusTicks({ status }: { status: MessageDto["status"] }) {
   const cls = "h-[13px] w-[13px]";
   if (status === "pending") return <Clock3 className={cn(cls, "text-text-4")} strokeWidth={1.7} />;
@@ -599,7 +607,7 @@ export function MessageThread({
                     )}
                   </span>
                 ) : m.type === "text" || m.type === "template" ? (
-                  <span className="whitespace-pre-wrap break-words">
+                  <span className={cn("whitespace-pre-wrap break-words", isEmojiOnly(m.text) && "text-[22px] leading-[1.2]")}>
                     <LinkedText text={m.text} />
                   </span>
                 ) : (
