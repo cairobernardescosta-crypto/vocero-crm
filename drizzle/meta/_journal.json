@@ -253,6 +253,13 @@
       "when": 1795122000000,
       "tag": "0035_baileys_dados_contato",
       "breakpoints": true
+    },
+    {
+      "idx": 36,
+      "version": "7",
+      "when": 1795208400000,
+      "tag": "0036_usuario_telefone",
+      "breakpoints": true
     }
   ]
 }

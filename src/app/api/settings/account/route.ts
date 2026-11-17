@@ -9,11 +9,13 @@ export const dynamic = "force-dynamic";
 const updateSchema = z.object({
   name: z.string().trim().min(1).max(120),
   email: z.string().trim().email().max(254),
+  phone: z.string().trim().max(30).nullable(),
+  image: z.string().url().max(1000).nullable(),
   password: z.string().max(128).nullable(),
 });
 
 export const GET = withAuth(async (session) => {
-  const [user] = await getDb().select({ name: schema.user.name, email: schema.user.email, image: schema.user.image })
+  const [user] = await getDb().select({ name: schema.user.name, email: schema.user.email, image: schema.user.image, phone: schema.user.phone })
     .from(schema.user).where(eq(schema.user.id, session.userId)).limit(1);
   if (!user) return apiError(404, "not_found", "Usuário não encontrado");
   return Response.json({ user, role: session.role });
@@ -27,6 +29,8 @@ export const PUT = withAuth(async (session, req: Request) => {
       await tx.update(schema.user).set({
         name: body.data.name,
         email: body.data.email.toLowerCase(),
+        phone: body.data.phone,
+        image: body.data.image,
         updatedAt: new Date(),
       }).where(eq(schema.user.id, session.userId));
       if (body.data.password) {
