@@ -41,6 +41,8 @@ type Runtime = {
   backfillCompleted: boolean;
   persistenceQueue: Promise<void>;
   acceptMessagesAfter: number | null;
+  lastUpsertAt: Date | null;
+  lastUpsertType: string | null;
 };
 
 const globalRuntime = globalThis as unknown as { __voceroBaileys?: Map<string, Runtime> };
@@ -122,7 +124,7 @@ const silentLogger = {
 function runtimeFor(organizationId: string): Runtime {
   const existing = runtimes.get(organizationId);
   if (existing) return existing;
-  const value: Runtime = { socket: null, qrDataUrl: null, starting: null, manualStop: false, lock: null, retryTimer: null, watchdog: null, historyTimer: null, syncing: false, syncProgress: 0, syncFailures: 0, syncError: null, historyObserved: false, retryAttempt: 0, backfill: null, backfillCompleted: false, persistenceQueue: Promise.resolve(), acceptMessagesAfter: null };
+  const value: Runtime = { socket: null, qrDataUrl: null, starting: null, manualStop: false, lock: null, retryTimer: null, watchdog: null, historyTimer: null, syncing: false, syncProgress: 0, syncFailures: 0, syncError: null, historyObserved: false, retryAttempt: 0, backfill: null, backfillCompleted: false, persistenceQueue: Promise.resolve(), acceptMessagesAfter: null, lastUpsertAt: null, lastUpsertType: null };
   runtimes.set(organizationId, value);
   return value;
 }
@@ -198,13 +200,13 @@ export function ignoredJid(jid: string): boolean {
 
 export function shouldPersistBaileysUpsert(
   type: string,
-  messageTimestamp: unknown,
-  acceptMessagesAfter: number | null
+  _messageTimestamp?: unknown,
+  _acceptMessagesAfter?: number | null
 ): boolean {
-  if (acceptMessagesAfter == null || (type !== "notify" && type !== "append")) return false;
-  const timestamp = Number(messageTimestamp);
-  if (!Number.isFinite(timestamp) || timestamp <= 0) return false;
-  return timestamp * 1000 >= acceptMessagesAfter;
+  // O histórico completo chega por `messaging-history.set`, que é ignorado.
+  // `append` também pode carregar mensagens novas que ficaram aguardando no
+  // servidor enquanto o aparelho estava offline; não filtre pelo relógio.
+  return type === "notify" || type === "append";
 }
 
 /** Mapeia somente confirmações documentadas em WebMessageInfo.Status. */
@@ -347,7 +349,12 @@ async function persistMessage(
   const quoted = baileysQuotedContext(message.message);
   const occurredAt = new Date(Number(message.messageTimestamp ?? Math.floor(Date.now() / 1000)) * 1000);
   const isGroup = jid.endsWith("@g.us");
-  const phone = jid.endsWith("@s.whatsapp.net") ? jid.split("@")[0] ?? null : null;
+  const phoneJid = jid.endsWith("@s.whatsapp.net")
+    ? jid
+    : !message.key.fromMe
+      ? message.key.senderPn ?? message.key.participantPn ?? null
+      : null;
+  const phone = phoneJid?.endsWith("@s.whatsapp.net") ? phoneJid.split("@")[0] ?? null : null;
   let name = options.contactName ?? message.pushName ?? null;
   let avatarUrl: string | null = null;
   let participants: unknown[] | null = null;
@@ -385,6 +392,7 @@ async function persistMessage(
       target: [schema.baileysChat.organizationId, schema.baileysChat.remoteJid],
       set: {
         name: name ?? undefined,
+        phone: phone ?? undefined,
         isGroup,
         avatarUrl: avatarUrl ?? undefined,
         participants: participants ?? undefined,
@@ -599,6 +607,8 @@ async function startInternal(organizationId: string): Promise<void> {
   }, 30000);
   socket.ev.on("creds.update", saveCreds);
   socket.ev.on("messages.upsert", ({ messages, type }) => {
+    runtime.lastUpsertAt = new Date();
+    runtime.lastUpsertType = type;
     for (const message of messages) {
       if (!shouldPersistBaileysUpsert(type, message.messageTimestamp, runtime.acceptMessagesAfter)) continue;
       void enqueueBaileysPersistence(runtime, () => retryBaileysPersistence(() => persistMessage(organizationId, message, socket)))
@@ -1244,6 +1254,10 @@ export async function baileysSnapshot(
     syncing: runtimeFor(organizationId).syncing,
     syncProgress: runtimeFor(organizationId).syncProgress,
     syncError: runtimeFor(organizationId).syncError,
+    diagnostics: {
+      lastUpsertAt: runtimeFor(organizationId).lastUpsertAt,
+      lastUpsertType: runtimeFor(organizationId).lastUpsertType,
+    },
     chats: responseChats.map((chat) => ({
       ...chat,
       stageName: stages.find((stage) => stage.id === chat.stageId)?.name ?? null,

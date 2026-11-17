@@ -11,7 +11,7 @@ describe("regra Baileys somente mensagens novas", () => {
     const cutoff = Date.UTC(2026, 10, 17, 12, 0, 0);
     expect(shouldPersistBaileysUpsert("notify", cutoff / 1000, cutoff)).toBe(true);
     expect(shouldPersistBaileysUpsert("append", cutoff / 1000 + 1, cutoff)).toBe(true);
-    expect(shouldPersistBaileysUpsert("append", cutoff / 1000 - 1, cutoff)).toBe(false);
+    expect(shouldPersistBaileysUpsert("append", cutoff / 1000 - 1, cutoff)).toBe(true);
     expect(shouldPersistBaileysUpsert("prepend", cutoff / 1000 + 1, cutoff)).toBe(false);
   });
 

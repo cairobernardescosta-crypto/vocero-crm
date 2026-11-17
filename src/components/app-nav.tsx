@@ -121,6 +121,11 @@ export function AppNav({
     } catch {}
   }, [baileys, pathname]);
 
+  useEffect(() => {
+    if (!baileys) return;
+    document.cookie = `vocero-modo-whatsapp=${modo}; path=/; max-age=31536000; samesite=lax`;
+  }, [baileys, modo]);
+
   const cambiarModo = (siguiente: ModoWhatsApp) => {
     setModo(siguiente);
     try { window.localStorage.setItem("vocero-modo-whatsapp", siguiente); } catch {}
@@ -357,7 +362,7 @@ export function AppNav({
       <BotonInstalar className={navItemClass(false)} />
 
       {/* Ajustes va abajo, solo: no es trabajo del día. */}
-      {renderItem(SETTINGS_ITEM)}
+      {renderItem({ ...SETTINGS_ITEM, href: modo === "baileys" ? "/baileys/settings" : "/settings" })}
 
       <div className="mt-1 flex items-center gap-2.5 rounded-sm px-2.5 py-2 hover:bg-accent">
         <span className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-brand-soft text-xs font-bold text-brand-text">
@@ -525,7 +530,7 @@ function Riel({
       </div>
       <div className="mt-3 flex flex-col items-center gap-2.5">
         <span className="flex h-11 w-11 items-center justify-center">{campana}</span>
-        {boton(SETTINGS_ITEM)}
+        {boton({ ...SETTINGS_ITEM, href: modo === "baileys" ? "/baileys/settings" : "/settings" })}
         <div ref={cuentaRef} className="relative">
           <button
             type="button"

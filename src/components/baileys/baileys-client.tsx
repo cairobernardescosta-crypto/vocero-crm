@@ -3,7 +3,7 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import Image from "next/image";
 import { useSearchParams } from "next/navigation";
-import { CalendarDays, ChevronLeft, LoaderCircle, LogOut, MessageCircle, Phone, QrCode, Search, Users, X } from "lucide-react";
+import { CalendarDays, ChevronLeft, Copy, ExternalLink, LoaderCircle, LogOut, MessageCircle, Phone, QrCode, Search, Users, X } from "lucide-react";
 import { ContactAvatar } from "@/components/avatar";
 import { Composer } from "@/components/inbox/composer";
 import { ConversationList } from "@/components/inbox/conversation-list";
@@ -117,8 +117,9 @@ export function BaileysClient() {
   }, [load]);
   useEffect(() => {
     const status = data?.connection.status;
-    if (!status || (!["connecting", "reconnecting", "waiting_qr"].includes(status) && !data?.syncing)) return;
-    const timer = window.setInterval(() => void load().catch((e: unknown) => setError(e instanceof Error ? e.message : "Não foi possível atualizar a conexão Baileys")), 2000);
+    if (!status) return;
+    const interval = status === "connected" ? 3000 : 2000;
+    const timer = window.setInterval(() => void load().catch((e: unknown) => setError(e instanceof Error ? e.message : "Não foi possível atualizar a conexão Baileys")), interval);
     return () => window.clearInterval(timer);
   }, [data?.connection.status, data?.syncing, load]);
   useEffect(() => {
@@ -247,6 +248,7 @@ export function BaileysClient() {
             <div className="flex items-center gap-3"><CalendarDays className="h-4 w-4 shrink-0 text-text-3" /><div><dt className="text-xs text-text-3">Primeira mensagem</dt><dd className="font-medium">{data?.selectedDetails?.firstMessageAt ? new Date(data.selectedDetails.firstMessageAt).toLocaleString("pt-BR") : "Ainda não disponível"}</dd></div></div>
             <div className="flex items-center gap-3"><CalendarDays className="h-4 w-4 shrink-0 text-text-3" /><div><dt className="text-xs text-text-3">Última mensagem</dt><dd className="font-medium">{data?.selectedDetails?.lastMessageAt ? new Date(data.selectedDetails.lastMessageAt).toLocaleString("pt-BR") : "Ainda não disponível"}</dd></div></div>
           </dl>
+          {selected.contact.phone && <div className="mt-4 grid grid-cols-2 gap-2"><button type="button" onClick={() => void navigator.clipboard.writeText(selected.contact.phone ?? "")} className="inline-flex items-center justify-center gap-2 rounded-lg border bg-background px-3 py-2 text-xs font-semibold"><Copy className="h-3.5 w-3.5" />Copiar número</button><a href={`https://wa.me/${selected.contact.phone}`} target="_blank" rel="noreferrer noopener" className="inline-flex items-center justify-center gap-2 rounded-lg border bg-background px-3 py-2 text-xs font-semibold"><ExternalLink className="h-3.5 w-3.5" />Abrir WhatsApp</a></div>}
         </div>
         <label className="block rounded-xl border p-3 text-left text-sm"><span className="mb-2 block text-xs font-semibold uppercase tracking-wide text-text-3">Etapa da pipeline</span><select aria-label="Etapa do contato" value={selectedChat?.stageId ?? ""} onChange={(event) => void action({ action: "set_stage", chatId: selected.id, stageId: event.target.value })} className="w-full rounded-lg border bg-background px-3 py-2"><option value="" disabled>Selecionar etapa</option>{(data?.stages ?? []).map((stage) => <option key={stage.id} value={stage.id}>{stage.name}</option>)}</select></label>
         <div className="flex items-center justify-between rounded-xl border p-3 text-sm"><span>Status do WhatsApp</span><span className={cn("rounded-full px-2 py-1 text-xs font-semibold", connected ? "bg-success-soft text-success-text" : "bg-warning-soft text-warning-text")}>{STATUS[data?.connection.status ?? "disconnected"]}</span></div>
