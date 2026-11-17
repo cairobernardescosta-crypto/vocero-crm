@@ -13,7 +13,7 @@ import { cn, formatPhone } from "@/lib/utils";
 
 type Connection = { status: string; phone: string | null; error: string | null };
 type Participant = { jid: string; admin?: string | null };
-type Chat = { id: string; name: string | null; phone: string | null; isGroup: boolean; avatarUrl: string | null; participants: Participant[] | null; stageId: string | null; stageName: string | null; lastMessage: string | null; lastMessageAt: string | null; unreadCount: number };
+type Chat = { id: string; name: string | null; phone: string | null; email: string | null; address: string | null; birthday: string | null; lastPurchaseAt: string | null; lastPurchaseAmount: number | null; isGroup: boolean; avatarUrl: string | null; participants: Participant[] | null; stageId: string | null; stageName: string | null; lastMessage: string | null; lastMessageAt: string | null; unreadCount: number };
 type RawMedia = { id: string; kind: "image" | "video" | "audio" | "document" | "sticker" | "location" | "contacts"; mimeType: string | null; fileName: string | null; fileSize: number | null; caption: string | null; fetchStatus: "available" | "pending" | "failed"; payload: unknown };
 type RawMessage = { id: string; chatId: string; providerId: string; direction: "in" | "out"; type: string; text: string | null; status: string; occurredAt: string; media: RawMedia | null; replyTo: MessageDto["replyTo"] };
 type Stage = { id: string; name: string; kind: string };
@@ -25,7 +25,7 @@ type QuickReply = { id: string; atajo: string; texto: string };
 const STATUS: Record<string, string> = { disconnected: "Desconectado", waiting_qr: "Aguardando QR", connecting: "Conectando", connected: "Conectado", reconnecting: "Reconectando", error: "Erro" };
 
 function toConversation(chat: Chat, connected: boolean): ConversationDto {
-  return { id: chat.id, channel: "whatsapp", contact: { id: `baileys:${chat.id}`, name: chat.name || chat.phone || "Conversa", phone: chat.phone, avatarUrl: chat.avatarUrl }, stageName: chat.stageName, aiEnabled: false, handoffAt: null, handoffReason: null, lastInboundAt: chat.lastMessageAt, lastMessageAt: chat.lastMessageAt, unreadCount: chat.unreadCount, windowOpen: connected, windowRemainingMs: connected ? Number.MAX_SAFE_INTEGER : 0, humanWindow: null, composer: { media: connected, structured: false, quoteReply: connected }, preview: chat.lastMessage, anuncio: null };
+  return { id: chat.id, channel: "whatsapp", contact: { id: `baileys:${chat.id}`, name: chat.name || chat.phone || "Conversa", phone: chat.phone, avatarUrl: chat.avatarUrl }, stageName: chat.stageName, aiEnabled: false, handoffAt: null, handoffReason: null, lastInboundAt: chat.lastMessageAt, lastMessageAt: chat.lastMessageAt, unreadCount: chat.unreadCount, windowOpen: connected, windowRemainingMs: 0, unlimitedWindow: connected, humanWindow: null, composer: { media: connected, structured: false, quoteReply: connected }, preview: chat.lastMessage, anuncio: null };
 }
 
 function toMessage(message: RawMessage): MessageDto {
@@ -55,6 +55,11 @@ export function BaileysClient() {
   const [focusMessageId, setFocusMessageId] = useState<string | null>(null);
   const [contactNameDraft, setContactNameDraft] = useState("");
   const [contactPhoneDraft, setContactPhoneDraft] = useState("");
+  const [contactEmailDraft, setContactEmailDraft] = useState("");
+  const [contactAddressDraft, setContactAddressDraft] = useState("");
+  const [contactBirthdayDraft, setContactBirthdayDraft] = useState("");
+  const [lastPurchaseAtDraft, setLastPurchaseAtDraft] = useState("");
+  const [lastPurchaseAmountDraft, setLastPurchaseAmountDraft] = useState("");
   const [quickReplies, setQuickReplies] = useState<QuickReply[]>([]);
   const [newShortcut, setNewShortcut] = useState("");
   const [newReplyText, setNewReplyText] = useState("");
@@ -152,7 +157,12 @@ export function BaileysClient() {
   useEffect(() => {
     setContactNameDraft(draftContact?.name || draftContact?.phone || "Conversa");
     setContactPhoneDraft(draftContact?.phone ?? "");
-  }, [draftContact?.name, draftContact?.phone]);
+    setContactEmailDraft(draftContact?.email ?? "");
+    setContactAddressDraft(draftContact?.address ?? "");
+    setContactBirthdayDraft(draftContact?.birthday ?? "");
+    setLastPurchaseAtDraft(draftContact?.lastPurchaseAt?.slice(0, 10) ?? "");
+    setLastPurchaseAmountDraft(draftContact?.lastPurchaseAmount != null ? (draftContact.lastPurchaseAmount / 100).toFixed(2).replace(".", ",") : "");
+  }, [draftContact]);
   useEffect(() => {
     if (!detailsOpen) return;
     void fetch("/api/quick-replies", { cache: "no-store" }).then(async (response) => {
@@ -175,11 +185,15 @@ export function BaileysClient() {
   }
 
   async function saveQuickReply() {
-    const response = await fetch("/api/quick-replies", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ atajo: newShortcut, texto: newReplyText }) });
-    if (!response.ok) { setError("Não foi possível salvar a resposta rápida"); return; }
-    const body = await response.json() as { resposta: QuickReply };
-    setQuickReplies((current) => [...current, body.resposta]);
-    setNewShortcut(""); setNewReplyText("");
+    setBusy(true); setError(null);
+    try {
+      const response = await fetch("/api/quick-replies", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ atajo: newShortcut, texto: newReplyText }) });
+      const body = await response.json().catch(() => null) as { resposta?: QuickReply; error?: { message?: string } } | null;
+      if (!response.ok || !body?.resposta?.id) throw new Error(body?.error?.message || "Não foi possível salvar a resposta rápida");
+      setQuickReplies((current) => [...current.filter((item) => item.id !== body.resposta!.id), body.resposta!]);
+      setNewShortcut(""); setNewReplyText("");
+    } catch (e) { setError(e instanceof Error ? e.message : "Não foi possível salvar a resposta rápida"); }
+    finally { setBusy(false); }
   }
 
   async function searchMessages(append = false) {
@@ -269,7 +283,15 @@ export function BaileysClient() {
       {!selectedChat?.isGroup && <section className="mt-6 space-y-3" aria-label="Informações do contato">
         <div className="rounded-xl border bg-subtle/40 p-3">
           <h3 className="text-xs font-semibold uppercase tracking-wide text-text-3">Contato</h3>
-          <div className="mt-3 space-y-2"><label className="block text-xs text-text-3">Nome<input value={contactNameDraft} maxLength={120} onChange={(event) => setContactNameDraft(event.target.value)} className="mt-1 w-full rounded-lg border bg-background px-3 py-2 text-sm text-foreground" /></label><label className="block text-xs text-text-3">Telefone internacional<input value={contactPhoneDraft} inputMode="tel" placeholder="5511999999999" onChange={(event) => setContactPhoneDraft(event.target.value.replace(/[^\d+]/g, ""))} className="mt-1 w-full rounded-lg border bg-background px-3 py-2 text-sm text-foreground" /></label><button type="button" disabled={!contactNameDraft.trim() || (contactPhoneDraft.length > 0 && !/^\+?[1-9]\d{7,14}$/.test(contactPhoneDraft))} onClick={() => void action({ action: "update_contact", chatId: selected.id, name: contactNameDraft, phone: contactPhoneDraft || null })} className="w-full rounded-lg bg-brand px-3 py-2 text-xs font-semibold text-brand-fg disabled:opacity-50">Salvar contato</button></div>
+          <div className="mt-3 space-y-2">
+            <label className="block text-xs text-text-3">Nome<input value={contactNameDraft} maxLength={120} onChange={(event) => setContactNameDraft(event.target.value)} className="mt-1 w-full rounded-lg border bg-background px-3 py-2 text-sm text-foreground" /></label>
+            <label className="block text-xs text-text-3">Telefone internacional<input value={contactPhoneDraft} inputMode="tel" placeholder="5511999999999" onChange={(event) => setContactPhoneDraft(event.target.value.replace(/[^\d+]/g, ""))} className="mt-1 w-full rounded-lg border bg-background px-3 py-2 text-sm text-foreground" /></label>
+            <label className="block text-xs text-text-3">E-mail<input type="email" value={contactEmailDraft} maxLength={254} onChange={(event) => setContactEmailDraft(event.target.value)} className="mt-1 w-full rounded-lg border bg-background px-3 py-2 text-sm text-foreground" /></label>
+            <label className="block text-xs text-text-3">Endereço<textarea value={contactAddressDraft} maxLength={300} rows={2} onChange={(event) => setContactAddressDraft(event.target.value)} className="mt-1 w-full rounded-lg border bg-background px-3 py-2 text-sm text-foreground" /></label>
+            <div className="grid grid-cols-2 gap-2"><label className="block text-xs text-text-3">Aniversário<input type="date" value={contactBirthdayDraft} onChange={(event) => setContactBirthdayDraft(event.target.value)} className="mt-1 w-full rounded-lg border bg-background px-2 py-2 text-sm text-foreground" /></label><label className="block text-xs text-text-3">Última compra<input type="date" value={lastPurchaseAtDraft} onChange={(event) => setLastPurchaseAtDraft(event.target.value)} className="mt-1 w-full rounded-lg border bg-background px-2 py-2 text-sm text-foreground" /></label></div>
+            <label className="block text-xs text-text-3">Valor da última compra (R$)<input value={lastPurchaseAmountDraft} inputMode="decimal" placeholder="0,00" onChange={(event) => setLastPurchaseAmountDraft(event.target.value.replace(/[^\d,.]/g, ""))} className="mt-1 w-full rounded-lg border bg-background px-3 py-2 text-sm text-foreground" /></label>
+            <button type="button" disabled={busy || !contactNameDraft.trim() || (contactPhoneDraft.length > 0 && !/^\+?[1-9]\d{7,14}$/.test(contactPhoneDraft)) || (contactEmailDraft.length > 0 && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(contactEmailDraft))} onClick={() => { const amount = Number(lastPurchaseAmountDraft.replace(".", "").replace(",", ".")); void action({ action: "update_contact", chatId: selected.id, name: contactNameDraft, phone: contactPhoneDraft || null, email: contactEmailDraft.trim() || null, address: contactAddressDraft.trim() || null, birthday: contactBirthdayDraft || null, lastPurchaseAt: lastPurchaseAtDraft || null, lastPurchaseAmount: lastPurchaseAmountDraft ? Math.round(amount * 100) : null }); }} className="w-full rounded-lg bg-brand px-3 py-2 text-xs font-semibold text-brand-fg disabled:opacity-50">Salvar contato</button>
+          </div>
           <dl className="mt-3 space-y-3 text-sm">
             <div className="flex items-center gap-3"><Phone className="h-4 w-4 shrink-0 text-text-3" /><div><dt className="text-xs text-text-3">Telefone</dt><dd className="font-medium">{selected.contact.phone ? formatPhone(selected.contact.phone) : "Não identificado"}</dd></div></div>
             <div className="flex items-center gap-3"><MessageCircle className="h-4 w-4 shrink-0 text-text-3" /><div><dt className="text-xs text-text-3">Mensagens salvas</dt><dd className="font-medium">{data?.selectedDetails?.messageCount ?? 0}</dd></div></div>
@@ -280,7 +302,7 @@ export function BaileysClient() {
         </div>
         <label className="block rounded-xl border p-3 text-left text-sm"><span className="mb-2 block text-xs font-semibold uppercase tracking-wide text-text-3">Etapa da pipeline</span><select aria-label="Etapa do contato" value={selectedChat?.stageId ?? ""} onChange={(event) => void action({ action: "set_stage", chatId: selected.id, stageId: event.target.value })} className="w-full rounded-lg border bg-background px-3 py-2"><option value="" disabled>Selecionar etapa</option>{(data?.stages ?? []).map((stage) => <option key={stage.id} value={stage.id}>{stage.name}</option>)}</select></label>
         <div className="flex items-center justify-between rounded-xl border p-3 text-sm"><span>Status do WhatsApp</span><span className={cn("rounded-full px-2 py-1 text-xs font-semibold", connected ? "bg-success-soft text-success-text" : "bg-warning-soft text-warning-text")}>{STATUS[data?.connection.status ?? "disconnected"]}</span></div>
-        <section className="rounded-xl border p-3 text-left"><h3 className="text-xs font-semibold uppercase tracking-wide text-text-3">Respostas rápidas</h3><div className="mt-2 max-h-44 space-y-2 overflow-y-auto">{quickReplies.map((reply) => <div key={reply.id} className="rounded-lg border bg-background p-2"><p className="font-mono text-xs font-semibold">/{reply.atajo}</p><p className="mt-1 line-clamp-2 text-xs text-text-2">{reply.texto}</p><button type="button" disabled={!connected} onClick={() => void action({ action: "send", chatId: selected.id, text: reply.texto.replaceAll("{nombre}", selected.contact.name.split(" ")[0] ?? selected.contact.name) })} className="mt-2 rounded-md border px-2 py-1 text-xs font-semibold disabled:opacity-50">Enviar</button></div>)}{!quickReplies.length && <p className="text-xs text-text-3">Nenhuma resposta salva.</p>}</div><div className="mt-3 space-y-2 border-t pt-3"><input value={newShortcut} onChange={(event) => setNewShortcut(event.target.value)} placeholder="Atalho" className="w-full rounded-lg border bg-background px-2 py-1.5 text-xs" /><textarea value={newReplyText} onChange={(event) => setNewReplyText(event.target.value)} placeholder="Mensagem para salvar" rows={3} className="w-full rounded-lg border bg-background px-2 py-1.5 text-xs" /><button type="button" disabled={!newShortcut.trim() || !newReplyText.trim()} onClick={() => void saveQuickReply()} className="w-full rounded-lg border px-3 py-2 text-xs font-semibold disabled:opacity-50">Salvar resposta rápida</button></div></section>
+        <section className="rounded-xl border p-3 text-left"><h3 className="text-xs font-semibold uppercase tracking-wide text-text-3">Respostas rápidas</h3><div className="mt-2 max-h-44 space-y-2 overflow-y-auto">{quickReplies.filter((reply) => reply?.id && reply?.atajo && reply?.texto).map((reply) => <div key={reply.id} className="rounded-lg border bg-background p-2"><p className="font-mono text-xs font-semibold">/{reply.atajo}</p><p className="mt-1 line-clamp-2 text-xs text-text-2">{reply.texto}</p><button type="button" disabled={!connected} onClick={() => void action({ action: "send", chatId: selected.id, text: reply.texto.replaceAll("{nome}", selected.contact.name.split(" ")[0] ?? selected.contact.name).replaceAll("{nombre}", selected.contact.name.split(" ")[0] ?? selected.contact.name) })} className="mt-2 rounded-md border px-2 py-1 text-xs font-semibold disabled:opacity-50">Enviar</button></div>)}{!quickReplies.length && <p className="text-xs text-text-3">Nenhuma resposta salva.</p>}</div><div className="mt-3 space-y-2 border-t pt-3"><input value={newShortcut} onChange={(event) => setNewShortcut(event.target.value)} placeholder="Atalho" className="w-full rounded-lg border bg-background px-2 py-1.5 text-xs" /><textarea value={newReplyText} onChange={(event) => setNewReplyText(event.target.value)} placeholder="Mensagem para salvar" rows={3} className="w-full rounded-lg border bg-background px-2 py-1.5 text-xs" /><button type="button" disabled={busy || !newShortcut.trim() || !newReplyText.trim()} onClick={() => void saveQuickReply()} className="w-full rounded-lg border px-3 py-2 text-xs font-semibold disabled:opacity-50">{busy ? "Salvando…" : "Salvar resposta rápida"}</button></div></section>
       </section>}
       {selectedChat?.isGroup && <section className="mt-6" aria-labelledby="baileys-participants-title">
         <h3 id="baileys-participants-title" className="flex items-center gap-2 text-sm font-semibold"><Users className="h-4 w-4" /> Participantes</h3>

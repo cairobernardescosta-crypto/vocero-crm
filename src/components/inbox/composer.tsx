@@ -871,7 +871,9 @@ export function Composer({
           <span />
         )}
         <p className="font-mono text-[10.5px] tracking-[0.04em] text-text-3">
-          {soloPersona
+          {conversation.unlimitedWindow
+            ? "WhatsApp conectado · envio liberado"
+            : soloPersona
             ? `Janela humana · restam ${formatRemainingLong(human!.remainingMs)}`
             : `Janela aberta · restam ${formatRemaining(conversation.windowRemainingMs)}`}
         </p>

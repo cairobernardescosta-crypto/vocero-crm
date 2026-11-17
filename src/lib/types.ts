@@ -16,6 +16,7 @@ export type ConversationDto = {
   unreadCount: number;
   windowOpen: boolean;
   windowRemainingMs: number;
+  unlimitedWindow?: boolean;
   /**
    * 024 — La ventana humana del canal (Instagram y Messenger:
    * hasta 7 días con la etiqueta de agente humano). `null` en un canal que no

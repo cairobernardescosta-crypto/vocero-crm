@@ -16,7 +16,12 @@ const actionSchema = z.discriminatedUnion("action", [
   z.object({ action: z.literal("disconnect") }),
   z.object({ action: z.literal("mark_read"), chatId: z.string().min(1).max(80) }),
   z.object({ action: z.literal("set_stage"), chatId: z.string().min(1).max(80), stageId: z.string().min(1).max(80) }),
-  z.object({ action: z.literal("update_contact"), chatId: z.string().min(1).max(80), name: z.string().trim().min(1).max(120), phone: z.string().regex(/^\+?[1-9]\d{7,14}$/).nullable() }),
+  z.object({
+    action: z.literal("update_contact"), chatId: z.string().min(1).max(80), name: z.string().trim().min(1).max(120),
+    phone: z.string().regex(/^\+?[1-9]\d{7,14}$/).nullable(), email: z.string().email().max(254).nullable(),
+    address: z.string().trim().max(300).nullable(), birthday: z.string().regex(/^\d{4}-\d{2}-\d{2}$/).nullable(),
+    lastPurchaseAt: z.string().regex(/^\d{4}-\d{2}-\d{2}$/).nullable(), lastPurchaseAmount: z.number().int().nonnegative().max(999999999).nullable(),
+  }),
   z.object({
     action: z.literal("send"),
     chatId: z.string().min(1).max(80),
@@ -119,6 +124,11 @@ export const POST = withAuth(async (session, req: Request) => {
       await updateBaileysContact(session.organizationId, body.data.chatId, {
         name: body.data.name,
         phone: body.data.phone?.replace(/^\+/, "") ?? null,
+        email: body.data.email,
+        address: body.data.address,
+        birthday: body.data.birthday,
+        lastPurchaseAt: body.data.lastPurchaseAt,
+        lastPurchaseAmount: body.data.lastPurchaseAmount,
       });
     } catch (error) {
       return apiError(404, "contact_not_found", error instanceof Error ? error.message : "Contato não encontrado");

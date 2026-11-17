@@ -1094,11 +1094,16 @@ export async function setBaileysChatStage(
 export async function updateBaileysContact(
   organizationId: string,
   chatId: string,
-  input: { name: string; phone: string | null }
+  input: { name: string; phone: string | null; email: string | null; address: string | null; birthday: string | null; lastPurchaseAt: string | null; lastPurchaseAmount: number | null }
 ): Promise<void> {
   const [updated] = await getDb().update(schema.baileysChat).set({
     name: input.name.trim(),
     phone: input.phone,
+    email: input.email,
+    address: input.address,
+    birthday: input.birthday,
+    lastPurchaseAt: input.lastPurchaseAt ? new Date(`${input.lastPurchaseAt}T12:00:00Z`) : null,
+    lastPurchaseAmount: input.lastPurchaseAmount,
     updatedAt: new Date(),
   }).where(and(
     eq(schema.baileysChat.organizationId, organizationId),

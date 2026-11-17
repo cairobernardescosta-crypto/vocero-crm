@@ -80,12 +80,11 @@ export function QuickRepliesClient() {
           <CardTitle>Respostas rápidas</CardTitle>
           <CardDescription>
             O que você escreve várias vezes ao dia. Na Caixa de entrada, digite{" "}
-            <span className="font-mono">/</span> y el atajo (por ejemplo{" "}
-            <span className="font-mono">/horario</span>) y elige la respuesta: se
-            pone en la caja y la revisas antes de mandarla.{" "}
-            <span className="font-mono">{"{nombre}"}</span> se cambia por el primer
-            nome do cliente. Somente dentro da janela de 24 horas: para reabri-la
-            están las plantillas.
+            <span className="font-mono">/</span> e o atalho (por exemplo{" "}
+            <span className="font-mono">/horario</span>) e escolha a resposta: ela
+            será inserida no campo para você revisar antes de enviar.{" "}
+            <span className="font-mono">{"{nome}"}</span> é substituído pelo primeiro
+            nome do cliente.
           </CardDescription>
         </CardHeader>
         <CardContent className="space-y-3">
