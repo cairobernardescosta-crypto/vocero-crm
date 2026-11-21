@@ -62,7 +62,7 @@ export function BrandingClient({
   const [loaded, setLoaded] = useState(false);
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState<string | null>(null);
-  const [saved, setSaved] = useState(false);
+  const [saved, setSaved] = useState<string | null>(null);
 
   useEffect(() => {
     fetch("/api/settings/branding")
@@ -88,7 +88,7 @@ export function BrandingClient({
   async function save() {
     setSaving(true);
     setError(null);
-    setSaved(false);
+    setSaved(null);
     const res = await fetch("/api/settings/branding", {
       method: "PUT",
       headers: { "content-type": "application/json" },
@@ -102,7 +102,10 @@ export function BrandingClient({
       setError(data?.error?.message ?? "Não foi possível salvar");
       return;
     }
-    setSaved(true);
+    const data = await res.json().catch(() => null) as { shortcutUpdated?: boolean } | null;
+    setSaved(data?.shortcutUpdated
+      ? "Marca e atalho atualizados ✓"
+      : "Marca salva. O atalho local não pôde ser atualizado.");
     // Re-renderiza el árbol server (layout raíz inyecta el acento y el título)
     router.refresh();
   }
@@ -195,8 +198,8 @@ export function BrandingClient({
               </label>
             </div>
             <p className="text-xs text-text-3">
-              Con un color personalizado, los tonos derivados (hover, fondos
-              suaves) se calculan solos y se ajusta el contraste.
+              Com uma cor personalizada, os tons derivados (realce e fundos
+              suaves) são calculados automaticamente com contraste adequado.
             </p>
           </div>
 
@@ -228,19 +231,19 @@ export function BrandingClient({
               style={accentVars(previewSet)}
             >
               <span className="rounded-full bg-brand px-3.5 py-1.5 text-xs font-semibold text-brand-fg shadow-sm">
-                Botón de ejemplo
+                Botão de exemplo
               </span>
             </div>
           </div>
 
           {error && <p className="text-sm text-destructive">{error}</p>}
-          {saved && <p className="text-sm" style={{ color: previewSet.text }}>Marca e atalho atualizados ✓</p>}
+          {saved && <p role="status" aria-live="polite" className="text-sm" style={{ color: previewSet.text }}>{saved}</p>}
           <div className="flex flex-wrap gap-2">
             <Button disabled={saving || !name.trim()} onClick={() => void save()}>
               {saving ? "Salvando…" : "Salvar marca"}
             </Button>
-            <Button variant="outline" disabled={saving} onClick={() => { setName(DEFAULT_BRANDING.name); setAccent(DEFAULT_BRANDING.accent); setCurrency(DEFAULT_CURRENCY); setSaved(false); }}>
-              Restaurar padrão
+            <Button variant="outline" disabled={saving} onClick={() => { setName(DEFAULT_BRANDING.name); setAccent(DEFAULT_BRANDING.accent); setCurrency(DEFAULT_CURRENCY); setSaved("Padrão carregado. Clique em “Salvar marca” para aplicar."); }}>
+              Carregar padrão
             </Button>
           </div>
         </CardContent>

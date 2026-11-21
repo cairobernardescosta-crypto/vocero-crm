@@ -175,7 +175,7 @@ export function BookingDrawer({
                   href={`/inbox?contact=${b.contact.id}`}
                   className="flex w-full items-center justify-center gap-2 rounded-md border bg-secondary px-3 py-2 text-sm font-medium hover:bg-accent"
                 >
-                  <MessageSquareText className="h-4 w-4" /> Abrir conversación
+                  <MessageSquareText className="h-4 w-4" /> Abrir conversa
                 </Link>
               )}
               {b.meetingLink && (
@@ -190,7 +190,7 @@ export function BookingDrawer({
               )}
               {b.connector === "google" && (
                 <p className="text-xs text-text-3">
-                  Mueve y cancela desde Vocero: los cambios hechos en Google Calendar no se importan.
+                  Reagende e cancele pelo Vocero: alterações feitas no Google Agenda não são importadas.
                 </p>
               )}
               {b.notes && isSession && (
@@ -272,7 +272,7 @@ export function BookingDrawer({
                   disabled={busy}
                   onClick={() => void run({ action: "status", status: "no_show" })}
                 >
-                  No asistió
+                  Não compareceu
                 </Button>
               </>
             )}

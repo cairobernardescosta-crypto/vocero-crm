@@ -24,6 +24,9 @@ export const GET = withAuth(async (session) => {
 export const PUT = withAuth(async (session, req: Request) => {
   const body = await parseBody(req, updateSchema);
   if (!body.ok) return body.response;
+  const passwordHash = body.data.password
+    ? await hashPassword(body.data.password)
+    : null;
   try {
     await getDb().transaction(async (tx) => {
       await tx.update(schema.user).set({
@@ -33,11 +36,13 @@ export const PUT = withAuth(async (session, req: Request) => {
         image: body.data.image,
         updatedAt: new Date(),
       }).where(eq(schema.user.id, session.userId));
-      if (body.data.password) {
-        await tx.update(schema.account).set({
-          password: await hashPassword(body.data.password),
+      if (passwordHash) {
+        const credentials = await tx.update(schema.account).set({
+          password: passwordHash,
           updatedAt: new Date(),
-        }).where(and(eq(schema.account.userId, session.userId), eq(schema.account.providerId, "credential")));
+        }).where(and(eq(schema.account.userId, session.userId), eq(schema.account.providerId, "credential")))
+          .returning({ id: schema.account.id });
+        if (!credentials[0]) throw new Error("credential_not_found");
       }
     });
     return Response.json({ ok: true });
@@ -45,6 +50,9 @@ export const PUT = withAuth(async (session, req: Request) => {
     const code = (error as { code?: string; cause?: { code?: string } })?.code
       ?? (error as { cause?: { code?: string } })?.cause?.code;
     if (code === "23505") return apiError(409, "email_in_use", "Este e-mail já está em uso");
+    if (error instanceof Error && error.message === "credential_not_found") {
+      return apiError(409, "credential_not_found", "Este usuário não possui senha local");
+    }
     throw error;
   }
 });

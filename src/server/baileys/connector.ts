@@ -43,11 +43,13 @@ type Runtime = {
   acceptMessagesAfter: number | null;
   lastUpsertAt: Date | null;
   lastUpsertType: string | null;
+  connectionQueue: Promise<void>;
 };
 
 const globalRuntime = globalThis as unknown as { __voceroBaileys?: Map<string, Runtime> };
 const runtimes = globalRuntime.__voceroBaileys ?? new Map<string, Runtime>();
 globalRuntime.__voceroBaileys = runtimes;
+const avatarRefreshAt = new Map<string, number>();
 
 const logGuard = globalThis as unknown as { __voceroBaileysLogGuard?: boolean };
 
@@ -124,7 +126,7 @@ const silentLogger = {
 function runtimeFor(organizationId: string): Runtime {
   const existing = runtimes.get(organizationId);
   if (existing) return existing;
-  const value: Runtime = { socket: null, qrDataUrl: null, starting: null, manualStop: false, lock: null, retryTimer: null, watchdog: null, historyTimer: null, syncing: false, syncProgress: 0, syncFailures: 0, syncError: null, historyObserved: false, retryAttempt: 0, backfill: null, backfillCompleted: false, persistenceQueue: Promise.resolve(), acceptMessagesAfter: null, lastUpsertAt: null, lastUpsertType: null };
+  const value: Runtime = { socket: null, qrDataUrl: null, starting: null, manualStop: false, lock: null, retryTimer: null, watchdog: null, historyTimer: null, syncing: false, syncProgress: 0, syncFailures: 0, syncError: null, historyObserved: false, retryAttempt: 0, backfill: null, backfillCompleted: false, persistenceQueue: Promise.resolve(), acceptMessagesAfter: null, lastUpsertAt: null, lastUpsertType: null, connectionQueue: Promise.resolve() };
   runtimes.set(organizationId, value);
   return value;
 }
@@ -308,6 +310,34 @@ async function persistChatInfo(
   ));
 }
 
+async function refreshChatAvatar(
+  organizationId: string,
+  jid: string,
+  socket: import("@whiskeysockets/baileys").WASocket
+): Promise<void> {
+  const key = `${organizationId}:${jid}`;
+  const now = Date.now();
+  if ((avatarRefreshAt.get(key) ?? 0) > now - 5 * 60_000) return;
+  avatarRefreshAt.set(key, now);
+  try {
+    const avatarUrl = (await socket.profilePictureUrl(jid, "image")) ?? null;
+    if (!avatarUrl) return;
+    const [updated] = await getDb().update(schema.baileysChat).set({ avatarUrl, updatedAt: new Date() }).where(and(
+      eq(schema.baileysChat.organizationId, organizationId),
+      eq(schema.baileysChat.remoteJid, jid)
+    )).returning({ id: schema.baileysChat.id });
+    if (updated) publish(organizationId, { type: "baileys.updated", data: { chatId: updated.id } });
+  } catch (error) {
+    console.warn(`[baileys] falha ao atualizar foto do contato: ${error instanceof Error ? error.message.slice(0, 160) : "erro"}`);
+  }
+}
+
+function persistAuxiliaryEvent(label: string, task: () => Promise<void>): void {
+  void retryBaileysPersistence(task).catch((error: unknown) => {
+    console.warn(`[baileys] falha ao persistir ${label}: ${error instanceof Error ? error.message.slice(0, 160) : "erro"}`);
+  });
+}
+
 async function setStatus(
   organizationId: string,
   status: ConnectionStatus,
@@ -357,13 +387,7 @@ async function persistMessage(
       : null;
   const phone = phoneJid?.endsWith("@s.whatsapp.net") ? phoneJid.split("@")[0] ?? null : null;
   let name = options.contactName ?? message.pushName ?? null;
-  let avatarUrl: string | null = null;
   let participants: unknown[] | null = null;
-  if (!options.history) {
-    try {
-      avatarUrl = (await socket.profilePictureUrl(jid, "image")) ?? null;
-    } catch {}
-  }
   if (isGroup && !options.history) {
     try {
       const metadata = await socket.groupMetadata(jid);
@@ -382,7 +406,7 @@ async function persistMessage(
       name,
       phone,
       isGroup,
-      avatarUrl,
+      avatarUrl: null,
       participants,
       lastMessage: content.preview,
       lastMessageAt: occurredAt,
@@ -395,7 +419,6 @@ async function persistMessage(
         name: name ? sql`coalesce(${schema.baileysChat.name}, ${name})` : undefined,
         phone: phone ? sql`coalesce(${schema.baileysChat.phone}, ${phone})` : undefined,
         isGroup,
-        avatarUrl: avatarUrl ?? undefined,
         participants: participants ?? undefined,
         updatedAt: new Date(),
       },
@@ -612,12 +635,17 @@ async function startInternal(organizationId: string): Promise<void> {
     runtime.lastUpsertType = type;
     for (const message of messages) {
       if (!shouldPersistBaileysUpsert(type, message.messageTimestamp, runtime.acceptMessagesAfter)) continue;
-      void enqueueBaileysPersistence(runtime, () => retryBaileysPersistence(() => persistMessage(organizationId, message, socket)))
+      const persisted = enqueueBaileysPersistence(runtime, () => retryBaileysPersistence(() => persistMessage(organizationId, message, socket)));
+      void persisted
         .catch((error: unknown) => {
           const providerId = message.key.id ?? "sem-id";
           const reason = error instanceof Error ? error.message.slice(0, 160) : "erro desconhecido";
           console.error(`[baileys] falha ao persistir mensagem org=${organizationId} id=${providerId}: ${reason}`);
         });
+      const jid = message.key.remoteJid;
+      if (jid && !ignoredJid(jid)) {
+        void persisted.then(() => refreshChatAvatar(organizationId, jid, socket)).catch(() => undefined);
+      }
     }
   });
   socket.ev.on("messages.update", (updates) => {
@@ -633,38 +661,41 @@ async function startInternal(organizationId: string): Promise<void> {
     }
   });
   socket.ev.on("contacts.upsert", (contacts) => {
-    for (const contact of contacts) void persistContact(organizationId, contact, socket).catch(() => undefined);
+    for (const contact of contacts) persistAuxiliaryEvent("contato", () => persistContact(organizationId, contact, socket));
   });
   socket.ev.on("contacts.update", (contacts) => {
     for (const contact of contacts) {
       if (!contact.id) continue;
-      void persistContact(organizationId, contact as import("@whiskeysockets/baileys").Contact, socket).catch(() => undefined);
+      persistAuxiliaryEvent("atualização de contato", () => persistContact(organizationId, contact as import("@whiskeysockets/baileys").Contact, socket));
     }
   });
   socket.ev.on("chats.upsert", (chats) => {
-    for (const chat of chats) void persistChatInfo(organizationId, chat).catch(() => undefined);
+    for (const chat of chats) persistAuxiliaryEvent("conversa", () => persistChatInfo(organizationId, chat));
   });
   socket.ev.on("chats.update", (chats) => {
     for (const chat of chats) {
       if (!chat.id) continue;
-      void persistChatInfo(organizationId, chat as import("@whiskeysockets/baileys").Chat).catch(() => undefined);
+      persistAuxiliaryEvent("atualização de conversa", () => persistChatInfo(organizationId, chat as import("@whiskeysockets/baileys").Chat));
     }
   });
   socket.ev.on("chats.phoneNumberShare", ({ lid, jid }) => {
-    void persistContact(organizationId, { id: lid, lid, jid }, socket).catch(() => undefined);
+    persistAuxiliaryEvent("compartilhamento de número", () => persistContact(organizationId, { id: lid, lid, jid }, socket));
   });
   socket.ev.on("messaging-history.set", () => {
     // Regra local: o CRM começa vazio e aceita somente mensagens novas.
     // O evento histórico é ignorado mesmo se o provedor o emitir inesperadamente.
   });
   socket.ev.on("connection.update", (update) => {
-    void (async () => {
+    runtime.connectionQueue = runtime.connectionQueue.then(async () => {
       if (update.qr) {
         if (runtime.watchdog) clearTimeout(runtime.watchdog);
-        runtime.qrDataUrl = await QRCode.toDataURL(update.qr, { width: 320, margin: 2 });
+        const qrDataUrl = await QRCode.toDataURL(update.qr, { width: 320, margin: 2 });
+        if (runtime.socket !== socket) return;
+        runtime.qrDataUrl = qrDataUrl;
         await setStatus(organizationId, "waiting_qr");
       }
       if (update.connection === "open") {
+        if (runtime.socket !== socket) return;
         if (runtime.watchdog) clearTimeout(runtime.watchdog);
         runtime.qrDataUrl = null;
         runtime.retryAttempt = 0;
@@ -678,6 +709,7 @@ async function startInternal(organizationId: string): Promise<void> {
         await setStatus(organizationId, "connected", { phone });
       }
       if (update.connection === "close") {
+        if (runtime.socket !== socket) return;
         if (runtime.watchdog) clearTimeout(runtime.watchdog);
         runtime.socket = null;
         runtime.qrDataUrl = null;
@@ -699,10 +731,10 @@ async function startInternal(organizationId: string): Promise<void> {
           : Math.min(60_000, 3_000 * (2 ** runtime.retryAttempt++)) + Math.floor(Math.random() * 1_000);
         scheduleBaileysReconnect(organizationId, runtime, delay);
       }
-    })().catch(async (error: unknown) => {
+    }).catch(async (error: unknown) => {
       await setStatus(organizationId, "error", {
         error: error instanceof Error ? error.message.slice(0, 240) : "Erro de conexão",
-      });
+      }).catch(() => undefined);
     });
   });
 }
@@ -979,30 +1011,45 @@ export async function sendBaileysMedia(
   } catch (error) {
     const messageId = newId("baileysMessage");
     const reason = error instanceof Error ? error.message.slice(0, 240) : "Falha no envio da mídia";
-    await db.insert(schema.baileysMessage).values({
-      id: messageId,
-      organizationId,
-      chatId: chat.id,
-      providerId: `failed:${messageId}`,
-      direction: "out",
-      type: kind,
-      text: input.caption ?? null,
-      replyToProviderId: reply?.providerId ?? null,
-      replyToType: reply?.type ?? null,
-      replyToText: reply?.text?.slice(0, 200) ?? null,
-      mediaAssetId: assetId,
-      status: "failed",
-      error: reason,
-      occurredAt: new Date(),
-    });
-    publish(organizationId, { type: "baileys.updated", data: { chatId: chat.id, messageId } });
+    const occurredAt = new Date();
+    try {
+      await db.insert(schema.baileysMessage).values({
+        id: messageId,
+        organizationId,
+        chatId: chat.id,
+        providerId: `failed:${messageId}`,
+        direction: "out",
+        type: kind,
+        text: input.caption ?? null,
+        replyToProviderId: reply?.providerId ?? null,
+        replyToType: reply?.type ?? null,
+        replyToText: reply?.text?.slice(0, 200) ?? null,
+        mediaAssetId: assetId,
+        status: "failed",
+        error: reason,
+        occurredAt,
+      });
+      await db.update(schema.baileysChat).set({
+        lastMessage: input.caption ?? `Falha ao enviar [${kind}]`,
+        lastMessageAt: occurredAt,
+        updatedAt: occurredAt,
+      }).where(and(eq(schema.baileysChat.organizationId, organizationId), eq(schema.baileysChat.id, chat.id)));
+      publish(organizationId, { type: "baileys.updated", data: { chatId: chat.id, messageId } });
+    } catch (persistError) {
+      await deleteMediaFile(organizationId, assetId).catch(() => undefined);
+      await db.delete(schema.mediaAsset).where(and(
+        eq(schema.mediaAsset.organizationId, organizationId),
+        eq(schema.mediaAsset.id, assetId)
+      )).catch(() => undefined);
+      console.error(`[baileys] falha ao registrar envio de mídia malsucedido: ${persistError instanceof Error ? persistError.message.slice(0, 160) : "erro"}`);
+    }
     throw error;
   }
 
   const occurredAt = sent.messageTimestamp
     ? new Date(Number(sent.messageTimestamp) * 1000)
     : new Date();
-  await retryBaileysPersistence(async () => {
+  await enqueueBaileysPersistence(runtime, () => retryBaileysPersistence(async () => {
     const [stored] = await db.insert(schema.baileysMessage).values({
       id: newId("baileysMessage"),
       organizationId,
@@ -1019,18 +1066,44 @@ export async function sendBaileysMedia(
       occurredAt,
     }).onConflictDoNothing().returning({ id: schema.baileysMessage.id });
     if (!stored) {
-      await db.update(schema.baileysMessage).set({ mediaAssetId: assetId }).where(and(
+      const [attached] = await db.update(schema.baileysMessage).set({ mediaAssetId: assetId }).where(and(
         eq(schema.baileysMessage.organizationId, organizationId),
         eq(schema.baileysMessage.providerId, sent!.key.id!),
         isNull(schema.baileysMessage.mediaAssetId)
-      ));
+      )).returning({ id: schema.baileysMessage.id });
+      if (!attached) {
+        const [winner] = await db.select({ mediaAssetId: schema.baileysMessage.mediaAssetId })
+          .from(schema.baileysMessage).where(and(
+            eq(schema.baileysMessage.organizationId, organizationId),
+            eq(schema.baileysMessage.providerId, sent!.key.id!)
+          )).limit(1);
+        if (winner?.mediaAssetId !== assetId) {
+          await deleteMediaFile(organizationId, assetId).catch(() => undefined);
+          await db.delete(schema.mediaAsset).where(and(
+            eq(schema.mediaAsset.organizationId, organizationId),
+            eq(schema.mediaAsset.id, assetId)
+          ));
+        }
+      }
     }
     await db.update(schema.baileysChat).set({
       lastMessage: input.caption ?? `[${kind}]`,
       lastMessageAt: occurredAt,
       updatedAt: new Date(),
     }).where(and(eq(schema.baileysChat.organizationId, organizationId), eq(schema.baileysChat.id, chat.id)));
-  }).catch((error: unknown) => {
+  })).catch(async (error: unknown) => {
+    const [referenced] = await db.select({ id: schema.baileysMessage.id })
+      .from(schema.baileysMessage).where(and(
+        eq(schema.baileysMessage.organizationId, organizationId),
+        eq(schema.baileysMessage.mediaAssetId, assetId)
+      )).limit(1).catch(() => []);
+    if (!referenced) {
+      await deleteMediaFile(organizationId, assetId).catch(() => undefined);
+      await db.delete(schema.mediaAsset).where(and(
+        eq(schema.mediaAsset.organizationId, organizationId),
+        eq(schema.mediaAsset.id, assetId)
+      )).catch(() => undefined);
+    }
     const reason = error instanceof Error ? error.message.slice(0, 160) : "erro desconhecido";
     console.error(`[baileys] mídia enviada, mas não persistida org=${organizationId}: ${reason}`);
   });

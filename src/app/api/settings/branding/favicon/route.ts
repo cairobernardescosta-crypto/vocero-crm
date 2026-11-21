@@ -20,6 +20,18 @@ export const PUT = withAuth(async (session, req: Request) => {
     return apiError(403, "forbidden", "Somente o proprietário pode alterar a marca");
   }
 
+  const lengthHeader = req.headers.get("content-length");
+  const contentLength = Number(lengthHeader);
+  if (!lengthHeader || !Number.isSafeInteger(contentLength) || contentLength <= 0) {
+    return apiError(411, "length_required", "O tamanho do arquivo é obrigatório");
+  }
+  if (contentLength > MAX_FAVICON_BYTES) {
+    return apiError(
+      413,
+      "too_large",
+      `O ícone não pode ultrapassar ${Math.round(MAX_FAVICON_BYTES / 1024)} KB`
+    );
+  }
   const buf = new Uint8Array(await req.arrayBuffer());
   if (buf.byteLength === 0) {
     return apiError(422, "empty", "Nenhum arquivo foi enviado");
@@ -28,7 +40,7 @@ export const PUT = withAuth(async (session, req: Request) => {
     return apiError(
       413,
       "too_large",
-      `El icono no puede pasar de ${Math.round(MAX_FAVICON_BYTES / 1024)} KB`
+      `O ícone não pode ultrapassar ${Math.round(MAX_FAVICON_BYTES / 1024)} KB`
     );
   }
 

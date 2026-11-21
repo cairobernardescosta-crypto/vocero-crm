@@ -1,4 +1,4 @@
-import { count, eq, sql } from "drizzle-orm";
+import { and, asc, count, eq, sql } from "drizzle-orm";
 import { getDb, schema } from "@/lib/db";
 import { newId } from "@/lib/db/ids";
 
@@ -66,7 +66,8 @@ export async function resolveActiveOrganizationId(
 }
 
 export async function resolveMembership(
-  userId: string
+  userId: string,
+  organizationId?: string | null
 ): Promise<{ organizationId: string; role: string } | null> {
   const db = getDb();
   const rows = await db
@@ -75,7 +76,11 @@ export async function resolveMembership(
       role: schema.member.role,
     })
     .from(schema.member)
-    .where(eq(schema.member.userId, userId))
+    .where(and(
+      eq(schema.member.userId, userId),
+      organizationId ? eq(schema.member.organizationId, organizationId) : undefined
+    ))
+    .orderBy(asc(schema.member.createdAt), asc(schema.member.id))
     .limit(1);
   return rows[0] ?? null;
 }

@@ -69,15 +69,25 @@ export const POST = withAuth(async (session, req: Request) => {
   }
 
   const db = getDb();
-  await db
-    .insert(schema.member)
-    .values({
-      id: newId("member"),
-      organizationId: session.organizationId,
-      userId: newUserId,
-      role: "member",
-    })
-    .onConflictDoNothing();
+  try {
+    const inserted = await db
+      .insert(schema.member)
+      .values({
+        id: newId("member"),
+        organizationId: session.organizationId,
+        userId: newUserId,
+        role: "member",
+      })
+      .returning({ id: schema.member.id });
+    if (!inserted[0]) throw new Error("membership_not_created");
+  } catch (error) {
+    // Better Auth confirma usuário + credencial em sua própria transação.
+    // Se a associação falhar, compensamos para não bloquear o e-mail.
+    await db.delete(schema.user).where(eq(schema.user.id, newUserId)).catch((cleanupError) => {
+      console.error("[team] não foi possível remover conta órfã:", cleanupError);
+    });
+    throw error;
+  }
 
   return Response.json({ ok: true }, { status: 201 });
 });

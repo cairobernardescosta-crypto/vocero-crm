@@ -235,15 +235,15 @@ export function ContactPanel({
           <div className="mt-3 rounded-md border bg-subtle px-3 py-2.5">
             <div className="flex items-center justify-between gap-3">
               <div className="min-w-0">
-                <p className="text-[13px] font-medium">IA en esta conversación</p>
+                <p className="text-[13px] font-medium">IA nesta conversa</p>
                 <p className="text-[11px] text-text-3">
                   {conversation.handoffAt
-                    ? "En pausa · atención humana"
+                    ? "Em pausa · atendimento humano"
                     : !conversation.aiEnabled
-                      ? "En pausa"
+                      ? "Em pausa"
                       : externalActive
-                        ? "Respondiendo"
-                        : "Activada"}
+                        ? "Respondendo"
+                        : "Ativada"}
                 </p>
               </div>
               <Switch
@@ -270,13 +270,13 @@ export function ContactPanel({
                   strokeWidth={1.7}
                 />
                 <p className="text-[11px] leading-relaxed text-warning-text">
-                  Tu agente no está en línea: nadie contesta en automático hasta
-                  que vuelva.
+                  Seu agente está offline: ninguém responderá automaticamente até
+                  ele voltar.
                   <Link
                     href="/agent"
                     className="ml-1 whitespace-nowrap font-medium text-brand-text underline underline-offset-2 hover:text-brand"
                   >
-                    Ver en Agente →
+                    Ver em Agente →
                   </Link>
                 </p>
               </div>

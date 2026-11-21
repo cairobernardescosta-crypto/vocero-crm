@@ -106,7 +106,7 @@ export function ForwardDialog({
       >
         <h3 className="mb-1 font-semibold">{titulo}</h3>
         {/* D4 — La Cloud API no deja marcarlo como reenviado. */}
-        <p className="mb-3 text-xs text-text-3">Le llega como un mensaje nuevo, sin la marca «Reenviado».</p>
+        <p className="mb-3 text-xs text-text-3">Chegará como uma mensagem nova, sem a indicação “Encaminhada”.</p>
         {message.media?.kind === "image" || message.media?.kind === "sticker" ? (
           // eslint-disable-next-line @next/next/no-img-element
           <img
@@ -129,7 +129,7 @@ export function ForwardDialog({
         )}
         {conPie && (
           <label className="mb-3 block text-xs text-text-2">
-            Pie (opcional)
+            Legenda (opcional)
             <textarea
               value={caption}
               onChange={(e) => setCaption(e.target.value)}

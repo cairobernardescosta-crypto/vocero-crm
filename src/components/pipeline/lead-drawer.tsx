@@ -154,7 +154,7 @@ export function LeadDrawer({
                 href={`/inbox?contact=${lead.contact.id}`}
                 className="mt-3 flex w-full items-center justify-center gap-2 rounded-md border bg-secondary px-3 py-2 text-sm font-medium hover:bg-accent"
               >
-                <MessageSquareText className="h-4 w-4" /> Abrir conversación
+                <MessageSquareText className="h-4 w-4" /> Abrir conversa
               </Link>
             ) : (
               <p className="mt-3 text-xs text-text-3">
@@ -196,7 +196,7 @@ export function LeadDrawer({
                     ? "Esse valor não foi reconhecido."
                     : montoParseado === null
                       ? "Deixe vazio para remover o valor."
-                      : `Se guardará como ${formatMoneyCents(montoParseado, moneda)}`}
+                      : `Será salvo como ${formatMoneyCents(montoParseado, moneda)}`}
                 </p>
                 <div className="mt-2 flex gap-1.5">
                   <Button
@@ -239,7 +239,7 @@ export function LeadDrawer({
           {/* A quién llamar primero */}
           <section className="border-b p-4">
             <p className="mb-2 kicker">
-              Prioridad
+              Prioridade
             </p>
             <PriorityPicker value={lead.priority} onChange={onPriority} />
           </section>

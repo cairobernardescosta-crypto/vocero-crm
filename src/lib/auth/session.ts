@@ -25,7 +25,11 @@ export async function requireSession(): Promise<SessionContext> {
   if (!session) throw new UnauthorizedError();
   // La sesión puede crearse antes de que la membresía exista (registro
   // inicial) — la membresía en BD es la fuente de verdad de org + rol.
-  const membership = await resolveMembership(session.user.id);
+  const activeOrganizationId = session.session.activeOrganizationId;
+  const preferredMembership = activeOrganizationId
+    ? await resolveMembership(session.user.id, activeOrganizationId)
+    : null;
+  const membership = preferredMembership ?? await resolveMembership(session.user.id);
   if (!membership) {
     throw new UnauthorizedError("Sesión sin organización activa");
   }
@@ -40,7 +44,8 @@ export async function requireSession(): Promise<SessionContext> {
 export async function getSessionOrNull(): Promise<SessionContext | null> {
   try {
     return await requireSession();
-  } catch {
-    return null;
+  } catch (error) {
+    if (error instanceof UnauthorizedError) return null;
+    throw error;
   }
 }

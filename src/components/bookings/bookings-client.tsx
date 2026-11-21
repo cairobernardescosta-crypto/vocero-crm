@@ -516,7 +516,7 @@ function Legend() {
   const items = [
     { label: "Agendado", dot: "rounded-full bg-brand" },
     { label: "Realizada", dot: "rounded-full bg-success" },
-    { label: "No asistió", dot: "rounded-full bg-warning" },
+    { label: "Não compareceu", dot: "rounded-full bg-warning" },
     // El rayado no se lee en un punto de 10 px: un cuadrito con borde sí.
     { label: "Bloqueo", dot: "booking-hatch rounded-[3px] border border-text-3" },
   ];

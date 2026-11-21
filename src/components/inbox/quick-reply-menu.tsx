@@ -48,14 +48,14 @@ export function QuickReplyMenu({
       </p>
       {vacio ? (
         <div className="space-y-1 px-3 py-3 text-sm">
-          <p className="text-text-2">Aún no hay respuestas rápidas.</p>
+          <p className="text-text-2">Ainda não há respostas rápidas.</p>
           {puedeEditar && (
             <Link
               href="/settings/quick-replies"
               className="text-[13px] font-semibold text-brand-ink hover:underline"
               onMouseDown={(e) => e.preventDefault()}
             >
-              Crearlas en Ajustes →
+              Criar nas Configurações →
             </Link>
           )}
         </div>

@@ -77,9 +77,9 @@ export function FaviconCard({ branding }: { branding: Branding }) {
   return (
     <Card>
       <CardHeader>
-        <CardTitle>Logo del negocio</CardTitle>
+        <CardTitle>Logo do negócio</CardTitle>
         <p className="text-sm text-text-3">
-          Se ve en la pestaña del navegador y en la barra lateral del CRM.
+          Aparece na aba do navegador e na barra lateral do CRM.
         </p>
       </CardHeader>
       <CardContent className="space-y-4">
@@ -90,14 +90,14 @@ export function FaviconCard({ branding }: { branding: Branding }) {
           {/* eslint-disable-next-line @next/next/no-img-element */}
           <img
             src={src}
-            alt="Vista previa del icono de la pestaña"
+            alt="Prévia do ícone da aba"
             width={48}
             height={48}
             className="h-12 w-12 rounded-lg border bg-card object-contain"
           />
           <div className="min-w-0 flex-1">
             <p className="text-sm">
-              {actual ? "Logo propio" : "Generado con tu marca"}
+              {actual ? "Logo próprio" : "Gerado com sua marca"}
             </p>
             <p className="mt-0.5 text-xs text-text-3">
               {actual
@@ -128,7 +128,7 @@ export function FaviconCard({ branding }: { branding: Branding }) {
             onClick={() => input.current?.click()}
           >
             <ImageUp className="h-4 w-4" />
-            {subiendo ? "Subiendo…" : actual ? "Cambiar logo" : "Subir logo"}
+            {subiendo ? "Enviando…" : actual ? "Alterar logo" : "Enviar logo"}
           </Button>
           {actual && (
             <Button variant="ghost" disabled={subiendo} onClick={() => void quitar()}>
@@ -138,9 +138,9 @@ export function FaviconCard({ branding }: { branding: Branding }) {
         </div>
 
         <p className="text-xs text-text-3">
-          PNG, SVG, ICO, JPEG o WebP, hasta{" "}
-          {Math.round(MAX_FAVICON_BYTES / 1024)} KB. Cuadrado y con fondo
-          transparente se ve mejor: se dibuja sobre tu color de acento.
+          PNG, SVG, ICO, JPEG ou WebP, até{" "}
+          {Math.round(MAX_FAVICON_BYTES / 1024)} KB. O formato quadrado e com fundo
+          transparente oferece melhor resultado sobre a cor de destaque.
         </p>
 
         {error && <p className="text-sm text-destructive">{error}</p>}
