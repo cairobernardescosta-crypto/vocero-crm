@@ -47,14 +47,21 @@ export async function listNormalizedContacts(organizationId: string, filters: Ma
   const geoMap = new Map(geos.map((g) => [`${g.source}:${g.sourceId}`, g]));
   const consentMap = new Map(consents.map((c) => [`${c.source}:${c.sourceId}`, c.status]));
   const contacts: NormalizedMapContact[] = [];
+  const uniqueApiRows = new Map<string, (typeof apiRows)[number]>();
   for (const row of apiRows) {
+    const current = uniqueApiRows.get(row.id);
+    if (!current || (row.lastInteractionAt?.getTime() ?? 0) > (current.lastInteractionAt?.getTime() ?? 0)) {
+      uniqueApiRows.set(row.id, row);
+    }
+  }
+  for (const row of uniqueApiRows.values()) {
     const key = `api:${row.id}`; const geo = geoMap.get(key);
     contacts.push({ key, source: "api", sourceId: row.id, name: row.name, phone: row.phone, email: null,
       address: geo?.address ?? null, city: geo?.city ?? null, neighborhood: geo?.neighborhood ?? null,
       latitude: geo?.latitude ?? null, longitude: geo?.longitude ?? null, locationStatus: geo?.status ?? null,
       manualLocation: geo?.manual ?? false, createdAt: iso(row.createdAt), lastInteractionAt: iso(row.lastInteractionAt),
       stageId: row.stageId, stageName: row.stageName, amountCents: row.amountCents, lastPurchaseAt: null,
-      lastPurchaseAmount: null, consent: consentMap.get(key) ?? null, contactHref: "/contacts",
+      lastPurchaseAmount: null, consent: consentMap.get(key) ?? null, contactHref: `/contacts?contact=${encodeURIComponent(row.id)}`,
       conversationHref: row.conversationId ? `/inbox?conversation=${encodeURIComponent(row.conversationId)}` : null });
   }
   for (const row of baileysRows) {

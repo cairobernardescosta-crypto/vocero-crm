@@ -37,8 +37,9 @@ function LocationEditor({ contact, onSaved }: { contact: MapsContact; onSaved: (
   return <div className="space-y-3"><div className="grid gap-3 sm:grid-cols-2"><label className="text-sm"><span className="text-text-2">Endereço</span><Input value={address} onChange={(e) => setAddress(e.target.value)} /></label><label className="text-sm"><span className="text-text-2">Cidade</span><Input value={city} onChange={(e) => setCity(e.target.value)} /></label><label className="text-sm"><span className="text-text-2">Bairro</span><Input value={neighborhood} onChange={(e) => setNeighborhood(e.target.value)} /></label><span /></div><div className="grid grid-cols-2 gap-3"><label className="text-sm"><span className="text-text-2">Latitude</span><Input inputMode="decimal" value={lat} onChange={(e) => setLat(e.target.value)} /></label><label className="text-sm"><span className="text-text-2">Longitude</span><Input inputMode="decimal" value={lng} onChange={(e) => setLng(e.target.value)} /></label></div>{error && <p role="alert" className="text-sm text-destructive">{error}</p>}<Button size="sm" disabled={busy || Boolean(lat) !== Boolean(lng)} onClick={() => void save()}>{busy ? "Salvando…" : "Salvar localização"}</Button><p className="text-xs text-text-3">A posição é manual. Nenhum dado pessoal é enviado a serviços externos.</p></div>;
 }
 
-export function MapsClient() {
-  const [tab, setTab] = useState<Tab>("map"); const [filters, setFilters] = useState<MapsFilters>(EMPTY_MAP_FILTERS);
+export function MapsClient({ initialSource }: { initialSource: "api" | "baileys" }) {
+  const [tab, setTab] = useState<Tab>("map");
+  const [filters, setFilters] = useState<MapsFilters>({ ...EMPTY_MAP_FILTERS, source: initialSource });
   const [data, setData] = useState<MapsPayload | null>(null); const [selected, setSelected] = useState<MapsContact | null>(null);
   const [loading, setLoading] = useState(true); const [error, setError] = useState<string | null>(null); const [heatmap, setHeatmap] = useState(false);
   const [segmentName, setSegmentName] = useState(""); const [segments, setSegments] = useState<{ id: string; name: string; filters: MapsFilters }[]>([]);

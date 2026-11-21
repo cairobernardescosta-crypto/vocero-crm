@@ -12,9 +12,10 @@ describe("Maps UI", () => {
     expect(client).toContain('"conversation.updated"');
     expect(client).toContain('"baileys.updated"');
   });
-  it("não cria pins sem coordenadas e usa OpenFreeMap", () => {
+  it("não cria pins sem coordenadas e usa mapa raster com atribuição", () => {
     expect(canvas).toContain("c.latitude != null && c.longitude != null");
-    expect(canvas).toContain("tiles.openfreemap.org/styles/liberty");
+    expect(canvas).toContain("tile.openstreetmap.org/{z}/{x}/{y}.png");
+    expect(canvas).toContain("© OpenStreetMap contributors");
   });
   it("expõe as cinco áreas internas", () => {
     for (const label of ["Mapa", "Clientes", "Filtros", "Regiões e rotas", "Estatísticas"]) expect(client).toContain(label);

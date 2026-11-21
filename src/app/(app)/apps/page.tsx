@@ -1,7 +1,9 @@
 import { AppsClient } from "@/components/apps/apps-client";
+import { cookies } from "next/headers";
 
 export const dynamic = "force-dynamic";
 
-export default function AppsPage() {
-  return <AppsClient />;
+export default async function AppsPage() {
+  const mode = (await cookies()).get("vocero-modo-whatsapp")?.value === "baileys" ? "baileys" : "api";
+  return <AppsClient initialSource={mode} />;
 }

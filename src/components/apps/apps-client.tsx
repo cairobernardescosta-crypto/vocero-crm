@@ -32,10 +32,10 @@ const columnOptions: { id: Column; label: string }[] = [
 
 function formatMoney(cents: number | null): string { return cents == null ? "—" : (cents / 100).toLocaleString("pt-BR", { style: "currency", currency: "BRL" }); }
 
-export function AppsClient() {
+export function AppsClient({ initialSource }: { initialSource: "api" | "baileys" }) {
   const [tab, setTab] = useState<Tab>("exports");
   const [format, setFormat] = useState<Format>("contacts");
-  const [source, setSource] = useState("");
+  const [source, setSource] = useState<string>(initialSource);
   const [query, setQuery] = useState("");
   const [columns, setColumns] = useState<Column[]>(["name", "phone", "email", "address", "city", "neighborhood"]);
   const [preview, setPreview] = useState<PreviewContact[]>([]);

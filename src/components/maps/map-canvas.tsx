@@ -7,6 +7,18 @@ import "maplibre-gl/dist/maplibre-gl.css";
 import type { MapsContact } from "./types";
 
 const ITURAMA: [number, number] = [-50.2009, -19.7276];
+const MAP_STYLE: maplibregl.StyleSpecification = {
+  version: 8,
+  sources: {
+    osm: {
+      type: "raster",
+      tiles: ["https://tile.openstreetmap.org/{z}/{x}/{y}.png"],
+      tileSize: 256,
+      attribution: "© OpenStreetMap contributors",
+    },
+  },
+  layers: [{ id: "osm", type: "raster", source: "osm" }],
+};
 
 function popupNode(contact: MapsContact): HTMLElement {
   const root = document.createElement("div");
@@ -33,9 +45,9 @@ export default function MapCanvas({ contacts, heatmap, onSelect }: { contacts: M
 
   useEffect(() => {
     if (!containerRef.current || mapRef.current) return;
-    const map = new maplibregl.Map({ container: containerRef.current, style: "https://tiles.openfreemap.org/styles/liberty", center: ITURAMA, zoom: 11, attributionControl: false });
+    const map = new maplibregl.Map({ container: containerRef.current, style: MAP_STYLE, center: ITURAMA, zoom: 11, attributionControl: false });
     map.addControl(new maplibregl.NavigationControl(), "top-right");
-    map.addControl(new maplibregl.AttributionControl({ compact: true, customAttribution: "OpenFreeMap · OpenStreetMap" }));
+    map.addControl(new maplibregl.AttributionControl({ compact: true }));
     map.on("load", () => {
       map.addSource("crm-contacts", { type: "geojson", data: { type: "FeatureCollection", features: contactsRef.current.filter((c) => c.latitude != null && c.longitude != null).map((c) => ({ type: "Feature", geometry: { type: "Point", coordinates: [c.longitude!, c.latitude!] }, properties: { key: c.key, source: c.source } })) } });
       map.addLayer({ id: "crm-heat", type: "heatmap", source: "crm-contacts", layout: { visibility: heatmapRef.current ? "visible" : "none" }, paint: { "heatmap-weight": 1, "heatmap-intensity": 0.8, "heatmap-radius": 26, "heatmap-opacity": 0.65 } });
