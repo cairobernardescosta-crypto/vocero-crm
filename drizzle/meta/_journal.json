@@ -260,6 +260,13 @@
       "when": 1795208400000,
       "tag": "0036_usuario_telefone",
       "breakpoints": true
+    },
+    {
+      "idx": 37,
+      "version": "7",
+      "when": 1795294800000,
+      "tag": "0037_maps_apps",
+      "breakpoints": true
     }
   ]
 }

@@ -44,6 +44,13 @@ const prefixes = {
   baileysConnection: "bconn",
   baileysChat: "bchat",
   baileysMessage: "bmsg",
+  mapContactGeo: "geo",
+  mapSavedSegment: "seg",
+  marketingConsent: "mkt",
+  appExportLog: "exp",
+  campaignResult: "camp",
+  mapSettings: "mapcfg",
+  appIntegration: "appint",
 } as const;
 
 export type IdKind = keyof typeof prefixes;

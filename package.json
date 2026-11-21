@@ -39,6 +39,7 @@
     "clsx": "^2.1.1",
     "drizzle-orm": "^0.45.4",
     "lucide-react": "^0.469.0",
+    "maplibre-gl": "^6.19.0",
     "nanoid": "^5.0.9",
     "next": "^15.5.28",
     "postgres": "^3.4.5",

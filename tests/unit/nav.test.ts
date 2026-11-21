@@ -18,10 +18,11 @@ const labels = (groups: { items: { label: string }[] }[]) =>
 describe("barra lateral agrupada", () => {
   it("con todo apagado y como miembro: Trabajo, Agente y Resultados", () => {
     const groups = appNavGroups({ role: "member" });
-    expect(groups.map((g) => g.title)).toEqual(["Trabalho", "Agente", undefined]);
+    expect(groups.map((g) => g.title)).toEqual(["Trabalho", "Agente", "Ferramentas", undefined]);
     expect(labels(groups)).toEqual([
       ["WhatsApp API", "Pipeline", "Contatos"],
       ["Agente", "Laboratorio"],
+      ["Maps", "Apps"],
       ["Resultados"],
     ]);
   });
@@ -40,7 +41,7 @@ describe("barra lateral agrupada", () => {
   it("BAILEYS muestra solamente sus funciones al seleccionar su modo", () => {
     const items = appNavGroups({ baileys: true, modo: "baileys", role: "member" }).flatMap((g) => g.items);
     expect(items.filter((i) => i.href === "/baileys/inbox")).toHaveLength(1);
-    expect(items.map((i) => i.label)).toEqual(["Conversas", "Pipeline", "Contatos", "Resultados"]);
+    expect(items.map((i) => i.label)).toEqual(["Conversas", "Pipeline", "Contatos", "Resultados", "Maps", "Apps"]);
     expect(items.map((i) => i.href)).not.toContain("/inbox");
   });
 

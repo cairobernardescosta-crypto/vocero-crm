@@ -9,6 +9,8 @@ import {
   Sparkles,
   Users,
   MessageCircleMore,
+  MapPinned,
+  Blocks,
   type LucideIcon,
 } from "lucide-react";
 import { canConfigure } from "@/lib/auth/roles";
@@ -73,6 +75,12 @@ export function appNavGroups({
         { href: "/baileys/contacts", label: "Contatos", icon: Users },
         { href: "/baileys/results", label: "Resultados", icon: ChartColumn },
       ],
+    }, {
+      title: "Ferramentas",
+      items: [
+        { href: "/maps", label: "Maps", icon: MapPinned },
+        { href: "/apps", label: "Apps", icon: Blocks },
+      ],
     }];
   }
 
@@ -98,6 +106,10 @@ export function appNavGroups({
   return [
     { title: "Trabalho", items: trabajo },
     { title: "Agente", items: agente },
+    { title: "Ferramentas", items: [
+      { href: "/maps", label: "Maps", icon: MapPinned },
+      { href: "/apps", label: "Apps", icon: Blocks },
+    ] },
     // 019 — Se mide al final: primero se atiende y se organiza.
     { items: [{ href: "/results", label: "Resultados", icon: ChartColumn }] },
   ];

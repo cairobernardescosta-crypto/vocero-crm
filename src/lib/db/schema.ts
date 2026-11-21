@@ -1,6 +1,7 @@
 import {
   boolean,
   check,
+  doublePrecision,
   index,
   integer,
   jsonb,
@@ -1485,3 +1486,120 @@ export const baileysMessage = pgTable(
     index("baileys_message_org_reply_idx").on(t.organizationId, t.replyToProviderId),
   ]
 );
+
+/* ============================================================
+ * Maps + Apps — extensões que referenciam a fonte original
+ * ============================================================ */
+
+export const mapContactGeo = pgTable(
+  "map_contact_geo",
+  {
+    id: text("id").primaryKey(),
+    organizationId: text("organization_id").notNull().references(() => organization.id, { onDelete: "cascade" }),
+    source: text("source", { enum: ["api", "baileys"] }).notNull(),
+    sourceId: text("source_id").notNull(),
+    address: text("address"),
+    city: text("city"),
+    neighborhood: text("neighborhood"),
+    latitude: doublePrecision("latitude"),
+    longitude: doublePrecision("longitude"),
+    status: text("status", { enum: ["pending", "located", "failed"] }).notNull().default("pending"),
+    provider: text("provider"),
+    addressHash: text("address_hash"),
+    manual: boolean("manual").notNull().default(false),
+    updatedAt: timestamp("updated_at").notNull().defaultNow(),
+    createdAt: timestamp("created_at").notNull().defaultNow(),
+  },
+  (t) => [
+    uniqueIndex("map_geo_org_source_uq").on(t.organizationId, t.source, t.sourceId),
+    index("map_geo_org_status_idx").on(t.organizationId, t.status),
+  ]
+);
+
+export const mapSavedSegment = pgTable(
+  "map_saved_segment",
+  {
+    id: text("id").primaryKey(),
+    organizationId: text("organization_id").notNull().references(() => organization.id, { onDelete: "cascade" }),
+    name: text("name").notNull(),
+    filters: jsonb("filters").$type<Record<string, unknown>>().notNull(),
+    createdAt: timestamp("created_at").notNull().defaultNow(),
+    updatedAt: timestamp("updated_at").notNull().defaultNow(),
+  },
+  (t) => [index("map_segment_org_idx").on(t.organizationId, t.createdAt)]
+);
+
+export const marketingConsent = pgTable(
+  "marketing_consent",
+  {
+    id: text("id").primaryKey(),
+    organizationId: text("organization_id").notNull().references(() => organization.id, { onDelete: "cascade" }),
+    source: text("source", { enum: ["api", "baileys"] }).notNull(),
+    sourceId: text("source_id").notNull(),
+    status: text("status", { enum: ["opt_in", "opt_out"] }).notNull(),
+    legalBasis: text("legal_basis"),
+    recordedAt: timestamp("recorded_at").notNull().defaultNow(),
+    updatedAt: timestamp("updated_at").notNull().defaultNow(),
+  },
+  (t) => [uniqueIndex("marketing_consent_org_source_uq").on(t.organizationId, t.source, t.sourceId)]
+);
+
+export const appExportLog = pgTable(
+  "app_export_log",
+  {
+    id: text("id").primaryKey(),
+    organizationId: text("organization_id").notNull().references(() => organization.id, { onDelete: "cascade" }),
+    format: text("format").notNull(),
+    rowCount: integer("row_count").notNull(),
+    filters: jsonb("filters").$type<Record<string, unknown>>(),
+    columns: jsonb("columns").$type<string[]>(),
+    createdAt: timestamp("created_at").notNull().defaultNow(),
+  },
+  (t) => [index("app_export_org_idx").on(t.organizationId, t.createdAt)]
+);
+
+export const campaignResult = pgTable(
+  "campaign_result",
+  {
+    id: text("id").primaryKey(),
+    organizationId: text("organization_id").notNull().references(() => organization.id, { onDelete: "cascade" }),
+    name: text("name").notNull(),
+    platform: text("platform", { enum: ["meta", "tiktok", "email", "other"] }).notNull(),
+    startsAt: timestamp("starts_at"),
+    endsAt: timestamp("ends_at"),
+    investmentCents: integer("investment_cents"),
+    reach: integer("reach"),
+    impressions: integer("impressions"),
+    clicks: integer("clicks"),
+    leads: integer("leads"),
+    conversions: integer("conversions"),
+    revenueCents: integer("revenue_cents"),
+    createdAt: timestamp("created_at").notNull().defaultNow(),
+    updatedAt: timestamp("updated_at").notNull().defaultNow(),
+  },
+  (t) => [index("campaign_result_org_period_idx").on(t.organizationId, t.startsAt)]
+);
+
+export const mapSettings = pgTable("map_settings", {
+  id: text("id").primaryKey(),
+  organizationId: text("organization_id").notNull().references(() => organization.id, { onDelete: "cascade" }),
+  mapProvider: text("map_provider").notNull().default("openfreemap"),
+  geocoder: text("geocoder").notNull().default("manual"),
+  initialLatitude: doublePrecision("initial_latitude").notNull().default(-19.7276),
+  initialLongitude: doublePrecision("initial_longitude").notNull().default(-50.2009),
+  showPins: boolean("show_pins").notNull().default(true),
+  showHeatmap: boolean("show_heatmap").notNull().default(false),
+  updatedAt: timestamp("updated_at").notNull().defaultNow(),
+}, (t) => [uniqueIndex("map_settings_org_uq").on(t.organizationId)]);
+
+export const appIntegration = pgTable("app_integration", {
+  id: text("id").primaryKey(),
+  organizationId: text("organization_id").notNull().references(() => organization.id, { onDelete: "cascade" }),
+  provider: text("provider", { enum: ["brevo", "mailchimp", "meta", "tiktok"] }).notNull(),
+  accountId: text("account_id"),
+  credentials: jsonb("credentials").$type<{ cipher: string; iv: string; tag: string }>(),
+  enabled: boolean("enabled").notNull().default(false),
+  status: text("status").notNull().default("not_configured"),
+  lastSyncAt: timestamp("last_sync_at"),
+  updatedAt: timestamp("updated_at").notNull().defaultNow(),
+}, (t) => [uniqueIndex("app_integration_org_provider_uq").on(t.organizationId, t.provider)]);
